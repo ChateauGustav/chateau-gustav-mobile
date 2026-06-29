@@ -4,6 +4,11 @@ workflows:
     name: Château Gustav — iOS
     max_build_duration: 60
     instance_type: mac_mini_m2
+    integrations:
+      # This must match the exact name you give the integration in
+      # Codemagic's UI under Team settings > Integrations > Developer
+      # Portal (see README for setup steps).
+      app_store_connect: appstore_connect
     environment:
       groups:
         # Create this group in Codemagic's dashboard under
@@ -42,10 +47,9 @@ workflows:
     publishing:
       # This automatically uploads a successful build to TestFlight, so you
       # can install and test the real app on your own iPhone without ever
-      # touching a Mac. Set up the named integration first — see README.
+      # touching a Mac. Uses the integration named above.
       app_store_connect:
         auth: integration
-        integration: "appstore_connect"
         submit_to_testflight: true
 
   # ── Android: builds a signed .aab ready to upload to Play Console ──
