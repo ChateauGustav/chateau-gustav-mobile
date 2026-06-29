@@ -80,7 +80,7 @@ workflows:
           storePassword=$CM_KEYSTORE_PASSWORD
           keyPassword=$CM_KEY_PASSWORD
           keyAlias=$CM_KEY_ALIAS
-          storeFile=app/keystore.jks
+          storeFile=keystore.jks
           EOF
       - name: Make gradlew executable
         script: chmod +x android/gradlew
