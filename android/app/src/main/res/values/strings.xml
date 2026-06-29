@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Château Gustav</string>
+    <string name="title_activity_main">Château Gustav</string>
+    <string name="package_name">com.chateaugustav.pairing</string>
+    <string name="custom_url_scheme">com.chateaugustav.pairing</string>
+</resources>

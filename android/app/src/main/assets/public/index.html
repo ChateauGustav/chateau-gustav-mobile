@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Château Gustav — Wine Pairing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:       #1a1612;
+    --parchment: #f7f3ed;
+    --gold:      #b8933a;
+    --gold-lt:   #d4aa56;
+    --rouge:     #7c2d3e;
+    --mist:      #e8e2d9;
+    --dim:       #7a7068;
+    --white:     #ffffff;
+    --radius:    6px;
+    --transition: 220ms ease;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    background: var(--parchment); color: var(--ink);
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    line-height: 1.6; min-height: 100vh;
+  }
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 2.5rem; border-bottom: 1px solid var(--mist);
+    background: var(--parchment); position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif; font-size: 1.35rem;
+    font-weight: 600; letter-spacing: 0.04em; color: var(--ink); text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-tagline {
+    font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim);
+  }
+  .hero { text-align: center; padding: 5rem 2rem 3rem; max-width: 680px; margin: 0 auto; }
+  .hero-eyebrow {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 6vw, 3.8rem);
+    font-weight: 300; line-height: 1.1; color: var(--ink); margin-bottom: 1.2rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--rouge); }
+  .hero p { font-size: 1rem; color: var(--dim); max-width: 480px; margin: 0 auto 2.5rem; }
+  .mode-toggle {
+    display: inline-flex; background: var(--mist); border-radius: 40px;
+    padding: 4px; margin-bottom: 2.5rem; gap: 2px;
+  }
+  .mode-btn {
+    padding: 0.45rem 1.4rem; border: none; background: transparent; border-radius: 40px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 400;
+    letter-spacing: 0.04em; cursor: pointer; color: var(--dim); transition: all var(--transition);
+  }
+  .mode-btn.active { background: var(--white); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .card {
+    background: var(--white); border: 1px solid var(--mist); border-radius: 12px;
+    padding: 2rem; max-width: 680px; margin: 0 auto 2rem; box-shadow: 0 2px 16px rgba(26,22,18,0.06);
+  }
+  .form-section-label {
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.1rem;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.4rem; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field label { font-size: 0.75rem; font-weight: 500; color: var(--dim); letter-spacing: 0.05em; }
+  .field select, .field input[type="text"] {
+    background: var(--parchment); border: 1px solid var(--mist); border-radius: var(--radius);
+    padding: 0.6rem 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    color: var(--ink); appearance: none; -webkit-appearance: none; outline: none;
+    transition: border-color var(--transition); width: 100%;
+  }
+  .field select:focus, .field input[type="text"]:focus { border-color: var(--gold); }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾'; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+    color: var(--dim); pointer-events: none; font-size: 0.75rem;
+  }
+  .slider-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.4rem; }
+  .slider-row label {
+    font-size: 0.75rem; font-weight: 500; color: var(--dim); letter-spacing: 0.05em;
+    white-space: nowrap; min-width: 70px;
+  }
+  input[type="range"] { flex: 1; accent-color: var(--gold); height: 4px; cursor: pointer; }
+  .slider-labels {
+    display: flex; justify-content: space-between; font-size: 0.67rem; color: var(--dim);
+    margin-top: -0.8rem; margin-bottom: 1.4rem; padding: 0 0.1rem;
+  }
+  .attr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; margin-bottom: 1.4rem; }
+  .attr-item { display: flex; flex-direction: column; gap: 0.3rem; }
+  .attr-item label {
+    font-size: 0.68rem; font-weight: 500; color: var(--dim);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .btn-primary {
+    width: 100%; padding: 0.85rem; background: var(--rouge); color: var(--white);
+    border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.06em; cursor: pointer;
+    transition: background var(--transition), transform var(--transition); margin-top: 0.5rem;
+  }
+  .btn-primary:hover { background: #6a2434; }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: var(--mist); color: var(--dim); cursor: not-allowed; }
+  #results { max-width: 680px; margin: 0 auto 4rem; display: none; }
+  .results-header {
+    font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 0.3rem;
+  }
+  .results-sub { font-size: 0.8rem; color: var(--dim); margin-bottom: 1.5rem; }
+  .curated-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.62rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid #e8d5a0; background: #fdf8f0; border-radius: 20px;
+    padding: 0.25rem 0.7rem; margin-bottom: 1rem; font-weight: 500;
+  }
+  .curated-badge::before { content: '✦'; font-size: 0.7rem; }
+  .pairing-card {
+    background: var(--white); border: 1px solid var(--mist); border-radius: 10px;
+    padding: 1.4rem 1.6rem; margin-bottom: 0.85rem; box-shadow: 0 1px 6px rgba(26,22,18,0.05);
+    position: relative; overflow: hidden;
+  }
+  .pairing-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--gold); border-radius: 3px 0 0 3px;
+  }
+  .pairing-card.rank-2::before { background: var(--dim); }
+  .pairing-card.rank-3::before { background: var(--mist); }
+  .pairing-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.7rem; }
+  .pairing-name { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 600; color: var(--ink); }
+  .pairing-region { font-size: 0.75rem; color: var(--dim); margin-top: 0.1rem; }
+  .score-badge { text-align: center; min-width: 52px; }
+  .score-num {
+    font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600;
+    color: var(--gold); line-height: 1;
+  }
+  .score-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+  .pairing-why { font-size: 0.87rem; color: var(--ink); line-height: 1.65; margin-bottom: 0.9rem; }
+  .attr-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .pill {
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.06em; padding: 0.2rem 0.65rem;
+    border-radius: 20px; background: var(--parchment); color: var(--dim); border: 1px solid var(--mist);
+  }
+  .pill.gold { background: #fdf5e6; color: var(--gold); border-color: #e8d5a0; }
+  .avoid-card {
+    background: var(--white); border: 1px solid var(--mist); border-radius: 10px;
+    padding: 1.2rem 1.6rem; margin-top: 1.2rem;
+  }
+  .avoid-label {
+    font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--rouge); font-weight: 500; margin-bottom: 0.75rem;
+  }
+  .avoid-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .avoid-pill {
+    font-size: 0.75rem; padding: 0.22rem 0.7rem; border-radius: 20px;
+    background: #fdf0f2; color: var(--rouge); border: 1px solid #f0cdd2;
+  }
+  .loading { text-align: center; padding: 3rem 2rem; display: none; }
+  .loading-text {
+    font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-style: italic;
+    color: var(--dim); animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+  .sommelier-note {
+    background: #fdf8f0; border: 1px solid #e8d5a0; border-radius: 8px;
+    padding: 1rem 1.3rem; margin-top: 1.5rem; font-size: 0.85rem; color: var(--ink); line-height: 1.7;
+  }
+  .sommelier-note strong {
+    font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600;
+    color: var(--gold); display: block; margin-bottom: 0.3rem;
+  }
+  .share-row { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .btn-outline {
+    flex: 1; padding: 0.65rem; border: 1px solid var(--mist); border-radius: var(--radius);
+    background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+    font-weight: 500; color: var(--dim); cursor: pointer; transition: all var(--transition);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  footer {
+    border-top: 1px solid var(--mist); text-align: center; padding: 2rem;
+    font-size: 0.75rem; color: var(--dim); letter-spacing: 0.05em;
+  }
+  footer span { color: var(--gold); }
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.25rem; }
+    .hero { padding: 3rem 1.25rem 2rem; }
+    .card { padding: 1.4rem 1.25rem; margin: 0 1rem 1.5rem; }
+    #results { margin: 0 1rem 3rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+    .attr-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-logo" href="https://chateaugustav.com">Château <span>Gustav</span></a>
+  <span class="nav-tagline">Intelligent Pairing</span>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">Sommelier-level pairing</p>
+  <h1>Not just Cab <em>with steak.</em><br>The right wine for <em>this</em> dish.</h1>
+  <p>Describe what you're eating — or start with a wine — and get pairings built on flavor chemistry, not lookup tables.</p>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-food" onclick="setMode('food')">Start with food</button>
+    <button class="mode-btn" id="btn-wine" onclick="setMode('wine')">Start with wine</button>
+  </div>
+</section>
+
+<!-- FOOD MODE -->
+<div class="card" id="food-form">
+  <p class="form-section-label">Describe your dish</p>
+  <div class="form-grid">
+    <div class="field">
+      <label>Protein</label>
+      <div class="select-wrap">
+        <select id="f-protein">
+          <option value="">Select...</option>
+          <option>Beef</option><option>Lamb</option><option>Pork</option>
+          <option>Chicken</option><option>Duck</option><option>Turkey</option>
+          <option>Salmon</option><option>Tuna</option><option>Halibut</option>
+          <option>Shrimp</option><option>Scallops</option><option>Lobster</option>
+          <option>Vegetarian</option><option>Pasta</option><option>Cheese</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Cut or Style</label>
+      <div class="select-wrap">
+        <select id="f-cut">
+          <option value="">Select...</option>
+          <option>Ribeye</option><option>Filet</option><option>Strip</option>
+          <option>Braised</option><option>Smoked / BBQ</option><option>Grilled</option>
+          <option>Roasted</option><option>Pan-seared</option><option>Poached</option>
+          <option>Fried</option><option>Raw / Crudo</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="form-grid three">
+    <div class="field">
+      <label>Sauce</label>
+      <div class="select-wrap">
+        <select id="f-sauce">
+          <option value="">None / simple</option>
+          <option>Béarnaise</option><option>Chimichurri</option><option>Au jus / red wine</option>
+          <option>Cream sauce</option><option>Lemon butter</option><option>Tomato-based</option>
+          <option>Miso / soy glaze</option><option>BBQ / smoky</option>
+          <option>Herb crust</option><option>Mushroom / truffle</option><option>Peppercorn</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Side</label>
+      <div class="select-wrap">
+        <select id="f-side">
+          <option value="">None</option>
+          <option>Asparagus</option><option>Truffle fries</option><option>Roasted root veg</option>
+          <option>Creamed spinach</option><option>Risotto</option><option>Polenta</option>
+          <option>Salad / greens</option><option>Pasta</option><option>Potatoes</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Cuisine</label>
+      <div class="select-wrap">
+        <select id="f-cuisine">
+          <option value="">Any</option>
+          <option>French</option><option>Italian</option><option>Spanish</option>
+          <option>American</option><option>Japanese</option><option>Mexican</option>
+          <option>Indian</option><option>Mediterranean</option><option>Middle Eastern</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="slider-row">
+    <label>Spice level</label>
+    <input type="range" id="f-spice" min="0" max="4" value="1" />
+  </div>
+  <div class="slider-labels">
+    <span>Mild</span><span>Low</span><span>Medium</span><span>Hot</span><span>Very hot</span>
+  </div>
+  <div class="field" style="margin-bottom:1.4rem">
+    <label>Budget preference</label>
+    <div class="select-wrap">
+      <select id="f-budget">
+        <option value="">No preference</option>
+        <option>Under $20</option><option>$20–$40</option><option>$40–$75</option>
+        <option>$75–$150</option><option>$150+</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="getPairings('food')">Find my pairings →</button>
+</div>
+
+<!-- WINE MODE -->
+<div class="card" id="wine-form" style="display:none">
+  <p class="form-section-label">Describe your wine</p>
+  <div class="form-grid">
+    <div class="field">
+      <label>Grape / Varietal</label>
+      <div class="select-wrap">
+        <select id="w-grape">
+          <option value="">Select...</option>
+          <optgroup label="Red">
+            <option>Cabernet Sauvignon</option><option>Merlot</option><option>Pinot Noir</option>
+            <option>Syrah / Shiraz</option><option>Zinfandel</option><option>Malbec</option>
+            <option>Tempranillo</option><option>Nebbiolo</option><option>Sangiovese</option>
+            <option>Grenache</option><option>Barbera</option><option>Montepulciano</option>
+          </optgroup>
+          <optgroup label="White">
+            <option>Chardonnay</option><option>Sauvignon Blanc</option><option>Riesling</option>
+            <option>Pinot Grigio</option><option>Albariño</option><option>Viognier</option>
+            <option>Gewürztraminer</option><option>Grüner Veltliner</option>
+          </optgroup>
+          <optgroup label="Sparkling / Other">
+            <option>Champagne / Sparkling</option><option>Rosé</option>
+            <option>Prosecco</option><option>Orange Wine</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Region (optional)</label>
+      <input type="text" id="w-region" placeholder="e.g. Napa Valley, Burgundy" />
+    </div>
+  </div>
+  <p class="form-section-label" style="margin-top:0.5rem">Wine structure</p>
+  <div class="attr-grid">
+    <div class="attr-item field">
+      <label>Body</label>
+      <div class="select-wrap">
+        <select id="w-body"><option value="">Unknown</option><option>Light</option><option>Medium</option><option>Full</option></select>
+      </div>
+    </div>
+    <div class="attr-item field">
+      <label>Acidity</label>
+      <div class="select-wrap">
+        <select id="w-acid"><option value="">Unknown</option><option>Low</option><option>Medium</option><option>High</option></select>
+      </div>
+    </div>
+    <div class="attr-item field">
+      <label>Tannin</label>
+      <div class="select-wrap">
+        <select id="w-tannin"><option value="">Unknown</option><option>Soft</option><option>Medium</option><option>Firm</option></select>
+      </div>
+    </div>
+    <div class="attr-item field">
+      <label>Sweetness</label>
+      <div class="select-wrap">
+        <select id="w-sweet"><option value="">Unknown</option><option>Dry</option><option>Off-dry</option><option>Sweet</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="field" style="margin-bottom:1.4rem">
+    <label>Oak treatment</label>
+    <div class="select-wrap">
+      <select id="w-oak"><option value="">Unknown</option><option>Unoaked</option><option>Light oak</option><option>Moderate oak</option><option>Heavy oak</option></select>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="getPairings('wine')">Find food pairings →</button>
+</div>
+
+<div class="loading" id="loading"><p class="loading-text">Consulting the cellar…</p></div>
+<div id="results"></div>
+
+<footer>© 2025 <span>Château Gustav</span> · Intelligent Wine Pairing · Dallas, TX</footer>
+
+<script>
+let currentMode = 'food';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('food-form').style.display = mode === 'food' ? 'block' : 'none';
+  document.getElementById('wine-form').style.display = mode === 'wine' ? 'block' : 'none';
+  document.getElementById('btn-food').classList.toggle('active', mode === 'food');
+  document.getElementById('btn-wine').classList.toggle('active', mode === 'wine');
+  document.getElementById('results').style.display = 'none';
+}
+
+function collectInputs(mode) {
+  if (mode === 'food') {
+    return {
+      protein: document.getElementById('f-protein').value,
+      cut:     document.getElementById('f-cut').value,
+      sauce:   document.getElementById('f-sauce').value,
+      side:    document.getElementById('f-side').value,
+      cuisine: document.getElementById('f-cuisine').value,
+      spice:   parseInt(document.getElementById('f-spice').value, 10),
+      budget:  document.getElementById('f-budget').value
+    };
+  }
+  return {
+    grape:  document.getElementById('w-grape').value,
+    region: document.getElementById('w-region').value,
+    body:   document.getElementById('w-body').value,
+    acid:   document.getElementById('w-acid').value,
+    tannin: document.getElementById('w-tannin').value,
+    sweet:  document.getElementById('w-sweet').value,
+    oak:    document.getElementById('w-oak').value
+  };
+}
+
+async function getPairings(mode) {
+  const btn = document.querySelector(`#${mode}-form .btn-primary`);
+  const loading = document.getElementById('loading');
+  const results = document.getElementById('results');
+
+  btn.disabled = true;
+  loading.style.display = 'block';
+  results.style.display = 'none';
+
+  try {
+    // Calls YOUR backend, not Anthropic directly. The key stays server-side.
+    // Calls the live backend directly — inside the native app, there is no
+    // "/api/pair" path to fall back to like there is on the website, since
+    // this HTML is bundled into the app itself, not served from Vercel.
+    const response = await fetch('https://chateau-gustav-app.vercel.app/api/pair', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode, inputs: collectInputs(mode) })
+    });
+
+    if (response.status === 429) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || "You've made a lot of searches recently. Please wait a few minutes and try again.");
+    }
+    if (!response.ok) throw new Error('Request failed');
+    const parsed = await response.json();
+    renderResults(parsed, mode);
+  } catch (err) {
+    const message = (err && err.message && err.message.includes('searches recently'))
+      ? err.message
+      : 'Something went wrong. Please try again.';
+    results.innerHTML = `<div class="card"><p style="color:var(--rouge);font-size:0.9rem">${message}</p></div>`;
+    results.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+
+function renderResults(data, mode) {
+  const results = document.getElementById('results');
+  const pairings = data.pairings || [];
+  const avoid = data.avoid || [];
+  const note = data.sommelierNote || '';
+  const summary = mode === 'food' ? (data.dishSummary || '') : (data.wineSummary || '');
+  const header = mode === 'food' ? 'Your pairings' : 'Great with this wine';
+
+  const badge = data.source === 'curated'
+    ? `<div class="curated-badge">Curated by Château Gustav</div>`
+    : '';
+
+  let html = `${badge}<p class="results-header">${header}</p><p class="results-sub">${summary}</p>`;
+
+  pairings.forEach((p, i) => {
+    const rankClass = i === 0 ? '' : i === 1 ? 'rank-2' : 'rank-3';
+    const attrs = (p.attributes || []).map(a => `<span class="pill${i===0?' gold':''}">${a}</span>`).join('');
+    const title = mode === 'food' ? p.wine : p.food;
+    const region = mode === 'food' && p.region ? `<div class="pairing-region">${p.region}</div>` : '';
+    const budget = mode === 'food' && p.budgetNote ? `<p style="font-size:0.75rem;color:var(--dim);margin-top:0.6rem">${p.budgetNote}</p>` : '';
+    html += `
+      <div class="pairing-card ${rankClass}">
+        <div class="pairing-top">
+          <div><div class="pairing-name">${title}</div>${region}</div>
+          <div class="score-badge"><div class="score-num">${p.score}</div><div class="score-label">match</div></div>
+        </div>
+        <p class="pairing-why">${p.why}</p>
+        <div class="attr-pills">${attrs}</div>
+        ${budget}
+      </div>`;
+  });
+
+  if (avoid.length) {
+    const avoidPills = avoid.map(a => `<span class="avoid-pill">${a}</span>`).join('');
+    const label = mode === 'food' ? 'Skip these' : 'Avoid with this wine';
+    html += `<div class="avoid-card"><div class="avoid-label">${label}</div><div class="avoid-list">${avoidPills}</div></div>`;
+  }
+
+  if (note) {
+    html += `<div class="sommelier-note"><strong>Sommelier's note</strong>${note}</div>`;
+  }
+
+  html += `
+    <div class="share-row">
+      <button class="btn-outline" onclick="alert('Sharing coming soon!')">Share pairing card</button>
+      <button class="btn-outline" onclick="window.scrollTo({top:0,behavior:'smooth'})">New search</button>
+    </div>`;
+
+  results.innerHTML = html;
+  results.style.display = 'block';
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+<script>
+  // ── Native app touches (Capacitor) ──────────────────────────────────
+  // Everything here is guarded by `if (window.Capacitor)`, so this file
+  // still works fine as an ordinary web page (e.g. if you ever open it
+  // directly in a browser) — these enhancements only activate when
+  // actually running inside the packaged native app.
+  (function () {
+    if (!window.Capacitor || !window.Capacitor.Plugins) return;
+    var Plugins = window.Capacitor.Plugins;
+
+    // Match the status bar to the app's light header instead of the OS default
+    if (Plugins.StatusBar) {
+      try {
+        Plugins.StatusBar.setBackgroundColor({ color: '#f8f4ee' });
+        Plugins.StatusBar.setStyle({ style: 'DARK' }); // dark icons, for a light bar
+      } catch (e) { console.error('StatusBar setup failed:', e); }
+    }
+
+    // Hide the native splash screen once the page has actually rendered,
+    // instead of relying on a fixed timer
+    if (Plugins.SplashScreen) {
+      window.addEventListener('load', function () {
+        try { Plugins.SplashScreen.hide(); } catch (e) { console.error('SplashScreen hide failed:', e); }
+      });
+    }
+
+    // Real connectivity awareness — something a plain mobile-Safari tab
+    // can't do — so the app says something useful instead of every
+    // search just silently failing when there's no signal.
+    if (Plugins.Network) {
+      var offlineBanner = null;
+      function showOfflineBanner() {
+        if (offlineBanner) return;
+        offlineBanner = document.createElement('div');
+        offlineBanner.id = 'offline-banner';
+        offlineBanner.style.cssText =
+          'position:fixed;top:0;left:0;right:0;z-index:999;background:#6e2238;color:#f8f4ee;' +
+          'text-align:center;padding:0.6rem 1rem;font-family:"DM Sans",sans-serif;font-size:0.82rem;';
+        offlineBanner.textContent = "You're offline — reconnect to get pairings.";
+        document.body.prepend(offlineBanner);
+      }
+      function hideOfflineBanner() {
+        if (offlineBanner) { offlineBanner.remove(); offlineBanner = null; }
+      }
+      Plugins.Network.getStatus().then(function (status) {
+        if (!status.connected) showOfflineBanner();
+      });
+      Plugins.Network.addListener('networkStatusChange', function (status) {
+        if (status.connected) hideOfflineBanner();
+        else showOfflineBanner();
+      });
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+	"appId": "com.chateaugustav.pairing",
+	"appName": "Château Gustav",
+	"webDir": "www",
+	"packageClassList": [
+		"CAPNetworkPlugin",
+		"SplashScreenPlugin",
+		"StatusBarPlugin"
+	]
+}
