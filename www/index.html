@@ -1174,7 +1174,7 @@ function toggleSave(btn) {
 
 function updateSavedBadge() {
   var count = getSaved().length;
-  var tabBtn = document.querySelectorAll('.tab-btn')[2];
+  var tabBtn = document.querySelectorAll('.tab-btn')[3]; // index 3 = Saved (Food/Wine/Scan/Saved)
   var icon = tabBtn.querySelector('.tab-icon');
   icon.textContent = count > 0 ? '♥' : '♡';
 }
