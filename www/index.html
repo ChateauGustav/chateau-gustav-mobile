@@ -887,7 +887,8 @@ function renderResults(data, mode, inputs) {
     }).join('');
     var budgetNote = mode === 'food' && p.budgetNote ? '<div style="font-size:0.72rem;color:var(--dim);margin-top:5px;">' + p.budgetNote + '</div>' : '';
     var saveId = 'save-' + i;
-    var saveData = JSON.stringify({ title: title, sub: sub, score: p.score, why: p.why, dish: summary, mode: mode }).replace(/'/g, '&#39;');
+    var saveData = JSON.stringify({ title: title, sub: sub, score: p.score, why: p.why, dish: summary, mode: mode });
+    var saveDataAttr = saveData.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
 
     html += '<div class="pairing-card ' + rankClass + '">' +
       '<div class="pairing-card-accent"></div>' +
@@ -900,7 +901,7 @@ function renderResults(data, mode, inputs) {
         '<div class="pairing-why">' + p.why + '</div>' +
         '<div class="attr-pills">' + attrs + '</div>' +
         budgetNote +
-        '<button class="save-btn" id="' + saveId + '" onclick="toggleSave(' + saveId.replace('-', '') + ', ' + "'" + saveData + "'" + ')">♡ Save pairing</button>' +
+        '<button class="save-btn" id="' + saveId + '" data-save="' + saveDataAttr + '" onclick="toggleSave(this)">♡ Save pairing</button>' +
       '</div></div>';
   });
 
@@ -950,7 +951,8 @@ function setSaved(arr) {
   try { localStorage.setItem('cg_saved', JSON.stringify(arr)); } catch(e) {}
 }
 
-function toggleSave(btn, dataStr) {
+function toggleSave(btn) {
+  var dataStr = btn.getAttribute('data-save');
   var data = JSON.parse(dataStr);
   var saved = getSaved();
   var idx = saved.findIndex(function(s) { return s.title === data.title && Math.round(s.score) === Math.round(data.score); });
