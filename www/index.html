@@ -650,15 +650,248 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+/* ── PROFILE PANEL ──────────────────────────────────────────────── */
+.settings-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--dim);
+  padding: 4px;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
 }
+.settings-btn:active { color: var(--gold); }
+
+.profile-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--parchment);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--safe-bottom) + 24px);
+}
+.profile-panel.open { transform: translateX(0); }
+
+.profile-top {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--mist);
+  padding: calc(var(--safe-top) + 10px) 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.profile-back {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--gold);
+  cursor: pointer;
+  padding: 4px;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+.profile-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+.profile-save-top {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--rouge);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-section { padding: 20px 16px 0; }
+.profile-section-label {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.profile-section-sub {
+  font-size: 0.78rem;
+  color: var(--dim);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+/* Name input */
+.profile-input-row {
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.profile-input-label { font-size: 0.68rem; color: var(--dim); margin-bottom: 4px; }
+.profile-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  padding: 0;
+}
+.profile-input::placeholder { color: var(--mist); }
+
+/* Pill toggles for styles/grapes */
+.pill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.pill-toggle {
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--mist);
+  background: var(--card-bg);
+  color: var(--dim);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  font-weight: 400;
+}
+.pill-toggle.selected {
+  background: var(--rouge);
+  border-color: var(--rouge);
+  color: #f8f4ee;
+  font-weight: 500;
+}
+.pill-toggle.avoid-selected {
+  background: var(--parchment2);
+  border-color: var(--rouge);
+  color: var(--rouge);
+  font-weight: 500;
+}
+
+/* Grape group headers */
+.grape-group-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 10px 0 6px;
+  opacity: 0.7;
+}
+
+/* Budget select */
+.profile-select-row {
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.profile-select {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  appearance: none;
+  -webkit-appearance: none;
+}
+.profile-select option { background: var(--parchment); }
+
+/* Dietary notes */
+.profile-textarea {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  min-height: 80px;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.profile-textarea::placeholder { color: var(--mist); }
+.profile-textarea:focus { border-color: var(--gold); }
+
+/* Save button */
+.profile-save-btn {
+  width: calc(100% - 32px);
+  margin: 8px 16px 0;
+  padding: 15px;
+  background: var(--rouge);
+  color: #f8f4ee;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-save-btn:active { background: var(--rouge-deep); }
+
+/* Saved indicator */
+.profile-saved-indicator {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--gold);
+  padding: 8px 0 0;
+  display: none;
+}
+.profile-saved-indicator.visible { display: block; }
+
+/* Header preference indicator */
+.pref-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  margin-top: 4px;
+  display: none;
+}
+.pref-dot.visible { display: block; }
 </style>
 </head>
 <body>
 
-<header class="app-header">
+<header class="app-header" style="position:relative;">
   <div class="app-logo">Château <span>Gustav</span></div>
+  <button class="settings-btn" onclick="openProfile()" aria-label="Open preferences">⚙️</button>
+  <div class="pref-dot" id="pref-dot"></div>
 </header>
 
 <main class="app-body" id="app-body">
@@ -966,6 +1199,141 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   </button>
 </nav>
 
+<!-- ── PROFILE / PREFERENCES PANEL ── -->
+<div class="profile-panel" id="profile-panel" aria-label="Wine preferences">
+
+  <div class="profile-top">
+    <button class="profile-back" onclick="closeProfile()" aria-label="Close preferences">‹</button>
+    <div class="profile-title">Your wine profile</div>
+    <button class="profile-save-top" onclick="saveProfile()">Save</button>
+  </div>
+
+  <!-- Name -->
+  <div class="profile-section">
+    <div class="profile-section-label">About you</div>
+    <div class="profile-input-row">
+      <div class="profile-input-label">First name (optional)</div>
+      <input class="profile-input" id="pref-name" type="text" placeholder="e.g. Dele" autocomplete="off" />
+    </div>
+  </div>
+
+  <!-- Preferred styles -->
+  <div class="profile-section">
+    <div class="profile-section-label">Preferred styles</div>
+    <div class="profile-section-sub">Tap to select the styles you gravitate toward.</div>
+    <div class="pill-grid" id="pref-styles-grid">
+      <button class="pill-toggle" data-value="Bold reds" onclick="togglePill(this,'styles')">Bold reds</button>
+      <button class="pill-toggle" data-value="Medium reds" onclick="togglePill(this,'styles')">Medium reds</button>
+      <button class="pill-toggle" data-value="Light reds" onclick="togglePill(this,'styles')">Light reds</button>
+      <button class="pill-toggle" data-value="Full-bodied whites" onclick="togglePill(this,'styles')">Full-bodied whites</button>
+      <button class="pill-toggle" data-value="Crisp whites" onclick="togglePill(this,'styles')">Crisp whites</button>
+      <button class="pill-toggle" data-value="Aromatic whites" onclick="togglePill(this,'styles')">Aromatic whites</button>
+      <button class="pill-toggle" data-value="Sparkling" onclick="togglePill(this,'styles')">Sparkling</button>
+      <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'styles')">Rosé</button>
+      <button class="pill-toggle" data-value="Orange / natural" onclick="togglePill(this,'styles')">Orange / natural</button>
+      <button class="pill-toggle" data-value="Sweet / dessert" onclick="togglePill(this,'styles')">Sweet / dessert</button>
+      <button class="pill-toggle" data-value="Dry only" onclick="togglePill(this,'styles')">Dry only</button>
+      <button class="pill-toggle" data-value="Low tannin" onclick="togglePill(this,'styles')">Low tannin</button>
+    </div>
+  </div>
+
+  <!-- Favorite grapes -->
+  <div class="profile-section">
+    <div class="profile-section-label">Favorite grapes</div>
+    <div class="profile-section-sub">These get prioritised when they're also a great match for your dish.</div>
+
+    <div class="grape-group-label">Reds</div>
+    <div class="pill-grid">
+      <button class="pill-toggle" data-value="Cabernet Sauvignon" onclick="togglePill(this,'favoriteGrapes')">Cab Sauvignon</button>
+      <button class="pill-toggle" data-value="Merlot" onclick="togglePill(this,'favoriteGrapes')">Merlot</button>
+      <button class="pill-toggle" data-value="Pinot Noir" onclick="togglePill(this,'favoriteGrapes')">Pinot Noir</button>
+      <button class="pill-toggle" data-value="Syrah / Shiraz" onclick="togglePill(this,'favoriteGrapes')">Syrah / Shiraz</button>
+      <button class="pill-toggle" data-value="Zinfandel" onclick="togglePill(this,'favoriteGrapes')">Zinfandel</button>
+      <button class="pill-toggle" data-value="Malbec" onclick="togglePill(this,'favoriteGrapes')">Malbec</button>
+      <button class="pill-toggle" data-value="Tempranillo" onclick="togglePill(this,'favoriteGrapes')">Tempranillo</button>
+      <button class="pill-toggle" data-value="Nebbiolo" onclick="togglePill(this,'favoriteGrapes')">Nebbiolo</button>
+      <button class="pill-toggle" data-value="Sangiovese" onclick="togglePill(this,'favoriteGrapes')">Sangiovese</button>
+      <button class="pill-toggle" data-value="Grenache" onclick="togglePill(this,'favoriteGrapes')">Grenache</button>
+      <button class="pill-toggle" data-value="Barbera" onclick="togglePill(this,'favoriteGrapes')">Barbera</button>
+      <button class="pill-toggle" data-value="Cabernet Franc" onclick="togglePill(this,'favoriteGrapes')">Cab Franc</button>
+      <button class="pill-toggle" data-value="Gamay (Beaujolais)" onclick="togglePill(this,'favoriteGrapes')">Gamay</button>
+      <button class="pill-toggle" data-value="Petite Sirah" onclick="togglePill(this,'favoriteGrapes')">Petite Sirah</button>
+      <button class="pill-toggle" data-value="Carménère" onclick="togglePill(this,'favoriteGrapes')">Carménère</button>
+      <button class="pill-toggle" data-value="Pinotage" onclick="togglePill(this,'favoriteGrapes')">Pinotage</button>
+      <button class="pill-toggle" data-value="Primitivo" onclick="togglePill(this,'favoriteGrapes')">Primitivo</button>
+    </div>
+
+    <div class="grape-group-label">Whites</div>
+    <div class="pill-grid">
+      <button class="pill-toggle" data-value="Chardonnay" onclick="togglePill(this,'favoriteGrapes')">Chardonnay</button>
+      <button class="pill-toggle" data-value="Sauvignon Blanc" onclick="togglePill(this,'favoriteGrapes')">Sauv Blanc</button>
+      <button class="pill-toggle" data-value="Riesling" onclick="togglePill(this,'favoriteGrapes')">Riesling</button>
+      <button class="pill-toggle" data-value="Pinot Grigio" onclick="togglePill(this,'favoriteGrapes')">Pinot Grigio</button>
+      <button class="pill-toggle" data-value="Albariño" onclick="togglePill(this,'favoriteGrapes')">Albariño</button>
+      <button class="pill-toggle" data-value="Viognier" onclick="togglePill(this,'favoriteGrapes')">Viognier</button>
+      <button class="pill-toggle" data-value="Gewürztraminer" onclick="togglePill(this,'favoriteGrapes')">Gewürz</button>
+      <button class="pill-toggle" data-value="Grüner Veltliner" onclick="togglePill(this,'favoriteGrapes')">Grüner Veltliner</button>
+      <button class="pill-toggle" data-value="Chenin Blanc" onclick="togglePill(this,'favoriteGrapes')">Chenin Blanc</button>
+      <button class="pill-toggle" data-value="Vermentino" onclick="togglePill(this,'favoriteGrapes')">Vermentino</button>
+      <button class="pill-toggle" data-value="Moscato / Muscat" onclick="togglePill(this,'favoriteGrapes')">Moscato</button>
+      <button class="pill-toggle" data-value="Verdejo" onclick="togglePill(this,'favoriteGrapes')">Verdejo</button>
+    </div>
+
+    <div class="grape-group-label">Sparkling &amp; other</div>
+    <div class="pill-grid">
+      <button class="pill-toggle" data-value="Champagne / Sparkling" onclick="togglePill(this,'favoriteGrapes')">Champagne</button>
+      <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'favoriteGrapes')">Rosé</button>
+      <button class="pill-toggle" data-value="Prosecco" onclick="togglePill(this,'favoriteGrapes')">Prosecco</button>
+      <button class="pill-toggle" data-value="Cava" onclick="togglePill(this,'favoriteGrapes')">Cava</button>
+      <button class="pill-toggle" data-value="Orange Wine" onclick="togglePill(this,'favoriteGrapes')">Orange Wine</button>
+    </div>
+  </div>
+
+  <!-- Grapes to avoid -->
+  <div class="profile-section">
+    <div class="profile-section-label">Wines to avoid</div>
+    <div class="profile-section-sub">Claude will still recommend these if they're truly the best match — but will note the tension.</div>
+    <div class="pill-grid" id="pref-avoid-grid">
+      <button class="pill-toggle" data-value="High tannin reds" onclick="togglePill(this,'avoidGrapes')">High tannin reds</button>
+      <button class="pill-toggle" data-value="Sweet wines" onclick="togglePill(this,'avoidGrapes')">Sweet wines</button>
+      <button class="pill-toggle" data-value="Oaky whites" onclick="togglePill(this,'avoidGrapes')">Oaky whites</button>
+      <button class="pill-toggle" data-value="Very dry whites" onclick="togglePill(this,'avoidGrapes')">Very dry whites</button>
+      <button class="pill-toggle" data-value="Sparkling" onclick="togglePill(this,'avoidGrapes')">Sparkling</button>
+      <button class="pill-toggle" data-value="Orange / natural wine" onclick="togglePill(this,'avoidGrapes')">Orange wine</button>
+      <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'avoidGrapes')">Rosé</button>
+      <button class="pill-toggle" data-value="Red wine" onclick="togglePill(this,'avoidGrapes')">Red wine</button>
+      <button class="pill-toggle" data-value="White wine" onclick="togglePill(this,'avoidGrapes')">White wine</button>
+    </div>
+  </div>
+
+  <!-- Budget -->
+  <div class="profile-section">
+    <div class="profile-section-label">Typical budget per bottle</div>
+    <div class="profile-select-row">
+      <select class="profile-select" id="pref-budget">
+        <option value="">No preference</option>
+        <option value="Under $20">Under $20</option>
+        <option value="$20–$40">$20–$40</option>
+        <option value="$40–$75">$40–$75</option>
+        <option value="$75–$150">$75–$150</option>
+        <option value="$150+">$150+</option>
+      </select>
+      <span style="color:var(--mist);font-size:1rem;pointer-events:none;">›</span>
+    </div>
+  </div>
+
+  <!-- Dietary notes -->
+  <div class="profile-section">
+    <div class="profile-section-label">Dietary &amp; other notes</div>
+    <div class="profile-section-sub">Anything else Claude should know — vegetarian, avoiding high alcohol, sulphite sensitivity, etc.</div>
+    <textarea class="profile-textarea" id="pref-dietary" placeholder="e.g. I prefer vegetarian-friendly pairings and lower-alcohol wines"></textarea>
+  </div>
+
+  <button class="profile-save-btn" onclick="saveProfile()">Save preferences</button>
+  <div class="profile-saved-indicator" id="profile-saved-indicator">✦ Preferences saved</div>
+
+</div>
+
 <script>
 // ── TAB NAVIGATION ────────────────────────────────────────────────
 var currentTab = 'food';
@@ -1008,6 +1376,95 @@ function isCurated(mode, inputs) {
   return CURATED_KEYS_FOOD.indexOf(key) !== -1;
 }
 
+// ── PROFILE / PREFERENCES ─────────────────────────────────────────
+var prefState = { styles: [], favoriteGrapes: [], avoidGrapes: [] };
+
+function getPreferences() {
+  try { return JSON.parse(localStorage.getItem('cg_preferences') || 'null'); } catch(e) { return null; }
+}
+function setPreferences(p) {
+  try { localStorage.setItem('cg_preferences', JSON.stringify(p)); } catch(e) {}
+}
+
+function openProfile() {
+  loadProfileIntoUI();
+  document.getElementById('profile-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeProfile() {
+  document.getElementById('profile-panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function loadProfileIntoUI() {
+  var prefs = getPreferences() || {};
+  document.getElementById('pref-name').value = prefs.name || '';
+  document.getElementById('pref-budget').value = prefs.budget || '';
+  document.getElementById('pref-dietary').value = prefs.dietaryNotes || '';
+  prefState.styles = prefs.styles || [];
+  prefState.favoriteGrapes = prefs.favoriteGrapes || [];
+  prefState.avoidGrapes = prefs.avoidGrapes || [];
+  // Restore pill visual state
+  document.querySelectorAll('.pill-toggle').forEach(function(btn) {
+    var val = btn.getAttribute('data-value');
+    var fn = btn.getAttribute('onclick') || '';
+    if (fn.indexOf("'styles'") !== -1) {
+      btn.classList.toggle('selected', prefState.styles.indexOf(val) !== -1);
+    } else if (fn.indexOf("'favoriteGrapes'") !== -1) {
+      btn.classList.toggle('selected', prefState.favoriteGrapes.indexOf(val) !== -1);
+    } else if (fn.indexOf("'avoidGrapes'") !== -1) {
+      btn.classList.toggle('avoid-selected', prefState.avoidGrapes.indexOf(val) !== -1);
+    }
+  });
+}
+
+function togglePill(btn, field) {
+  var val = btn.getAttribute('data-value');
+  var arr = prefState[field];
+  var idx = arr.indexOf(val);
+  var isAvoid = field === 'avoidGrapes';
+  if (idx === -1) {
+    arr.push(val);
+    btn.classList.add(isAvoid ? 'avoid-selected' : 'selected');
+  } else {
+    arr.splice(idx, 1);
+    btn.classList.remove(isAvoid ? 'avoid-selected' : 'selected');
+  }
+}
+
+function saveProfile() {
+  var prefs = {
+    name: document.getElementById('pref-name').value.trim(),
+    styles: prefState.styles.slice(),
+    favoriteGrapes: prefState.favoriteGrapes.slice(),
+    avoidGrapes: prefState.avoidGrapes.slice(),
+    budget: document.getElementById('pref-budget').value,
+    dietaryNotes: document.getElementById('pref-dietary').value.trim()
+  };
+  setPreferences(prefs);
+  updatePrefIndicator();
+
+  // Show confirmation
+  var ind = document.getElementById('profile-saved-indicator');
+  ind.classList.add('visible');
+  setTimeout(function() {
+    ind.classList.remove('visible');
+    closeProfile();
+  }, 1200);
+}
+
+function updatePrefIndicator() {
+  var prefs = getPreferences();
+  var hasPrefs = prefs && (
+    prefs.name || (prefs.styles && prefs.styles.length) ||
+    (prefs.favoriteGrapes && prefs.favoriteGrapes.length) ||
+    (prefs.avoidGrapes && prefs.avoidGrapes.length) ||
+    prefs.budget || prefs.dietaryNotes
+  );
+  var dot = document.getElementById('pref-dot');
+  if (dot) dot.classList.toggle('visible', Boolean(hasPrefs));
+}
+
 // ── INPUT COLLECTION ──────────────────────────────────────────────
 function collectInputs(mode) {
   if (mode === 'food') return {
@@ -1045,10 +1502,11 @@ async function getPairings(mode) {
 
   try {
     var inputs = collectInputs(mode);
+    var preferences = getPreferences() || null;
     var response = await fetch('https://chateau-gustav-app.vercel.app/api/pair', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: mode, inputs: inputs })
+      body: JSON.stringify({ mode: mode, inputs: inputs, preferences: preferences })
     });
     if (!response.ok) throw new Error('Request failed');
     var data = await response.json();
