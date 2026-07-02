@@ -2091,8 +2091,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <!-- ── HUB LEVEL (shown first) ── -->
   <div id="profile-hub">
     <div class="profile-top">
-      <button class="profile-back" onclick="closeProfile()" aria-label="Close">‹</button>
-      <div class="profile-title">More</div>
+      <button class="profile-back" onclick="closeProfile()" aria-label="Close" style="font-size:0.82rem;letter-spacing:0.04em;">✕</button>
+      <div class="profile-title">Settings</div>
       <div style="width:44px"></div>
     </div>
 
@@ -2360,6 +2360,13 @@ function openProfile() {
   document.body.style.overflow = 'hidden';
 }
 function closeProfile() {
+  // Don't close the whole panel if a sub-panel is open — go back instead
+  if (document.getElementById('scanned-subpanel').classList.contains('open')) {
+    closeScannedWines(); return;
+  }
+  if (document.getElementById('prefs-subpanel').classList.contains('open')) {
+    closePrefsSubpanel(); return;
+  }
   document.getElementById('profile-panel').classList.remove('open');
   document.getElementById('prefs-subpanel').classList.remove('open');
   document.getElementById('scanned-subpanel').classList.remove('open');
