@@ -2931,7 +2931,9 @@ function renderScanResults(data) {
 
   results.innerHTML = html;
   results.classList.add('visible');
-  document.getElementById('app-body').scrollTop = 0;
+  setTimeout(function() {
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
 }
 
 function pairScannedWine(grape) {
