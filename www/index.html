@@ -6,7 +6,7 @@
 <title>Château Gustav</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 <style>
 /* ── TOKENS ─────────────────────────────────────────────────────── */
 :root {
@@ -1353,18 +1353,26 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   overflow: hidden;
 }
 .ob-splash.hidden { opacity: 0; pointer-events: none; }
-.ob-splash-bg-letter {
+.ob-splash-cg {
   position: absolute;
-  top: -30px;
-  right: -20px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 72vw;
-  font-weight: 600;
-  color: rgba(124,45,62,0.09);
-  line-height: 1;
-  user-select: none;
+  top: 44%;
+  left: 36%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
   pointer-events: none;
-  letter-spacing: -0.05em;
+  user-select: none;
+  white-space: nowrap;
+}
+.ob-cg-c, .ob-cg-g {
+  font-family: 'Allura', cursive;
+  font-weight: 400;
+  font-size: 120vw;
+  color: rgba(124,45,62,0.09);
+  line-height: 0.9;
+}
+.ob-cg-g {
+  margin-left: -42vw;
 }
 .ob-splash-line {
   width: 28px;
@@ -2788,7 +2796,10 @@ function resetScan() {
 
   <!-- Splash -->
   <div class="ob-splash" id="ob-splash">
-    <div class="ob-splash-bg-letter">G</div>
+    <div class="ob-splash-cg">
+      <span class="ob-cg-c">C</span>
+      <span class="ob-cg-g">G</span>
+    </div>
     <div class="ob-splash-line"></div>
     <div class="ob-splash-chateau">Château</div>
     <div class="ob-splash-name">Gustav</div>
