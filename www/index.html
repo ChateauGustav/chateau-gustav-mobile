@@ -1031,6 +1031,66 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   display: none;
 }
 .pref-dot.visible { display: block; }
+
+/* ── GLOSSARY POPUP ─────────────────────────────────────────────── */
+.glossary-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,22,18,0.45);
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+}
+.glossary-overlay.open { display: flex; }
+.glossary-card {
+  background: var(--card-bg);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 20px calc(var(--safe-bottom) + 20px);
+  width: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  animation: slideUpG 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes slideUpG {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.glossary-term {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.glossary-def {
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.7;
+}
+.glossary-wset {
+  font-size: 0.72rem;
+  color: var(--dim);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--mist);
+}
+.glossary-close {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  background: var(--parchment2);
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: var(--dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pill { cursor: pointer; }
+.pill:active { opacity: 0.6; }
+.saved-attr-pill { cursor: pointer; }
+.saved-attr-pill:active { opacity: 0.6; }
 </style>
 </head>
 <body>
@@ -1792,7 +1852,8 @@ function renderResults(data, mode, inputs) {
     var title = mode === 'food' ? p.wine : p.food;
     var sub = mode === 'food' && p.region ? p.region : '';
     var attrs = (p.attributes || []).map(function(a) {
-      return '<span class="pill' + (i === 0 ? ' gold' : '') + '">' + a + '</span>';
+      var aEsc = a.replace(/'/g, "\\'");
+      return '<span class="pill' + (i === 0 ? ' gold' : '') + '" onclick="event.stopPropagation();showTermDef(\'' + aEsc + '\',event)">' + a + '</span>';
     }).join('');
     var budgetNote = mode === 'food' && p.budgetNote ? '<div style="font-size:0.72rem;color:var(--dim);margin-top:5px;">' + p.budgetNote + '</div>' : '';
     var saveId = 'save-' + i;
@@ -1895,10 +1956,9 @@ function renderSaved() {
     return;
   }
   list.innerHTML = saved.map(function(s, i) {
-    var previewWhy = s.why && s.why.length > 90 ? s.why.substring(0, 90) + '…' : (s.why || '');
-    var hasMore = s.why && s.why.length > 90;
     var attrs = (s.attributes || []).map(function(a) {
-      return '<span class="saved-attr-pill">' + a + '</span>';
+      var aEsc = a.replace(/'/g, "\\'");
+      return '<span class="saved-attr-pill" onclick="event.stopPropagation();showTermDef(\'' + aEsc + '\',event)">' + a + '</span>';
     }).join('');
 
     return '<div class="saved-item" id="saved-card-' + i + '" onclick="toggleSavedCard(' + i + ')">' +
@@ -1908,14 +1968,12 @@ function renderSaved() {
       '</div>' +
       (s.dish ? '<div class="saved-dish">' + s.dish + '</div>' : '') +
       (s.sub ? '<div class="saved-dish" style="color:var(--dim);margin-top:1px;">' + s.sub + '</div>' : '') +
-      '<div class="saved-why">' + previewWhy + '</div>' +
-      (hasMore ? '<div class="saved-expand-hint">Tap to see why →</div>' : '') +
+      '<div class="saved-expand-hint">Tap to see why →</div>' +
       '<div class="saved-detail">' +
         '<div class="saved-full-why">' + (s.why || '') + '</div>' +
         (attrs ? '<div class="saved-attrs">' + attrs + '</div>' : '') +
         '<button class="saved-remove" onclick="event.stopPropagation(); removeSaved(' + i + ')">Remove</button>' +
       '</div>' +
-      (!hasMore ? '<button class="saved-remove" style="margin-top:4px;" onclick="event.stopPropagation(); removeSaved(' + i + ')">Remove</button>' : '') +
     '</div>';
   }).join('');
 }
@@ -2145,6 +2203,160 @@ function resetScan() {
     P.Network.addListener('networkStatusChange', function(s) { s.connected ? hideBanner() : showBanner(); });
   }
 })();
+</script>
+<!-- ── GLOSSARY POPUP ── -->
+<div class="glossary-overlay" id="glossary-overlay" onclick="closeGlossary()">
+  <div class="glossary-card" onclick="event.stopPropagation()">
+    <div class="glossary-term" id="glossary-term"></div>
+    <div class="glossary-def" id="glossary-def"></div>
+    <div class="glossary-wset" id="glossary-wset"></div>
+    <button class="glossary-close" onclick="closeGlossary()">Got it</button>
+  </div>
+</div>
+
+<script>
+// ── WINE GLOSSARY ─────────────────────────────────────────────────
+// Definitions written in Dele's voice — knowledgeable but accessible,
+// the same register as the pairing explanations.
+var WINE_GLOSSARY = {
+  // Acidity
+  'high acidity': { def: 'Makes your mouth water. High-acid wines feel bright and lively, and they cut through fat and richness the way a squeeze of lemon does. Essential for pairing with rich or oily dishes.', wset: 'WSET describes acidity as one of the eight key structural components of wine, alongside tannin, alcohol, sweetness, body, flavour intensity, flavour characteristics, and finish.' },
+  'low acidity': { def: 'Softer and rounder on the palate — less of that mouth-watering sensation. Works better with lighter, more delicate dishes where a high-acid wine would feel too sharp.' },
+  'bright acidity': { def: 'Acidity that feels clean and energetic rather than sharp or harsh — the kind that lifts a wine and makes it feel refreshing.' },
+  'crisp': { def: 'Noticeably fresh, clean acidity. A crisp wine wakes up your palate and pairs naturally with lighter foods like seafood, salads, and fresh vegetables.' },
+
+  // Tannin
+  'high tannin': { def: 'That drying, gripping sensation on your gums and cheeks after a sip of red wine. Tannin comes from grape skins, seeds, and oak barrels. High-tannin wines need fatty, protein-rich foods — meat literally softens the perception of tannin.' },
+  'soft tannin': { def: 'Tannins that feel smooth and rounded rather than grippy or harsh. Easier to drink on their own and work well with a wider range of foods, including leaner proteins.' },
+  'supple tannin': { def: 'Refined, polished tannins that feel silky rather than drying. Often the result of careful winemaking or careful aging.' },
+  'firm tannin': { def: 'Noticeable structure and grip — the wine holds its own against bold dishes. Firm tannins tend to soften with food and age well in the bottle.' },
+  'low tannin': { def: 'Barely any grip or drying sensation. Common in whites, rosés, and lighter reds like Pinot Noir and Gamay. Works with almost anything at the table.' },
+
+  // Body
+  'full body': { def: 'A rich, heavy, weighty feeling on the palate — like the difference between whole milk and skim. Full-bodied wines have more alcohol and extract, and they need equally substantial food.' },
+  'medium body': { def: 'The Goldilocks zone — substantial enough to hold its own with most dishes without overpowering anything. The most versatile category.' },
+  'light body': { def: 'Delicate and lower in alcohol — closer to water in texture. Think Pinot Noir or Pinot Grigio. Pairs best with lighter proteins and vegetable dishes.' },
+
+  // Fruit character
+  'dark fruit': { def: 'Aromas and flavors of blackberry, blueberry, black cherry, or plum. Associated with riper, warmer-climate reds like Malbec, Syrah, and Zinfandel.' },
+  'red fruit': { def: 'Strawberry, raspberry, cherry, or cranberry aromas — brighter and fresher than dark fruit. Common in lighter, cooler-climate reds like Pinot Noir and Grenache.' },
+  'jammy fruit': { def: 'Very ripe, concentrated fruit character — like jam rather than fresh fruit. Common in warm-climate reds like Zinfandel and Australian Shiraz.' },
+  'jammy': { def: 'Very ripe, concentrated fruit character — like jam rather than fresh fruit. Common in warm-climate reds like Zinfandel. Rich and bold, pairs with equally bold dishes.' },
+  'orchard fruit': { def: 'Apple, pear, peach, or apricot aromas. Common in whites like Riesling, Chardonnay, and Chenin Blanc — especially those from cooler climates.' },
+  'citrus': { def: 'Lemon, lime, grapefruit, or orange zest aromas. Common in crisp whites and adds brightness and energy to the wine\'s character.' },
+  'juicy dark fruit': { def: 'A combination of ripe, concentrated dark fruit (blackberry, plum) with a lively, fresh quality that keeps it from feeling heavy.' },
+  'juicy': { def: 'Bright, fresh-tasting fruit character with good acidity — the wine feels alive and vibrant on the palate.' },
+
+  // Earth & mineral
+  'earthy': { def: 'Non-fruit aromas like forest floor, mushroom, wet stone, or dried herbs. More common in Old World wines. Earthiness adds complexity and pairs naturally with earthy foods like mushrooms and root vegetables.' },
+  'mineral': { def: 'A stony, chalky, or saline quality — think wet rocks or sea spray after rain. Often found in cool-climate whites grown in limestone or volcanic soils. Hard to define but easy to recognize.' },
+  'saline': { def: 'A pleasantly salty, sea-breeze quality. Common in coastal whites like Albariño and Vermentino. Makes them natural partners for seafood.' },
+  'coastal': { def: 'Wines grown near the ocean absorb a saline freshness from sea breezes and benefit from the moderating effect of ocean temperatures. Usually means crispness and a slight mineral or salty note.' },
+
+  // Oak & aging
+  'toasty': { def: 'A warm, bread-like, or slightly smoky quality that comes from oak barrel aging. Different from actual smoke — more like toast or warm spice.' },
+  'buttery': { def: 'A rich, creamy texture and flavor most associated with oaked Chardonnay. Comes from a winemaking process called malolactic fermentation that converts sharp malic acid into softer lactic acid.' },
+  'subtle oak': { def: 'Light barrel influence that adds vanilla, texture, and gentle spice without dominating the wine\'s fruit character.' },
+  'heavy oak': { def: 'Pronounced barrel influence — vanilla, coconut, and toasty notes are front and center. Divides opinion but works well with rich, fatty dishes.' },
+  'leather': { def: 'A savory, complex aroma associated with aged red wines, particularly from Rioja and Bordeaux. Adds depth and earthiness — a sign of development in the bottle.' },
+
+  // Spice
+  'peppery': { def: 'A sharp, spicy character — specifically black or white pepper. A signature note of Syrah/Shiraz and Grüner Veltliner. Pairs especially well with dishes that share that peppery quality.' },
+  'spice': { def: 'Notes of black pepper, clove, cinnamon, or anise — can come from the grape variety itself or from oak aging.' },
+  'spice-driven': { def: 'Spice notes are a defining characteristic of this wine. Could be black pepper, clove, cinnamon, or savory herbs depending on the grape and region.' },
+  'warm spice': { def: 'Baking-spice aromas — cinnamon, clove, vanilla, nutmeg. Often comes from oak barrel aging rather than the grape itself.' },
+  'white pepper note': { def: 'A specific, clean, sharp spice that reads as white pepper rather than black. The distinctive calling card of Grüner Veltliner from Austria.' },
+  'bell pepper note': { def: 'A fresh, green, slightly vegetal character. Comes from a compound called pyrazine that\'s naturally present in some grapes, especially Cabernet Franc and cool-climate Cabernet Sauvignon. Not a flaw — it\'s a regional signature.' },
+
+  // Floral & aromatic
+  'floral': { def: 'Aromas of flowers — rose, violet, jasmine, or orange blossom. Common in Gewürztraminer, Viognier, and Pinot Noir. Adds elegance and lift to a wine.' },
+  'aromatic': { def: 'Intensely fragrant — the aromas leap out of the glass before you even taste the wine. Associated with varieties like Gewürztraminer, Viognier, Riesling, and Muscat.' },
+
+  // Texture & feel
+  'silky': { def: 'A smooth, flowing, luxurious texture on the palate — like running your finger across silk. Associated with fine Pinot Noir, Merlot, and other wines with refined, well-integrated tannins.' },
+  'plush': { def: 'Soft, rounded, and generous on the palate — rich without being heavy or tannic. Inviting and easy to enjoy.' },
+  'elegant': { def: 'Refined and balanced — nothing is too loud, too heavy, or too sharp. All the elements work together in harmony. Often associated with wines that reward patience and age well.' },
+  'fresh': { def: 'Light, vibrant, and clean — youthful acidity and brightness that makes the wine feel alive and easy-drinking.' },
+  'refreshing': { def: 'Bright acidity and crispness that makes the wine feel revitalizing, the way a cold glass of something fizzy feels on a hot day.' },
+  'clean finish': { def: 'The aftertaste is pleasant and fades cleanly rather than lingering unpleasantly. A mark of quality winemaking.' },
+  'round texture': { def: 'Soft, smooth mouthfeel with no sharp edges from tannin or acidity. Often associated with barrel-aged whites and medium-bodied reds.' },
+  'full texture': { def: 'A weighty, mouth-filling sensation — the wine feels substantial and rich on the palate.' },
+
+  // Style descriptors
+  'dry': { def: 'No perceptible sweetness — the sugar has been fully fermented into alcohol. Most table wines are dry.' },
+  'off-dry': { def: 'A hint of sweetness — not quite sweet, but not bone dry either. That touch of residual sugar is often what makes off-dry wines so good with spicy food.' },
+  'bold': { def: 'Full-flavored, assertive, and often higher in alcohol. A bold wine can stand up to the most intensely seasoned and richest dishes at the table.' },
+  'versatile': { def: 'Works comfortably with a wide range of foods — a reliable choice when you\'re not sure what everyone at the table is having.' },
+  'crowd-pleaser': { def: 'Approachable and broadly appealing — smooth, fruited, and easy to enjoy without a lot of context or prior experience with wine.' },
+  'savory': { def: 'Non-fruit, food-friendly flavors — olives, herbs, earth, or cured meat aromas rather than sweetness or berries. Savory wines tend to be Old World in style.' },
+
+  // Herbal
+  'herbal': { def: 'Green, fresh aromas like basil, thyme, mint, or fresh-cut grass. A characteristic of cool-climate whites and some reds, especially those from coastal or high-altitude regions.' },
+  'dried herb': { def: 'Oregano, thyme, rosemary, or sage aromas — drier and more complex than fresh herb notes. Common in Grenache, Tempranillo, and southern French reds.' },
+
+  // Pairing-specific
+  'regional match': { def: 'This wine and dish come from the same place — a pairing built over centuries of culinary tradition. When food and wine have evolved side by side, they almost always work together.' },
+  'classic match': { def: 'One of the most time-tested, well-documented pairings in the sommelier\'s canon. Not a happy accident — this combination has been studied and confirmed by generations of sommeliers.' },
+  'cuts richness': { def: 'The wine\'s acidity or tannin acts like a squeeze of lemon — it cleanses the palate between bites of rich, fatty food and makes the next bite taste as good as the first.' },
+  'cuts through fat': { def: 'High acidity or firm tannin literally breaks through the coating that fat leaves on your palate, refreshing it for the next bite.' },
+  'cuts grease': { def: 'Bubbles and acidity in sparkling wine physically scrub the palate clean after fried or fatty foods. One of Champagne\'s most underrated abilities.' },
+  'matches weight': { def: 'The wine and dish have similar body and intensity. Neither overwhelms the other — they exist comfortably at the same volume level.' },
+  'matches smoke': { def: 'The wine has its own smoky or dark character that complements rather than fights the smokiness in the dish.' },
+  'tames spice': { def: 'A touch of sweetness or softness in the wine cools the burning sensation of chili heat on your palate.' },
+  'balances umami': { def: 'Umami — the savory depth found in mushrooms, aged cheese, miso, and cured meats — can make dry wines taste harsh. A wine with fruit or a touch of sweetness brings the two into balance.' },
+  'balances salt': { def: 'Off-dry wines soften the perception of saltiness, the same way a squeeze of citrus balances a dish that\'s too salty.' },
+  'earthy mirror': { def: 'The wine\'s own earthy character — forest floor, mushroom — echoes the earthy flavors in the dish. A mirror pairing rather than a contrast.' },
+  'herbal mirror': { def: 'The wine\'s herbal notes match the herbs in the dish. Instead of contrasting, the two reinforce each other.' },
+  'herbal echo': { def: 'The wine picks up on the herbal character of the seasoning and reflects it back, creating a harmonious loop of flavor.' },
+  'serve chilled': { def: 'This red wine benefits from being served slightly cooler than room temperature — around 14–16°C / 57–61°F. Chilling enhances freshness and acidity, making it feel lighter and more food-friendly.' },
+  'luxurious': { def: 'Rich, indulgent, and generous — the wine adds to the celebratory or decadent feeling of the dish.' },
+  'celebratory': { def: 'Sparkling wines carry an inherent sense of occasion that elevates the dining experience beyond what the food alone provides.' },
+  'light red': { def: 'A red wine light enough in body and tannin that it can work where you\'d usually reach for a white — with fish, vegetable dishes, or lighter pasta.' },
+  'easy-drinking': { def: 'Smooth, fruited, and approachable with no sharp edges. You don\'t need to think about it — it just works.' },
+  'approachable': { def: 'Immediately enjoyable without needing food, decanting, or years of aging. Ready to drink now and works for a wide audience.' },
+  'off-dry option': { def: 'An off-dry (slightly sweet) style of this variety works especially well here. The residual sugar helps balance heat, salt, or richness in the dish.' },
+  'smoky': { def: 'A charred, toasty, or campfire-like quality — can come from volcanic soils, winemaking technique, or the grape variety itself. Complements grilled and smoked foods naturally.' },
+  'rustic': { def: 'Earthy, characterful, and a little unpolished — in the best way. Rustic wines have personality and pair naturally with honest, hearty cuisine.' },
+  'structured': { def: 'Well-defined tannin and acidity that give the wine a backbone — it can age well and stands up to substantial dishes.' },
+  'tangy match': { def: 'The wine\'s acidity directly echoes the tangy or acidic quality in the dish — like how Sauvignon Blanc mirrors the tang of goat cheese.' },
+};
+
+function showTermDef(term, event) {
+  if (event) event.stopPropagation();
+  var key = (term || '').toLowerCase().trim();
+  var entry = WINE_GLOSSARY[key];
+
+  // Fuzzy match if exact key not found
+  if (!entry) {
+    var keys = Object.keys(WINE_GLOSSARY);
+    for (var i = 0; i < keys.length; i++) {
+      if (key.indexOf(keys[i]) !== -1 || keys[i].indexOf(key) !== -1) {
+        entry = WINE_GLOSSARY[keys[i]];
+        break;
+      }
+    }
+  }
+
+  if (!entry) {
+    // Still show popup but with a graceful fallback
+    entry = { def: 'A wine tasting descriptor used by sommeliers to characterise the flavour, texture, or structure of this wine. Ask Délé for more at your next tasting.' };
+  }
+
+  document.getElementById('glossary-term').textContent = term;
+  document.getElementById('glossary-def').textContent = entry.def;
+  var wset = document.getElementById('glossary-wset');
+  if (entry.wset) {
+    wset.textContent = entry.wset;
+    wset.style.display = 'block';
+  } else {
+    wset.style.display = 'none';
+  }
+  document.getElementById('glossary-overlay').classList.add('open');
+}
+
+function closeGlossary() {
+  document.getElementById('glossary-overlay').classList.remove('open');
+}
 </script>
 </body>
 </html>
