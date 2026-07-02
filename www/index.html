@@ -454,7 +454,12 @@ input[type="range"] {
   margin-bottom: 10px;
   padding: 14px;
   position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s ease;
 }
+.saved-item:active { border-color: var(--gold); }
+.saved-item.expanded { border-color: var(--gold); }
 .saved-item-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
 .saved-wine-name {
   font-family: 'Cormorant Garamond', serif;
@@ -464,7 +469,38 @@ input[type="range"] {
 }
 .saved-score { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--gold); font-weight: 600; }
 .saved-dish { font-size: 0.75rem; color: var(--dim); margin-bottom: 6px; }
-.saved-why { font-size: 0.78rem; color: var(--ink); line-height: 1.5; margin-bottom: 8px; }
+.saved-why { font-size: 0.78rem; color: var(--ink); line-height: 1.5; margin-bottom: 6px; }
+.saved-expand-hint {
+  font-size: 0.68rem;
+  color: var(--gold);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.saved-detail {
+  display: none;
+  border-top: 1px solid var(--mist);
+  margin-top: 10px;
+  padding-top: 10px;
+}
+.saved-item.expanded .saved-detail { display: block; }
+.saved-item.expanded .saved-expand-hint { display: none; }
+.saved-full-why {
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+.saved-attrs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.saved-attr-pill {
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--parchment2);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  opacity: 0.8;
+}
 .saved-remove {
   font-size: 0.65rem;
   color: var(--dim);
@@ -1350,14 +1386,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
         </div>
         <div class="hub-row-chev">›</div>
       </div>
-      <div class="hub-row" onclick="closeProfile(); setTab('scan')">
-        <div class="hub-row-icon">📷</div>
-        <div class="hub-row-text">
-          <div class="hub-row-label">Scan a Label</div>
-          <div class="hub-row-sub">Identify any wine with your camera</div>
-        </div>
-        <div class="hub-row-chev">›</div>
-      </div>
     </div>
 
     <div class="hub-section">
@@ -1768,7 +1796,7 @@ function renderResults(data, mode, inputs) {
     }).join('');
     var budgetNote = mode === 'food' && p.budgetNote ? '<div style="font-size:0.72rem;color:var(--dim);margin-top:5px;">' + p.budgetNote + '</div>' : '';
     var saveId = 'save-' + i;
-    var saveData = JSON.stringify({ title: title, sub: sub, score: p.score, why: p.why, dish: summary, mode: mode });
+    var saveData = JSON.stringify({ title: title, sub: sub, score: p.score, why: p.why, dish: summary, mode: mode, attributes: p.attributes || [] });
     var saveDataAttr = saveData.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
 
     html += '<div class="pairing-card ' + rankClass + '">' +
@@ -1867,13 +1895,34 @@ function renderSaved() {
     return;
   }
   list.innerHTML = saved.map(function(s, i) {
-    return '<div class="saved-item">' +
-      '<div class="saved-item-top"><div class="saved-wine-name">' + s.title + '</div><div class="saved-score">' + Math.round(s.score) + '</div></div>' +
-      (s.dish ? '<div class="saved-dish">' + s.dish.substring(0, 60) + (s.dish.length > 60 ? '…' : '') + '</div>' : '') +
-      '<div class="saved-why">' + s.why.substring(0, 120) + (s.why.length > 120 ? '…' : '') + '</div>' +
-      '<button class="saved-remove" onclick="removeSaved(' + i + ')">Remove</button>' +
-      '</div>';
+    var previewWhy = s.why && s.why.length > 90 ? s.why.substring(0, 90) + '…' : (s.why || '');
+    var hasMore = s.why && s.why.length > 90;
+    var attrs = (s.attributes || []).map(function(a) {
+      return '<span class="saved-attr-pill">' + a + '</span>';
+    }).join('');
+
+    return '<div class="saved-item" id="saved-card-' + i + '" onclick="toggleSavedCard(' + i + ')">' +
+      '<div class="saved-item-top">' +
+        '<div class="saved-wine-name">' + s.title + '</div>' +
+        '<div class="saved-score">' + Math.round(s.score) + '</div>' +
+      '</div>' +
+      (s.dish ? '<div class="saved-dish">' + s.dish + '</div>' : '') +
+      (s.sub ? '<div class="saved-dish" style="color:var(--dim);margin-top:1px;">' + s.sub + '</div>' : '') +
+      '<div class="saved-why">' + previewWhy + '</div>' +
+      (hasMore ? '<div class="saved-expand-hint">Tap to see why →</div>' : '') +
+      '<div class="saved-detail">' +
+        '<div class="saved-full-why">' + (s.why || '') + '</div>' +
+        (attrs ? '<div class="saved-attrs">' + attrs + '</div>' : '') +
+        '<button class="saved-remove" onclick="event.stopPropagation(); removeSaved(' + i + ')">Remove</button>' +
+      '</div>' +
+      (!hasMore ? '<button class="saved-remove" style="margin-top:4px;" onclick="event.stopPropagation(); removeSaved(' + i + ')">Remove</button>' : '') +
+    '</div>';
   }).join('');
+}
+
+function toggleSavedCard(i) {
+  var card = document.getElementById('saved-card-' + i);
+  if (card) card.classList.toggle('expanded');
 }
 
 function removeSaved(idx) {
