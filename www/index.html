@@ -125,7 +125,11 @@ body {
 
 /* ── SCREENS ────────────────────────────────────────────────────── */
 .screen { display: none; padding: 0 0 24px; }
-.screen.active { display: block; }
+.screen.active { display: block; animation: screenEnter 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+@keyframes screenEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ── HERO BAND ──────────────────────────────────────────────────── */
 .hero-band {
@@ -263,7 +267,7 @@ input[type="range"] {
 
 /* ── RESULTS ────────────────────────────────────────────────────── */
 .results-area { padding: 16px; display: none; }
-.results-area.visible { display: block; }
+.results-area.visible { display: block; animation: screenEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 
 .back-row {
   display: flex;
@@ -620,7 +624,7 @@ input[type="range"] {
   inset: 0;
   background: var(--parchment);
   transform: translateX(100%);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 40px;
@@ -692,7 +696,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 
 /* Scan results */
 .scan-results { padding: 0 16px; display: none; }
-.scan-results.visible { display: block; }
+.scan-results.visible { display: block; animation: screenEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 .wine-identity {
   background: var(--rouge);
   border-radius: var(--radius);
@@ -820,7 +824,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   z-index: 100;
   background: var(--parchment);
   transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: calc(var(--safe-bottom) + 24px);
@@ -1038,19 +1042,27 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   right: 16px;
   bottom: calc(var(--safe-bottom) + 72px);
   background: var(--rouge);
-  border: 2px solid var(--gold);
+  border: none;
   border-radius: 28px;
   padding: 10px 16px 10px 12px;
   display: flex;
   align-items: center;
   gap: 7px;
-  box-shadow: 0 4px 20px rgba(124,45,62,0.4);
+  box-shadow: 0 4px 20px rgba(124,45,62,0.4), 0 0 0 0 rgba(199,169,107,0);
   cursor: pointer;
   z-index: 100;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: fabEnter 0.4s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both, fabGlow 2.8s 1s ease-in-out infinite;
   -webkit-tap-highlight-color: transparent;
 }
-.gustav-fab:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(124,45,62,0.3); }
+@keyframes fabGlow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(124,45,62,0.4), 0 0 8px 2px rgba(199,169,107,0.15);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(124,45,62,0.5), 0 0 18px 6px rgba(199,169,107,0.35);
+  }
+}
+.gustav-fab:active { transform: scale(0.96); animation: none; box-shadow: 0 2px 10px rgba(124,45,62,0.3); }
 .gustav-fab-icon { font-size: 1.1rem; line-height: 1; }
 .gustav-fab-label {
   font-family: 'DM Sans', sans-serif;
@@ -1070,7 +1082,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .chat-panel.open { transform: translateY(0); }
 
@@ -1268,7 +1280,87 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .chat-send:active { background: var(--rouge-deep); transform: scale(0.94); }
 .chat-send:disabled { background: var(--mist); cursor: not-allowed; transform: none; }
 
-/* ── GLOSSARY POPUP ─────────────────────────────────────────────── */
+/* ── SCANNED WINE ITEMS ─────────────────────────────────────────── */
+.scanned-item {
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  padding: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s ease;
+}
+.scanned-item:active { border-color: var(--gold); }
+.scanned-item.expanded { border-color: var(--gold); }
+.scanned-item-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; }
+.scanned-wine-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: var(--ink); line-height: 1.2; }
+.scanned-wine-style { font-size: 0.68rem; color: var(--gold); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.scanned-wine-meta { font-size: 0.75rem; color: var(--dim); margin-bottom: 4px; }
+.scanned-date { font-size: 0.65rem; color: var(--dim); opacity: 0.6; }
+.scanned-expand-hint { font-size: 0.68rem; color: var(--gold); font-weight: 500; letter-spacing: 0.06em; margin-top: 5px; }
+.scanned-detail { display: none; border-top: 1px solid var(--mist); margin-top: 10px; padding-top: 10px; }
+.scanned-item.expanded .scanned-detail { display: block; }
+.scanned-item.expanded .scanned-expand-hint { display: none; }
+.scanned-detail-text { font-size: 0.82rem; color: var(--ink); line-height: 1.65; margin-bottom: 8px; }
+.scanned-detail-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; font-weight: 500; }
+.scanned-pairing-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.scanned-pairing-item { font-size: 0.82rem; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+.scanned-pairing-item::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.scanned-remove { font-size: 0.65rem; color: var(--dim); background: none; border: none; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; padding: 0; opacity: 0.6; -webkit-tap-highlight-color: transparent; }
+.scanned-empty { text-align: center; padding: 40px 20px; }
+.scanned-empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+.scanned-empty-text { font-size: 0.88rem; color: var(--dim); line-height: 1.6; }
+
+/* ── SMOOTH TRANSITIONS ─────────────────────────────────────────── */
+/* Chat messages fade in as they appear */
+.msg {
+  animation: msgEnter 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes msgEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Pairing cards stagger in */
+.pairing-card {
+  animation: cardEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+/* Saved and scanned items */
+.saved-item, .scanned-item {
+  animation: cardEnter 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Row fields: smooth focus highlight */
+.row-field {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.row-field:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(184,147,58,0.1);
+}
+/* CTA buttons: smooth press */
+.cta-btn, .ob-next-btn, .ob-start-btn {
+  transition: background 0.18s ease, transform 0.12s ease;
+}
+/* Tab icons: smoother active scale */
+.tab-btn[data-active="true"] .tab-icon {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+.tab-btn[data-active="false"] .tab-icon {
+  transition: transform 0.2s ease, color 0.15s ease;
+}
+/* Hub rows: smooth background on press */
+.hub-row { transition: background 0.15s ease; }
+/* Glossary slide-up */
+.glossary-card { transition: none; }
+.glossary-overlay.open .glossary-card {
+  animation: slideUpG 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+/* Onboarding overlay fade */
+.onboarding-overlay { transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
 .glossary-overlay {
   position: fixed;
   inset: 0;
@@ -2033,6 +2125,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
         </div>
         <div class="hub-row-chev">›</div>
       </div>
+      <div class="hub-row" onclick="openScannedWines()">
+        <div class="hub-row-icon">🍾</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">Scanned Wines</div>
+          <div class="hub-row-sub" id="hub-scan-count">Your label scan history</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
     </div>
 
     <div class="hub-section">
@@ -2189,6 +2289,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 
   </div><!-- end prefs-subpanel -->
 
+  <!-- ── SCANNED WINES SUB-PANEL ── -->
+  <div id="scanned-subpanel" class="prefs-subpanel">
+    <div class="profile-top">
+      <button class="profile-back" onclick="closeScannedWines()" aria-label="Back to menu">‹</button>
+      <div class="profile-title">Scanned wines</div>
+      <div style="width:44px"></div>
+    </div>
+    <div id="scanned-list" style="padding:16px;"></div>
+  </div>
+
 </div><!-- end profile-panel -->
 
 <script>
@@ -2289,6 +2399,9 @@ function loadProfileIntoHub() {
   var savedCount = getSaved().length;
   document.getElementById('hub-saved-count').textContent =
     savedCount > 0 ? savedCount + ' pairing' + (savedCount === 1 ? '' : 's') + ' saved' : 'Your favourited matches';
+
+  // Scan count
+  updateScanCount();
 }
 
 function loadProfileIntoUI() {
@@ -2580,7 +2693,91 @@ function removeSaved(idx) {
 
 updateSavedBadge();
 
-// ── SCAN LABEL ────────────────────────────────────────────────────
+// ── SCANNED WINES ─────────────────────────────────────────────────
+function getScanHistory() {
+  try { return JSON.parse(localStorage.getItem('cg_scanned') || '[]'); } catch(e) { return []; }
+}
+function addToScanHistory(data) {
+  var history = getScanHistory();
+  history.unshift({
+    name: data.name || 'Unknown wine',
+    producer: data.producer || null,
+    vintage: data.vintage || null,
+    grape: data.grape || null,
+    region: data.region || null,
+    style: data.style || null,
+    tastingNotes: data.tastingNotes || null,
+    serveTemp: data.serveTemp || null,
+    pairings: data.pairings || [],
+    sommelierNote: data.sommelierNote || null,
+    scannedAt: new Date().toISOString()
+  });
+  // Keep last 50 scans
+  if (history.length > 50) history = history.slice(0, 50);
+  try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
+  updateScanCount();
+}
+function removeScanned(i, event) {
+  if (event) event.stopPropagation();
+  var history = getScanHistory();
+  history.splice(i, 1);
+  try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
+  updateScanCount();
+  renderScannedWines();
+}
+function updateScanCount() {
+  var count = getScanHistory().length;
+  var el = document.getElementById('hub-scan-count');
+  if (el) el.textContent = count > 0 ? count + ' bottle' + (count === 1 ? '' : 's') + ' scanned' : 'Your label scan history';
+}
+function openScannedWines() {
+  renderScannedWines();
+  document.getElementById('scanned-subpanel').classList.add('open');
+}
+function closeScannedWines() {
+  document.getElementById('scanned-subpanel').classList.remove('open');
+}
+function toggleScannedCard(i) {
+  var card = document.getElementById('scanned-card-' + i);
+  if (card) card.classList.toggle('expanded');
+}
+function renderScannedWines() {
+  var list = document.getElementById('scanned-list');
+  var history = getScanHistory();
+  if (history.length === 0) {
+    list.innerHTML = '<div class="scanned-empty">' +
+      '<div class="scanned-empty-icon">🍾</div>' +
+      '<div class="scanned-empty-text">Scanned labels will appear here.<br>Tap the Scan tab to identify a wine.</div></div>';
+    return;
+  }
+  list.innerHTML = history.map(function(s, i) {
+    var meta = [s.grape, s.region, s.vintage].filter(Boolean).join(' · ');
+    var date = s.scannedAt ? new Date(s.scannedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    var pairingRows = (s.pairings || []).map(function(p) {
+      return '<div class="scanned-pairing-item">' + p + '</div>';
+    }).join('');
+    return '<div class="scanned-item" id="scanned-card-' + i + '" onclick="toggleScannedCard(' + i + ')">' +
+      '<div class="scanned-item-top">' +
+        '<div class="scanned-wine-name">' + s.name + '</div>' +
+        (s.style ? '<div class="scanned-wine-style">' + s.style + '</div>' : '') +
+      '</div>' +
+      (meta ? '<div class="scanned-wine-meta">' + meta + '</div>' : '') +
+      (s.producer ? '<div class="scanned-wine-meta" style="color:var(--dim);">' + s.producer + '</div>' : '') +
+      '<div class="scanned-date">' + date + '</div>' +
+      '<div class="scanned-expand-hint">Tap for details →</div>' +
+      '<div class="scanned-detail">' +
+        (s.tastingNotes ? '<div class="scanned-detail-label">Tasting notes</div><div class="scanned-detail-text">' + s.tastingNotes + '</div>' : '') +
+        (s.serveTemp ? '<div class="scanned-detail-label">Serve at</div><div class="scanned-detail-text">' + s.serveTemp + '</div>' : '') +
+        (pairingRows ? '<div class="scanned-detail-label">Pairs with</div><div class="scanned-pairing-list">' + pairingRows + '</div>' : '') +
+        (s.sommelierNote ? '<div class="scanned-detail-label">Sommelier\'s note</div><div class="scanned-detail-text">' + s.sommelierNote + '</div>' : '') +
+        '<button class="scanned-remove" onclick="removeScanned(' + i + ', event)">Remove</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+updateScanCount();
+
+// ── SCANNED WINES ─────────────────────────────────────────────────
 var scannedImageData = null;
 var scannedMediaType = null;
 
@@ -2664,8 +2861,10 @@ async function scanLabel() {
 function renderScanResults(data) {
   var results = document.getElementById('scan-results');
 
-  if (!data.found) {
-    results.innerHTML = '<div style="padding:20px;text-align:center;"><div style="font-size:2rem;margin-bottom:12px;opacity:0.4;">🍾</div>' +
+  // Save to scan history if identified successfully
+  if (data.found) addToScanHistory(data);
+
+  if (!data.found) {    results.innerHTML = '<div style="padding:20px;text-align:center;"><div style="font-size:2rem;margin-bottom:12px;opacity:0.4;">🍾</div>' +
       '<div style="font-size:0.9rem;color:var(--dim);line-height:1.6;">' + (data.message || "Couldn't identify a wine label. Try a clearer photo with good lighting.") + '</div></div>';
     results.classList.add('visible');
     return;
@@ -2736,7 +2935,6 @@ function renderScanResults(data) {
 }
 
 function pairScannedWine(grape) {
-  // Switch to wine tab and pre-select the grape
   setTab('wine');
   var grapeSelect = document.getElementById('w-grape');
   if (grapeSelect) {
@@ -2745,6 +2943,8 @@ function pairScannedWine(grape) {
     if (match) grapeSelect.value = match.value;
   }
   document.getElementById('app-body').scrollTop = 0;
+  // Auto-fire the search so results appear immediately
+  getPairings('wine');
 }
 
 function resetScan() {
