@@ -1988,7 +1988,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <div class="screen" id="screen-scan">
     <div class="scan-header">
       <div class="scan-title">Scan a label</div>
-      <div class="scan-sub">Point your camera at any wine label. Claude will identify the wine and tell you everything you need to know.</div>
+      <div class="scan-sub">Point your camera at any wine label. Gustav will identify the wine and tell you everything you need to know.</div>
     </div>
 
     <input type="file" id="scan-file-input" accept="image/*" capture="environment" />
@@ -2247,7 +2247,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <!-- Grapes to avoid -->
     <div class="profile-section">
       <div class="profile-section-label">Wines to avoid</div>
-      <div class="profile-section-sub">Claude will still recommend these if they're truly the best match — but will note the tension.</div>
+      <div class="profile-section-sub">Gustav will still recommend these if they're truly the best match — but will note the tension.</div>
       <div class="pill-grid" id="pref-avoid-grid">
         <button class="pill-toggle" data-value="High tannin reds" onclick="togglePill(this,'avoidGrapes')">High tannin reds</button>
         <button class="pill-toggle" data-value="Sweet wines" onclick="togglePill(this,'avoidGrapes')">Sweet wines</button>
@@ -2280,7 +2280,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <!-- Dietary notes -->
     <div class="profile-section">
       <div class="profile-section-label">Dietary &amp; other notes</div>
-      <div class="profile-section-sub">Anything else Claude should know — vegetarian, avoiding high alcohol, sulphite sensitivity, etc.</div>
+      <div class="profile-section-sub">Anything else Gustav should know — vegetarian, avoiding high alcohol, sulphite sensitivity, etc.</div>
       <textarea class="profile-textarea" id="pref-dietary" placeholder="e.g. I prefer vegetarian-friendly pairings and lower-alcohol wines"></textarea>
     </div>
 
@@ -2292,9 +2292,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <!-- ── SCANNED WINES SUB-PANEL ── -->
   <div id="scanned-subpanel" class="prefs-subpanel">
     <div class="profile-top">
-      <button class="profile-back" onclick="closeScannedWines()" aria-label="Back to menu">‹</button>
+      <button class="profile-back" onclick="closeScannedWines()" aria-label="Back to menu" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
       <div class="profile-title">Scanned wines</div>
-      <div style="width:44px"></div>
+      <div style="width:60px"></div>
     </div>
     <div id="scanned-list" style="padding:16px;"></div>
   </div>
@@ -2361,8 +2361,8 @@ function openProfile() {
 }
 function closeProfile() {
   document.getElementById('profile-panel').classList.remove('open');
-  // Also close sub-panel silently so it's reset for next time
   document.getElementById('prefs-subpanel').classList.remove('open');
+  document.getElementById('scanned-subpanel').classList.remove('open');
   document.getElementById('hub-about').style.display = 'none';
   document.body.style.overflow = '';
 }
@@ -2736,6 +2736,13 @@ function openScannedWines() {
 }
 function closeScannedWines() {
   document.getElementById('scanned-subpanel').classList.remove('open');
+  // Block the hub briefly so the slide-out animation doesn't
+  // let a tap bleed through to the hub's own close button
+  var hub = document.getElementById('profile-hub');
+  if (hub) {
+    hub.style.pointerEvents = 'none';
+    setTimeout(function() { hub.style.pointerEvents = ''; }, 400);
+  }
 }
 function toggleScannedCard(i) {
   var card = document.getElementById('scanned-card-' + i);
