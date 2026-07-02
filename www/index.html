@@ -2892,8 +2892,6 @@ var OB_TOTAL = 3;
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
-  // v16: force onboarding reset so the new splash shows on first launch of this build
-  localStorage.removeItem('cg_onboarded');
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
     // Already onboarded — remove overlay immediately
