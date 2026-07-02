@@ -1463,6 +1463,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   gap: 7px;
   padding: 16px 0;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 .ob-dot {
   width: 7px;
@@ -1480,6 +1482,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   flex-direction: column;
   gap: 10px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 .ob-next-btn {
   width: 100%;
@@ -2877,6 +2881,8 @@ var OB_TOTAL = 3;
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
+  // v16: force onboarding reset so the new splash shows on first launch of this build
+  localStorage.removeItem('cg_onboarded');
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
     // Already onboarded — remove overlay immediately
@@ -2884,24 +2890,17 @@ var OB_TOTAL = 3;
     return;
   }
 
-  // First time — show splash then slides
-  // If running in Capacitor, skip HTML splash (native splash already showed)
-  var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-  if (isNative) {
+  // Always show the HTML splash — this is the branded onboarding
+  // experience, separate from Capacitor's native loading splash.
+  setTimeout(function() {
     document.getElementById('ob-splash').classList.add('hidden');
-    document.getElementById('ob-slides').style.display = 'flex';
-    document.getElementById('ob-slides').style.flexDirection = 'column';
-    document.getElementById('ob-slides').style.flex = '1';
-  } else {
     setTimeout(function() {
-      document.getElementById('ob-splash').classList.add('hidden');
-      setTimeout(function() {
-        document.getElementById('ob-slides').style.display = 'flex';
-        document.getElementById('ob-slides').style.flexDirection = 'column';
-        document.getElementById('ob-slides').style.flex = '1';
-      }, 420);
-    }, 2200);
-  }
+      var slides = document.getElementById('ob-slides');
+      slides.style.display = 'flex';
+      slides.style.flexDirection = 'column';
+      slides.style.flex = '1';
+    }, 420);
+  }, 2200);
 })();
 
 function obNext() {
