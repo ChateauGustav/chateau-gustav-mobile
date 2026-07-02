@@ -478,7 +478,118 @@ input[type="range"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── MISC ───────────────────────────────────────────────────────── */
+/* ── PROFILE HUB ─────────────────────────────────────────────── */
+#profile-hub {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 40px;
+}
+.hub-profile-card {
+  margin: 0 16px 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hub-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--rouge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hub-avatar span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #f8f4ee;
+}
+.hub-info { flex: 1; min-width: 0; }
+.hub-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.hub-tagline { font-size: 0.75rem; color: var(--dim); line-height: 1.4; }
+
+.hub-section {
+  margin: 0 16px 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hub-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--mist);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+}
+.hub-row:last-child { border-bottom: none; }
+.hub-row:active { background: var(--parchment2); }
+.hub-row-icon {
+  font-size: 1.2rem;
+  width: 30px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.hub-row-text { flex: 1; min-width: 0; }
+.hub-row-label { font-size: 0.92rem; color: var(--ink); font-weight: 400; margin-bottom: 1px; }
+.hub-row-sub { font-size: 0.72rem; color: var(--dim); }
+.hub-row-chev { font-size: 1.1rem; color: var(--mist); flex-shrink: 0; }
+
+.hub-about {
+  margin: 0 16px 20px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.hub-about-inner {
+  background: var(--parchment2);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.hub-about-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.hub-about-logo span { color: var(--gold); }
+.hub-about-text { font-size: 0.82rem; color: var(--ink); line-height: 1.65; }
+.hub-about-contact {
+  font-size: 0.78rem;
+  color: var(--gold);
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+/* ── PREFS SUB-PANEL ─────────────────────────────────────────── */
+.prefs-subpanel {
+  position: absolute;
+  inset: 0;
+  background: var(--parchment);
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 40px;
+}
+.prefs-subpanel.open { transform: translateX(0); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
 /* ── SCAN SCREEN ────────────────────────────────────────────────── */
 .scan-header { padding: 20px 16px 0; }
@@ -1200,139 +1311,210 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 </nav>
 
 <!-- ── PROFILE / PREFERENCES PANEL ── -->
-<div class="profile-panel" id="profile-panel" aria-label="Wine preferences">
+<div class="profile-panel" id="profile-panel" aria-label="Profile and preferences">
 
-  <div class="profile-top">
-    <button class="profile-back" onclick="closeProfile()" aria-label="Close preferences">‹</button>
-    <div class="profile-title">Your wine profile</div>
-    <button class="profile-save-top" onclick="saveProfile()">Save</button>
-  </div>
+  <!-- ── HUB LEVEL (shown first) ── -->
+  <div id="profile-hub">
+    <div class="profile-top">
+      <button class="profile-back" onclick="closeProfile()" aria-label="Close">‹</button>
+      <div class="profile-title">More</div>
+      <div style="width:44px"></div>
+    </div>
 
-  <!-- Name -->
-  <div class="profile-section">
-    <div class="profile-section-label">About you</div>
-    <div class="profile-input-row">
-      <div class="profile-input-label">First name (optional)</div>
-      <input class="profile-input" id="pref-name" type="text" placeholder="e.g. Dele" autocomplete="off" />
+    <!-- Profile card -->
+    <div class="hub-profile-card">
+      <div class="hub-avatar" id="hub-avatar">
+        <span id="hub-initial">?</span>
+      </div>
+      <div class="hub-info">
+        <div class="hub-name" id="hub-name">Wine Enthusiast</div>
+        <div class="hub-tagline" id="hub-tagline">Set your preferences below</div>
+      </div>
+    </div>
+
+    <!-- Menu sections -->
+    <div class="hub-section">
+      <div class="hub-row" onclick="openPrefsSubpanel()">
+        <div class="hub-row-icon">🍇</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">My Wine Preferences</div>
+          <div class="hub-row-sub">Grapes, styles, budget &amp; dietary notes</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
+      <div class="hub-row" onclick="closeProfile(); setTab('saved')">
+        <div class="hub-row-icon">♥</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">Saved Pairings</div>
+          <div class="hub-row-sub" id="hub-saved-count">Your favourited matches</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
+      <div class="hub-row" onclick="closeProfile(); setTab('scan')">
+        <div class="hub-row-icon">📷</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">Scan a Label</div>
+          <div class="hub-row-sub">Identify any wine with your camera</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
+    </div>
+
+    <div class="hub-section">
+      <div class="hub-row" onclick="openAbout()">
+        <div class="hub-row-icon">✦</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">About Château Gustav</div>
+          <div class="hub-row-sub">Sommelier-level pairing, built in Dallas</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
+    </div>
+
+    <!-- About sub-section (inline, hidden by default) -->
+    <div class="hub-about" id="hub-about" style="display:none;">
+      <div class="hub-about-inner">
+        <div class="hub-about-logo">Château <span>Gustav</span></div>
+        <div class="hub-about-text">Château Gustav is a private wine tasting and consulting practice founded by Dele Faulkner, WSET Level 2 — based in Dallas, serving Dallas, Austin, and Houston.</div>
+        <div class="hub-about-text" style="margin-top:8px;">This app pairs your dish with the right wine using the same flavor chemistry principles taught in WSET — not generic lookup tables.</div>
+        <div class="hub-about-contact">chateaugustav@gmail.com</div>
+      </div>
     </div>
   </div>
 
-  <!-- Preferred styles -->
-  <div class="profile-section">
-    <div class="profile-section-label">Preferred styles</div>
-    <div class="profile-section-sub">Tap to select the styles you gravitate toward.</div>
-    <div class="pill-grid" id="pref-styles-grid">
-      <button class="pill-toggle" data-value="Bold reds" onclick="togglePill(this,'styles')">Bold reds</button>
-      <button class="pill-toggle" data-value="Medium reds" onclick="togglePill(this,'styles')">Medium reds</button>
-      <button class="pill-toggle" data-value="Light reds" onclick="togglePill(this,'styles')">Light reds</button>
-      <button class="pill-toggle" data-value="Full-bodied whites" onclick="togglePill(this,'styles')">Full-bodied whites</button>
-      <button class="pill-toggle" data-value="Crisp whites" onclick="togglePill(this,'styles')">Crisp whites</button>
-      <button class="pill-toggle" data-value="Aromatic whites" onclick="togglePill(this,'styles')">Aromatic whites</button>
-      <button class="pill-toggle" data-value="Sparkling" onclick="togglePill(this,'styles')">Sparkling</button>
-      <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'styles')">Rosé</button>
-      <button class="pill-toggle" data-value="Orange / natural" onclick="togglePill(this,'styles')">Orange / natural</button>
-      <button class="pill-toggle" data-value="Sweet / dessert" onclick="togglePill(this,'styles')">Sweet / dessert</button>
-      <button class="pill-toggle" data-value="Dry only" onclick="togglePill(this,'styles')">Dry only</button>
-      <button class="pill-toggle" data-value="Low tannin" onclick="togglePill(this,'styles')">Low tannin</button>
-    </div>
-  </div>
+  <!-- ── PREFERENCES SUB-PANEL (hidden by default, slides in) ── -->
+  <div id="prefs-subpanel" class="prefs-subpanel">
 
-  <!-- Favorite grapes -->
-  <div class="profile-section">
-    <div class="profile-section-label">Favorite grapes</div>
-    <div class="profile-section-sub">These get prioritised when they're also a great match for your dish.</div>
-
-    <div class="grape-group-label">Reds</div>
-    <div class="pill-grid">
-      <button class="pill-toggle" data-value="Cabernet Sauvignon" onclick="togglePill(this,'favoriteGrapes')">Cab Sauvignon</button>
-      <button class="pill-toggle" data-value="Merlot" onclick="togglePill(this,'favoriteGrapes')">Merlot</button>
-      <button class="pill-toggle" data-value="Pinot Noir" onclick="togglePill(this,'favoriteGrapes')">Pinot Noir</button>
-      <button class="pill-toggle" data-value="Syrah / Shiraz" onclick="togglePill(this,'favoriteGrapes')">Syrah / Shiraz</button>
-      <button class="pill-toggle" data-value="Zinfandel" onclick="togglePill(this,'favoriteGrapes')">Zinfandel</button>
-      <button class="pill-toggle" data-value="Malbec" onclick="togglePill(this,'favoriteGrapes')">Malbec</button>
-      <button class="pill-toggle" data-value="Tempranillo" onclick="togglePill(this,'favoriteGrapes')">Tempranillo</button>
-      <button class="pill-toggle" data-value="Nebbiolo" onclick="togglePill(this,'favoriteGrapes')">Nebbiolo</button>
-      <button class="pill-toggle" data-value="Sangiovese" onclick="togglePill(this,'favoriteGrapes')">Sangiovese</button>
-      <button class="pill-toggle" data-value="Grenache" onclick="togglePill(this,'favoriteGrapes')">Grenache</button>
-      <button class="pill-toggle" data-value="Barbera" onclick="togglePill(this,'favoriteGrapes')">Barbera</button>
-      <button class="pill-toggle" data-value="Cabernet Franc" onclick="togglePill(this,'favoriteGrapes')">Cab Franc</button>
-      <button class="pill-toggle" data-value="Gamay (Beaujolais)" onclick="togglePill(this,'favoriteGrapes')">Gamay</button>
-      <button class="pill-toggle" data-value="Petite Sirah" onclick="togglePill(this,'favoriteGrapes')">Petite Sirah</button>
-      <button class="pill-toggle" data-value="Carménère" onclick="togglePill(this,'favoriteGrapes')">Carménère</button>
-      <button class="pill-toggle" data-value="Pinotage" onclick="togglePill(this,'favoriteGrapes')">Pinotage</button>
-      <button class="pill-toggle" data-value="Primitivo" onclick="togglePill(this,'favoriteGrapes')">Primitivo</button>
+    <div class="profile-top">
+      <button class="profile-back" onclick="closePrefsSubpanel()" aria-label="Back to menu">‹</button>
+      <div class="profile-title">Wine preferences</div>
+      <button class="profile-save-top" onclick="saveProfile()">Save</button>
     </div>
 
-    <div class="grape-group-label">Whites</div>
-    <div class="pill-grid">
-      <button class="pill-toggle" data-value="Chardonnay" onclick="togglePill(this,'favoriteGrapes')">Chardonnay</button>
-      <button class="pill-toggle" data-value="Sauvignon Blanc" onclick="togglePill(this,'favoriteGrapes')">Sauv Blanc</button>
-      <button class="pill-toggle" data-value="Riesling" onclick="togglePill(this,'favoriteGrapes')">Riesling</button>
-      <button class="pill-toggle" data-value="Pinot Grigio" onclick="togglePill(this,'favoriteGrapes')">Pinot Grigio</button>
-      <button class="pill-toggle" data-value="Albariño" onclick="togglePill(this,'favoriteGrapes')">Albariño</button>
-      <button class="pill-toggle" data-value="Viognier" onclick="togglePill(this,'favoriteGrapes')">Viognier</button>
-      <button class="pill-toggle" data-value="Gewürztraminer" onclick="togglePill(this,'favoriteGrapes')">Gewürz</button>
-      <button class="pill-toggle" data-value="Grüner Veltliner" onclick="togglePill(this,'favoriteGrapes')">Grüner Veltliner</button>
-      <button class="pill-toggle" data-value="Chenin Blanc" onclick="togglePill(this,'favoriteGrapes')">Chenin Blanc</button>
-      <button class="pill-toggle" data-value="Vermentino" onclick="togglePill(this,'favoriteGrapes')">Vermentino</button>
-      <button class="pill-toggle" data-value="Moscato / Muscat" onclick="togglePill(this,'favoriteGrapes')">Moscato</button>
-      <button class="pill-toggle" data-value="Verdejo" onclick="togglePill(this,'favoriteGrapes')">Verdejo</button>
+    <!-- Name -->
+    <div class="profile-section">
+      <div class="profile-section-label">About you</div>
+      <div class="profile-input-row">
+        <div class="profile-input-label">First name (optional)</div>
+        <input class="profile-input" id="pref-name" type="text" placeholder="e.g. Dele" autocomplete="off" />
+      </div>
     </div>
 
-    <div class="grape-group-label">Sparkling &amp; other</div>
-    <div class="pill-grid">
-      <button class="pill-toggle" data-value="Champagne / Sparkling" onclick="togglePill(this,'favoriteGrapes')">Champagne</button>
-      <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'favoriteGrapes')">Rosé</button>
-      <button class="pill-toggle" data-value="Prosecco" onclick="togglePill(this,'favoriteGrapes')">Prosecco</button>
-      <button class="pill-toggle" data-value="Cava" onclick="togglePill(this,'favoriteGrapes')">Cava</button>
-      <button class="pill-toggle" data-value="Orange Wine" onclick="togglePill(this,'favoriteGrapes')">Orange Wine</button>
+    <!-- Preferred styles -->
+    <div class="profile-section">
+      <div class="profile-section-label">Preferred styles</div>
+      <div class="profile-section-sub">Tap to select the styles you gravitate toward.</div>
+      <div class="pill-grid" id="pref-styles-grid">
+        <button class="pill-toggle" data-value="Bold reds" onclick="togglePill(this,'styles')">Bold reds</button>
+        <button class="pill-toggle" data-value="Medium reds" onclick="togglePill(this,'styles')">Medium reds</button>
+        <button class="pill-toggle" data-value="Light reds" onclick="togglePill(this,'styles')">Light reds</button>
+        <button class="pill-toggle" data-value="Full-bodied whites" onclick="togglePill(this,'styles')">Full-bodied whites</button>
+        <button class="pill-toggle" data-value="Crisp whites" onclick="togglePill(this,'styles')">Crisp whites</button>
+        <button class="pill-toggle" data-value="Aromatic whites" onclick="togglePill(this,'styles')">Aromatic whites</button>
+        <button class="pill-toggle" data-value="Sparkling" onclick="togglePill(this,'styles')">Sparkling</button>
+        <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'styles')">Rosé</button>
+        <button class="pill-toggle" data-value="Orange / natural" onclick="togglePill(this,'styles')">Orange / natural</button>
+        <button class="pill-toggle" data-value="Sweet / dessert" onclick="togglePill(this,'styles')">Sweet / dessert</button>
+        <button class="pill-toggle" data-value="Dry only" onclick="togglePill(this,'styles')">Dry only</button>
+        <button class="pill-toggle" data-value="Low tannin" onclick="togglePill(this,'styles')">Low tannin</button>
+      </div>
     </div>
-  </div>
 
-  <!-- Grapes to avoid -->
-  <div class="profile-section">
-    <div class="profile-section-label">Wines to avoid</div>
-    <div class="profile-section-sub">Claude will still recommend these if they're truly the best match — but will note the tension.</div>
-    <div class="pill-grid" id="pref-avoid-grid">
-      <button class="pill-toggle" data-value="High tannin reds" onclick="togglePill(this,'avoidGrapes')">High tannin reds</button>
-      <button class="pill-toggle" data-value="Sweet wines" onclick="togglePill(this,'avoidGrapes')">Sweet wines</button>
-      <button class="pill-toggle" data-value="Oaky whites" onclick="togglePill(this,'avoidGrapes')">Oaky whites</button>
-      <button class="pill-toggle" data-value="Very dry whites" onclick="togglePill(this,'avoidGrapes')">Very dry whites</button>
-      <button class="pill-toggle" data-value="Sparkling" onclick="togglePill(this,'avoidGrapes')">Sparkling</button>
-      <button class="pill-toggle" data-value="Orange / natural wine" onclick="togglePill(this,'avoidGrapes')">Orange wine</button>
-      <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'avoidGrapes')">Rosé</button>
-      <button class="pill-toggle" data-value="Red wine" onclick="togglePill(this,'avoidGrapes')">Red wine</button>
-      <button class="pill-toggle" data-value="White wine" onclick="togglePill(this,'avoidGrapes')">White wine</button>
+    <!-- Favorite grapes -->
+    <div class="profile-section">
+      <div class="profile-section-label">Favorite grapes</div>
+      <div class="profile-section-sub">These get prioritised when they're also a great match for your dish.</div>
+      <div class="grape-group-label">Reds</div>
+      <div class="pill-grid">
+        <button class="pill-toggle" data-value="Cabernet Sauvignon" onclick="togglePill(this,'favoriteGrapes')">Cab Sauvignon</button>
+        <button class="pill-toggle" data-value="Merlot" onclick="togglePill(this,'favoriteGrapes')">Merlot</button>
+        <button class="pill-toggle" data-value="Pinot Noir" onclick="togglePill(this,'favoriteGrapes')">Pinot Noir</button>
+        <button class="pill-toggle" data-value="Syrah / Shiraz" onclick="togglePill(this,'favoriteGrapes')">Syrah / Shiraz</button>
+        <button class="pill-toggle" data-value="Zinfandel" onclick="togglePill(this,'favoriteGrapes')">Zinfandel</button>
+        <button class="pill-toggle" data-value="Malbec" onclick="togglePill(this,'favoriteGrapes')">Malbec</button>
+        <button class="pill-toggle" data-value="Tempranillo" onclick="togglePill(this,'favoriteGrapes')">Tempranillo</button>
+        <button class="pill-toggle" data-value="Nebbiolo" onclick="togglePill(this,'favoriteGrapes')">Nebbiolo</button>
+        <button class="pill-toggle" data-value="Sangiovese" onclick="togglePill(this,'favoriteGrapes')">Sangiovese</button>
+        <button class="pill-toggle" data-value="Grenache" onclick="togglePill(this,'favoriteGrapes')">Grenache</button>
+        <button class="pill-toggle" data-value="Barbera" onclick="togglePill(this,'favoriteGrapes')">Barbera</button>
+        <button class="pill-toggle" data-value="Cabernet Franc" onclick="togglePill(this,'favoriteGrapes')">Cab Franc</button>
+        <button class="pill-toggle" data-value="Gamay (Beaujolais)" onclick="togglePill(this,'favoriteGrapes')">Gamay</button>
+        <button class="pill-toggle" data-value="Petite Sirah" onclick="togglePill(this,'favoriteGrapes')">Petite Sirah</button>
+        <button class="pill-toggle" data-value="Carménère" onclick="togglePill(this,'favoriteGrapes')">Carménère</button>
+        <button class="pill-toggle" data-value="Pinotage" onclick="togglePill(this,'favoriteGrapes')">Pinotage</button>
+        <button class="pill-toggle" data-value="Primitivo" onclick="togglePill(this,'favoriteGrapes')">Primitivo</button>
+      </div>
+      <div class="grape-group-label">Whites</div>
+      <div class="pill-grid">
+        <button class="pill-toggle" data-value="Chardonnay" onclick="togglePill(this,'favoriteGrapes')">Chardonnay</button>
+        <button class="pill-toggle" data-value="Sauvignon Blanc" onclick="togglePill(this,'favoriteGrapes')">Sauv Blanc</button>
+        <button class="pill-toggle" data-value="Riesling" onclick="togglePill(this,'favoriteGrapes')">Riesling</button>
+        <button class="pill-toggle" data-value="Pinot Grigio" onclick="togglePill(this,'favoriteGrapes')">Pinot Grigio</button>
+        <button class="pill-toggle" data-value="Albariño" onclick="togglePill(this,'favoriteGrapes')">Albariño</button>
+        <button class="pill-toggle" data-value="Viognier" onclick="togglePill(this,'favoriteGrapes')">Viognier</button>
+        <button class="pill-toggle" data-value="Gewürztraminer" onclick="togglePill(this,'favoriteGrapes')">Gewürz</button>
+        <button class="pill-toggle" data-value="Grüner Veltliner" onclick="togglePill(this,'favoriteGrapes')">Grüner Veltliner</button>
+        <button class="pill-toggle" data-value="Chenin Blanc" onclick="togglePill(this,'favoriteGrapes')">Chenin Blanc</button>
+        <button class="pill-toggle" data-value="Vermentino" onclick="togglePill(this,'favoriteGrapes')">Vermentino</button>
+        <button class="pill-toggle" data-value="Moscato / Muscat" onclick="togglePill(this,'favoriteGrapes')">Moscato</button>
+        <button class="pill-toggle" data-value="Verdejo" onclick="togglePill(this,'favoriteGrapes')">Verdejo</button>
+      </div>
+      <div class="grape-group-label">Sparkling &amp; other</div>
+      <div class="pill-grid">
+        <button class="pill-toggle" data-value="Champagne / Sparkling" onclick="togglePill(this,'favoriteGrapes')">Champagne</button>
+        <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'favoriteGrapes')">Rosé</button>
+        <button class="pill-toggle" data-value="Prosecco" onclick="togglePill(this,'favoriteGrapes')">Prosecco</button>
+        <button class="pill-toggle" data-value="Cava" onclick="togglePill(this,'favoriteGrapes')">Cava</button>
+        <button class="pill-toggle" data-value="Orange Wine" onclick="togglePill(this,'favoriteGrapes')">Orange Wine</button>
+      </div>
     </div>
-  </div>
 
-  <!-- Budget -->
-  <div class="profile-section">
-    <div class="profile-section-label">Typical budget per bottle</div>
-    <div class="profile-select-row">
-      <select class="profile-select" id="pref-budget">
-        <option value="">No preference</option>
-        <option value="Under $20">Under $20</option>
-        <option value="$20–$40">$20–$40</option>
-        <option value="$40–$75">$40–$75</option>
-        <option value="$75–$150">$75–$150</option>
-        <option value="$150+">$150+</option>
-      </select>
-      <span style="color:var(--mist);font-size:1rem;pointer-events:none;">›</span>
+    <!-- Grapes to avoid -->
+    <div class="profile-section">
+      <div class="profile-section-label">Wines to avoid</div>
+      <div class="profile-section-sub">Claude will still recommend these if they're truly the best match — but will note the tension.</div>
+      <div class="pill-grid" id="pref-avoid-grid">
+        <button class="pill-toggle" data-value="High tannin reds" onclick="togglePill(this,'avoidGrapes')">High tannin reds</button>
+        <button class="pill-toggle" data-value="Sweet wines" onclick="togglePill(this,'avoidGrapes')">Sweet wines</button>
+        <button class="pill-toggle" data-value="Oaky whites" onclick="togglePill(this,'avoidGrapes')">Oaky whites</button>
+        <button class="pill-toggle" data-value="Very dry whites" onclick="togglePill(this,'avoidGrapes')">Very dry whites</button>
+        <button class="pill-toggle" data-value="Sparkling" onclick="togglePill(this,'avoidGrapes')">Sparkling</button>
+        <button class="pill-toggle" data-value="Orange / natural wine" onclick="togglePill(this,'avoidGrapes')">Orange wine</button>
+        <button class="pill-toggle" data-value="Rosé" onclick="togglePill(this,'avoidGrapes')">Rosé</button>
+        <button class="pill-toggle" data-value="Red wine" onclick="togglePill(this,'avoidGrapes')">Red wine</button>
+        <button class="pill-toggle" data-value="White wine" onclick="togglePill(this,'avoidGrapes')">White wine</button>
+      </div>
     </div>
-  </div>
 
-  <!-- Dietary notes -->
-  <div class="profile-section">
-    <div class="profile-section-label">Dietary &amp; other notes</div>
-    <div class="profile-section-sub">Anything else Claude should know — vegetarian, avoiding high alcohol, sulphite sensitivity, etc.</div>
-    <textarea class="profile-textarea" id="pref-dietary" placeholder="e.g. I prefer vegetarian-friendly pairings and lower-alcohol wines"></textarea>
-  </div>
+    <!-- Budget -->
+    <div class="profile-section">
+      <div class="profile-section-label">Typical budget per bottle</div>
+      <div class="profile-select-row">
+        <select class="profile-select" id="pref-budget">
+          <option value="">No preference</option>
+          <option value="Under $20">Under $20</option>
+          <option value="$20–$40">$20–$40</option>
+          <option value="$40–$75">$40–$75</option>
+          <option value="$75–$150">$75–$150</option>
+          <option value="$150+">$150+</option>
+        </select>
+        <span style="color:var(--mist);font-size:1rem;pointer-events:none;">›</span>
+      </div>
+    </div>
 
-  <button class="profile-save-btn" onclick="saveProfile()">Save preferences</button>
-  <div class="profile-saved-indicator" id="profile-saved-indicator">✦ Preferences saved</div>
+    <!-- Dietary notes -->
+    <div class="profile-section">
+      <div class="profile-section-label">Dietary &amp; other notes</div>
+      <div class="profile-section-sub">Anything else Claude should know — vegetarian, avoiding high alcohol, sulphite sensitivity, etc.</div>
+      <textarea class="profile-textarea" id="pref-dietary" placeholder="e.g. I prefer vegetarian-friendly pairings and lower-alcohol wines"></textarea>
+    </div>
 
-</div>
+    <button class="profile-save-btn" onclick="saveProfile()">Save preferences</button>
+    <div class="profile-saved-indicator" id="profile-saved-indicator">✦ Preferences saved</div>
+
+  </div><!-- end prefs-subpanel -->
+
+</div><!-- end profile-panel -->
 
 <script>
 // ── TAB NAVIGATION ────────────────────────────────────────────────
@@ -1387,13 +1569,51 @@ function setPreferences(p) {
 }
 
 function openProfile() {
+  loadProfileIntoHub();
   loadProfileIntoUI();
   document.getElementById('profile-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeProfile() {
   document.getElementById('profile-panel').classList.remove('open');
+  // Also close sub-panel silently so it's reset for next time
+  document.getElementById('prefs-subpanel').classList.remove('open');
+  document.getElementById('hub-about').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+function openPrefsSubpanel() {
+  document.getElementById('prefs-subpanel').classList.add('open');
+}
+function closePrefsSubpanel() {
+  document.getElementById('prefs-subpanel').classList.remove('open');
+}
+
+function openAbout() {
+  var el = document.getElementById('hub-about');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function loadProfileIntoHub() {
+  var prefs = getPreferences() || {};
+  var name = prefs.name || 'Wine Enthusiast';
+  var initial = name.charAt(0).toUpperCase();
+  document.getElementById('hub-name').textContent = name;
+  document.getElementById('hub-initial').textContent = initial;
+
+  // Tagline: show first preferred style or favorite grape, else default
+  var tagline = 'Set your preferences below';
+  if (prefs.styles && prefs.styles.length) {
+    tagline = prefs.styles.slice(0, 2).join(' · ');
+  } else if (prefs.favoriteGrapes && prefs.favoriteGrapes.length) {
+    tagline = 'Loves: ' + prefs.favoriteGrapes.slice(0, 3).join(', ');
+  }
+  document.getElementById('hub-tagline').textContent = tagline;
+
+  // Saved count
+  var savedCount = getSaved().length;
+  document.getElementById('hub-saved-count').textContent =
+    savedCount > 0 ? savedCount + ' pairing' + (savedCount === 1 ? '' : 's') + ' saved' : 'Your favourited matches';
 }
 
 function loadProfileIntoUI() {
