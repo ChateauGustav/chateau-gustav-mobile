@@ -1327,6 +1327,303 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .pill:active { opacity: 0.6; }
 .saved-attr-pill { cursor: pointer; }
 .saved-attr-pill:active { opacity: 0.6; }
+/* ── ONBOARDING ─────────────────────────────────────────────────── */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--parchment);
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.5s ease;
+}
+.onboarding-overlay.fade-out { opacity: 0; pointer-events: none; }
+
+/* Splash */
+.ob-splash {
+  position: absolute;
+  inset: 0;
+  background: #f8f4ee;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 0 52px 36px;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  overflow: hidden;
+}
+.ob-splash.hidden { opacity: 0; pointer-events: none; }
+.ob-splash-bg-letter {
+  position: absolute;
+  top: -30px;
+  right: -20px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 72vw;
+  font-weight: 600;
+  color: rgba(124,45,62,0.09);
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  letter-spacing: -0.05em;
+}
+.ob-splash-line {
+  width: 28px;
+  height: 1.5px;
+  background: #b8933a;
+  margin-bottom: 12px;
+}
+.ob-splash-chateau {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #b8933a;
+  font-weight: 400;
+  margin-bottom: 5px;
+}
+.ob-splash-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 400;
+  color: #1a1612;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.ob-splash-tagline {
+  font-size: 0.62rem;
+  color: #7a7068;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+/* Slide deck */
+.ob-slides {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.ob-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px 20px;
+  text-align: center;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+.ob-slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.ob-slide.exit {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+.ob-illus {
+  width: 120px;
+  height: 120px;
+  border-radius: 30px;
+  background: var(--rouge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 30px rgba(124,45,62,0.2);
+}
+.ob-slide-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.ob-slide-headline em { color: var(--rouge); font-style: italic; }
+.ob-slide-body {
+  font-size: 0.88rem;
+  color: var(--dim);
+  line-height: 1.7;
+  max-width: 300px;
+}
+
+/* Progress dots */
+.ob-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px 0;
+  flex-shrink: 0;
+}
+.ob-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mist);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.ob-dot.active { background: var(--rouge); transform: scale(1.2); }
+
+/* Bottom nav */
+.ob-nav {
+  padding: 0 24px calc(var(--safe-bottom) + 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.ob-next-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--rouge);
+  color: #f8f4ee;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease;
+}
+.ob-next-btn:active { background: var(--rouge-deep); }
+.ob-skip-btn {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  color: var(--dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Profile setup screen */
+.ob-profile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  overflow-y: auto;
+}
+.ob-profile.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+
+.ob-profile-header {
+  background: var(--rouge);
+  padding: calc(var(--safe-top) + 40px) 24px 30px;
+  text-align: center;
+}
+.ob-profile-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: rgba(248,244,238,0.7);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.ob-profile-logo span { color: var(--gold-lt); }
+.ob-profile-welcome {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: #f8f4ee;
+  line-height: 1.2;
+}
+.ob-profile-body {
+  flex: 1;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ob-field-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.ob-field-sub { font-size: 0.78rem; color: var(--dim); margin-bottom: 10px; }
+.ob-name-input {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+}
+.ob-name-input:focus { border-color: var(--gold); }
+.ob-name-input::placeholder { color: var(--mist); }
+.ob-style-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ob-style-pill {
+  background: var(--card-bg);
+  border: 1.5px solid var(--mist);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  color: var(--dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s ease;
+}
+.ob-style-pill.selected {
+  background: var(--rouge);
+  border-color: var(--rouge);
+  color: #f8f4ee;
+}
+.ob-profile-cta {
+  padding: 0 24px calc(var(--safe-bottom) + 24px);
+  flex-shrink: 0;
+}
+.ob-start-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--rouge);
+  color: #f8f4ee;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ob-start-btn:active { background: var(--rouge-deep); }
+.ob-skip-link {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 </style>
 </head>
 <body>
@@ -1656,7 +1953,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
       <div class="chat-avatar-sm">G</div>
       <div>
         <div class="chat-header-name">Ask Gustav</div>
-        <div class="chat-header-sub">Your AI sommelier</div>
+        <div class="chat-header-sub">Your Personal Sommelier</div>
       </div>
     </div>
     <button class="chat-close" onclick="closeChat()" aria-label="Close chat">✕</button>
@@ -2482,6 +2779,85 @@ function resetScan() {
   }
 })();
 </script>
+<!-- ── ONBOARDING ── -->
+<div class="onboarding-overlay" id="onboarding-overlay">
+
+  <!-- Splash -->
+  <div class="ob-splash" id="ob-splash">
+    <div class="ob-splash-bg-letter">G</div>
+    <div class="ob-splash-line"></div>
+    <div class="ob-splash-chateau">Château</div>
+    <div class="ob-splash-name">Gustav</div>
+    <div class="ob-splash-tagline">Your personal sommelier</div>
+  </div>
+
+  <!-- Feature slides -->
+  <div class="ob-slides" id="ob-slides" style="display:none;">
+
+    <div class="ob-slide active" id="ob-slide-0">
+      <div class="ob-illus">🍽</div>
+      <div class="ob-slide-headline">The right wine<br>for <em>this</em> dish.</div>
+      <div class="ob-slide-body">Describe what you're eating and get sommelier-level recommendations built on flavor chemistry — not lookup tables.</div>
+    </div>
+
+    <div class="ob-slide" id="ob-slide-1">
+      <div class="ob-illus">📷</div>
+      <div class="ob-slide-headline">Know every<br>bottle you <em>open.</em></div>
+      <div class="ob-slide-body">Point your camera at any wine label. Gustav identifies it instantly and tells you everything — tasting notes, pairings, and serving suggestions.</div>
+    </div>
+
+    <div class="ob-slide" id="ob-slide-2">
+      <div class="ob-illus">💬</div>
+      <div class="ob-slide-headline">A sommelier<br><em>in your pocket.</em></div>
+      <div class="ob-slide-body">Ask Gustav anything — what wine pairs with spicy food, what's the difference between Old and New World, or where to start if you're new to wine.</div>
+    </div>
+
+    <div class="ob-dots">
+      <div class="ob-dot active" id="dot-0"></div>
+      <div class="ob-dot" id="dot-1"></div>
+      <div class="ob-dot" id="dot-2"></div>
+    </div>
+
+    <div class="ob-nav">
+      <button class="ob-next-btn" id="ob-next-btn" onclick="obNext()">Next</button>
+      <button class="ob-skip-btn" onclick="showObProfile()">Skip</button>
+    </div>
+  </div>
+
+  <!-- Profile setup -->
+  <div class="ob-profile" id="ob-profile">
+    <div class="ob-profile-header">
+      <div class="ob-profile-logo">Château <span>Gustav</span></div>
+      <div class="ob-profile-welcome">Welcome.<br>Let's get to know you.</div>
+    </div>
+    <div class="ob-profile-body">
+      <div>
+        <div class="ob-field-label">What should we call you?</div>
+        <input class="ob-name-input" id="ob-name" type="text" placeholder="Your first name" autocomplete="given-name" autocorrect="off" />
+      </div>
+      <div>
+        <div class="ob-field-label">What do you love?</div>
+        <div class="ob-field-sub">Pick any that apply — we'll use this to personalise your recommendations.</div>
+        <div class="ob-style-grid">
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Bold reds</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Light reds</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Crisp whites</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Sparkling</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Dry only</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Off-dry / sweet</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Natural wines</button>
+          <button class="ob-style-pill" onclick="toggleObStyle(this)">Still learning</button>
+        </div>
+      </div>
+    </div>
+    <div class="ob-profile-cta">
+      <button class="ob-start-btn" onclick="finishOnboarding()">Start exploring →</button>
+      <span class="ob-skip-link" onclick="finishOnboarding()">Skip for now</span>
+    </div>
+  </div>
+
+</div>
+
 <!-- ── GLOSSARY POPUP ── -->
 <div class="glossary-overlay" id="glossary-overlay" onclick="closeGlossary()">
   <div class="glossary-card" onclick="event.stopPropagation()">
@@ -2493,6 +2869,109 @@ function resetScan() {
 </div>
 
 <script>
+// ── ONBOARDING ────────────────────────────────────────────────────
+var obSlideIndex = 0;
+var OB_TOTAL = 3;
+
+(function initOnboarding() {
+  var overlay = document.getElementById('onboarding-overlay');
+  if (!overlay) return;
+
+  var onboarded = localStorage.getItem('cg_onboarded');
+  if (onboarded) {
+    // Already onboarded — remove overlay immediately
+    overlay.style.display = 'none';
+    return;
+  }
+
+  // First time — show splash then slides
+  // If running in Capacitor, skip HTML splash (native splash already showed)
+  var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  if (isNative) {
+    document.getElementById('ob-splash').classList.add('hidden');
+    document.getElementById('ob-slides').style.display = 'flex';
+    document.getElementById('ob-slides').style.flexDirection = 'column';
+    document.getElementById('ob-slides').style.flex = '1';
+  } else {
+    setTimeout(function() {
+      document.getElementById('ob-splash').classList.add('hidden');
+      setTimeout(function() {
+        document.getElementById('ob-slides').style.display = 'flex';
+        document.getElementById('ob-slides').style.flexDirection = 'column';
+        document.getElementById('ob-slides').style.flex = '1';
+      }, 420);
+    }, 2200);
+  }
+})();
+
+function obNext() {
+  if (obSlideIndex < OB_TOTAL - 1) {
+    var current = document.getElementById('ob-slide-' + obSlideIndex);
+    current.classList.remove('active');
+    current.classList.add('exit');
+    setTimeout(function() { current.classList.remove('exit'); }, 350);
+
+    obSlideIndex++;
+
+    var next = document.getElementById('ob-slide-' + obSlideIndex);
+    next.classList.add('active');
+
+    // Update dots
+    document.querySelectorAll('.ob-dot').forEach(function(d, i) {
+      d.classList.toggle('active', i === obSlideIndex);
+    });
+
+    // Update button text on last slide
+    if (obSlideIndex === OB_TOTAL - 1) {
+      document.getElementById('ob-next-btn').textContent = 'Get started';
+    }
+  } else {
+    showObProfile();
+  }
+}
+
+function showObProfile() {
+  document.getElementById('ob-slides').style.display = 'none';
+  var profile = document.getElementById('ob-profile');
+  profile.style.display = 'flex';
+  profile.style.flexDirection = 'column';
+  profile.style.flex = '1';
+  setTimeout(function() { profile.classList.add('active'); }, 20);
+  setTimeout(function() { document.getElementById('ob-name').focus(); }, 400);
+}
+
+function toggleObStyle(btn) {
+  btn.classList.toggle('selected');
+}
+
+function finishOnboarding() {
+  // Collect whatever the user entered
+  var name = (document.getElementById('ob-name').value || '').trim();
+  var selectedStyles = [];
+  document.querySelectorAll('.ob-style-pill.selected').forEach(function(p) {
+    selectedStyles.push(p.textContent.trim());
+  });
+
+  // Save to preferences so the rest of the app picks it up
+  var prefs = getPreferences() || {};
+  if (name) prefs.name = name;
+  if (selectedStyles.length) prefs.styles = selectedStyles;
+  if (name || selectedStyles.length) setPreferences(prefs);
+
+  // Mark onboarded
+  try { localStorage.setItem('cg_onboarded', '1'); } catch(e) {}
+
+  // Fade overlay out
+  var overlay = document.getElementById('onboarding-overlay');
+  overlay.classList.add('fade-out');
+  setTimeout(function() {
+    overlay.style.display = 'none';
+    // Update the hub to reflect new name if already initialised
+    updateSavedBadge();
+    updatePrefDot();
+  }, 500);
+}
+
 // ── ASK GUSTAV CHAT ───────────────────────────────────────────────
 var chatHistory = []; // { role: 'user'|'assistant', content: '...' }
 var chatOpen = false;
@@ -2749,7 +3228,7 @@ function showTermDef(term, event) {
 
   if (!entry) {
     // Still show popup but with a graceful fallback
-    entry = { def: 'A wine tasting descriptor used by sommeliers to characterise the flavour, texture, or structure of this wine. Ask Dele for more at your next tasting.' };
+    entry = { def: 'A wine tasting descriptor used by sommeliers to characterise the flavour, texture, or structure of this wine. Ask Gustav in the chat — he can explain it in more detail.' };
   }
 
   document.getElementById('glossary-term').textContent = term;
