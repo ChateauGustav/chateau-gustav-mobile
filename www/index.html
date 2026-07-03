@@ -2794,6 +2794,7 @@ updateScanCount();
 // ── SCANNED WINES ─────────────────────────────────────────────────
 var scannedImageData = null;
 var scannedMediaType = null;
+var lastScanData = null;
 
 function triggerCamera() {
   document.getElementById('scan-file-input').click();
@@ -2877,6 +2878,7 @@ function renderScanResults(data) {
 
   // Save to scan history if identified successfully
   if (data.found) addToScanHistory(data);
+  if (data.found) lastScanData = data;
 
   if (!data.found) {    results.innerHTML = '<div style="padding:20px;text-align:center;"><div style="font-size:2rem;margin-bottom:12px;opacity:0.4;">🍾</div>' +
       '<div style="font-size:0.9rem;color:var(--dim);line-height:1.6;">' + (data.message || "Couldn't identify a wine label. Try a clearer photo with good lighting.") + '</div></div>';
@@ -2951,21 +2953,49 @@ function renderScanResults(data) {
 }
 
 function pairScannedWine(grape) {
+  // Switch to wine tab and show loading immediately
   setTab('wine');
-  var grapeSelect = document.getElementById('w-grape');
-  if (grapeSelect) {
-    var opts = Array.from(grapeSelect.options);
-    var match = opts.find(function(o) { return o.value.toLowerCase() === grape || o.text.toLowerCase() === grape; });
-    if (match) grapeSelect.value = match.value;
-  }
+  var form = document.getElementById('wine-form');
+  var loading = document.getElementById('wine-loading');
+  var results = document.getElementById('wine-results');
+  form.style.display = 'none';
+  loading.classList.add('visible');
+  results.classList.remove('visible');
+  results.innerHTML = '';
   document.getElementById('app-body').scrollTop = 0;
-  // Auto-fire the search so results appear immediately
-  getPairings('wine');
+
+  // Build the richest possible wine description from the scan data,
+  // bypassing the dropdown entirely so any grape — even one not in our
+  // list — gets handled correctly by the AI.
+  var inputs = {
+    grape: lastScanData && lastScanData.grape ? lastScanData.grape : grape,
+    region: lastScanData && lastScanData.region ? lastScanData.region : '',
+    body: '', acid: '', tannin: '',
+    sweet: '', oak: ''
+  };
+
+  fetch('https://chateau-gustav-app.vercel.app/api/pair', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: 'wine', inputs: inputs, preferences: getPreferences() || null })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    loading.classList.remove('visible');
+    renderResults(data, 'wine', inputs);
+  })
+  .catch(function() {
+    loading.classList.remove('visible');
+    results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--rouge);font-size:0.9rem;">Something went wrong. Please try again.</div>';
+    results.classList.add('visible');
+    form.style.display = 'block';
+  });
 }
 
 function resetScan() {
   scannedImageData = null;
   scannedMediaType = null;
+  lastScanData = null;
   var preview = document.getElementById('photo-preview');
   preview.src = '';
   preview.classList.remove('visible');
