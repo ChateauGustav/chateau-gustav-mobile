@@ -3421,6 +3421,8 @@ var OB_TOTAL = 3;
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
+  // v29: reset onboarding so the new login screen appears
+  localStorage.removeItem('cg_onboarded');
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
     // Already onboarded — remove overlay immediately
