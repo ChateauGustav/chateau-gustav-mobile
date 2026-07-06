@@ -3269,7 +3269,7 @@ function resetScan() {
 })();
 </script>
 <!-- ── ONBOARDING ── -->
-<div class="onboarding-overlay" id="onboarding-overlay">
+<div class="onboarding-overlay" id="onboarding-overlay" style="display:flex;">
 
   <!-- Splash -->
   <div class="ob-splash" id="ob-splash">
@@ -3417,32 +3417,41 @@ function resetScan() {
 var obSlideIndex = 0;
 var OB_TOTAL = 3;
 
-document.addEventListener('DOMContentLoaded', function() {
-(function initOnboarding() {
+function initOnboarding() {
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
-  // v30: reset onboarding so the new login screen appears
+  // Force onboarding to show for this build
   localStorage.removeItem('cg_onboarded');
+
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
     overlay.style.display = 'none';
     return;
   }
 
-  // Always show the HTML splash — this is the branded onboarding
-  // experience, separate from Capacitor's native loading splash.
+  // Overlay is visible by default — just handle the splash timing
   setTimeout(function() {
-    document.getElementById('ob-splash').classList.add('hidden');
+    var splash = document.getElementById('ob-splash');
+    if (splash) splash.classList.add('hidden');
     setTimeout(function() {
       var slides = document.getElementById('ob-slides');
-      slides.style.display = 'flex';
-      slides.style.flexDirection = 'column';
-      slides.style.flex = '1';
+      if (slides) {
+        slides.style.display = 'flex';
+        slides.style.flexDirection = 'column';
+        slides.style.flex = '1';
+      }
     }, 420);
   }, 2200);
-})();
-});
+}
+
+// Run immediately since script is at bottom of body (DOM is ready)
+// but guard against edge cases where it might not be
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initOnboarding);
+} else {
+  initOnboarding();
+}
 
 function obNext() {
   if (obSlideIndex < OB_TOTAL - 1) {
