@@ -1312,6 +1312,237 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .scanned-empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
 .scanned-empty-text { font-size: 0.88rem; color: var(--dim); line-height: 1.6; }
 
+/* ── LOGIN SCREEN ────────────────────────────────────────────────── */
+.ob-login {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  overflow-y: auto;
+}
+.ob-login.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+
+.ob-login-hero {
+  background: linear-gradient(160deg, #2a0812 0%, #5e1f2d 100%);
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--safe-top) + 20px) 24px 30px;
+  min-height: 45vh;
+}
+.ob-login-bg-cg {
+  position: absolute;
+  top: 50%;
+  left: 43%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+.ob-login-bg-cg span {
+  font-family: 'Allura', cursive;
+  font-size: 55vw;
+  color: rgba(199,169,107,0.08);
+  line-height: 0.9;
+}
+.ob-login-bg-cg span:last-child { margin-left: -18vw; }
+.ob-login-logo-wrap { position: relative; z-index: 1; text-align: center; }
+.ob-login-chateau {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-lt);
+  margin-bottom: 4px;
+}
+.ob-login-gustav {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.8rem;
+  font-weight: 400;
+  color: #f8f4ee;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.ob-login-tag {
+  font-size: 0.7rem;
+  color: rgba(248,244,238,0.5);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ob-login-body {
+  background: var(--parchment);
+  padding: 28px 24px calc(var(--safe-bottom) + 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.ob-login-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.ob-login-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s ease, transform 0.12s ease;
+}
+.ob-login-btn:active { opacity: 0.85; transform: scale(0.99); }
+.ob-login-primary {
+  background: var(--rouge);
+  color: #f8f4ee;
+  border: none;
+}
+.ob-login-social {
+  background: transparent;
+  border: 1.5px solid var(--mist);
+  color: var(--ink);
+}
+.ob-login-btn-icon { font-size: 1rem; }
+.ob-g-icon {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #4285F4;
+}
+.ob-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dim);
+  font-size: 0.75rem;
+  margin: 2px 0;
+}
+.ob-login-divider::before, .ob-login-divider::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--mist);
+}
+.ob-login-terms {
+  font-size: 0.65rem;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.6;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
+/* Email form */
+.ob-email-screen {
+  position: absolute;
+  inset: 0;
+  background: var(--parchment);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+  pointer-events: none;
+  overflow-y: auto;
+}
+.ob-email-screen.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.ob-email-top {
+  padding: calc(var(--safe-top) + 16px) 16px 0;
+  flex-shrink: 0;
+}
+.ob-email-back {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  color: var(--gold);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.ob-email-body {
+  padding: 20px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.ob-email-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.ob-email-sub { font-size: 0.82rem; color: var(--dim); line-height: 1.6; }
+.ob-email-field { display: flex; flex-direction: column; gap: 6px; }
+.ob-email-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.ob-email-input {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+  transition: border-color 0.18s ease;
+}
+.ob-email-input:focus { border-color: var(--gold); }
+.ob-email-input::placeholder { color: var(--dim); opacity: 0.5; }
+.ob-email-cta {
+  padding: 0 24px calc(var(--safe-bottom) + 24px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Coming soon toast */
+.ob-coming-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--ink);
+  color: var(--parchment);
+  font-size: 0.8rem;
+  padding: 10px 18px;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 2000;
+}
+.ob-coming-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* ── SMOOTH TRANSITIONS ─────────────────────────────────────────── */
 /* Chat messages fade in as they appear */
 .msg {
@@ -3081,25 +3312,74 @@ function resetScan() {
 
     <div class="ob-nav">
       <button class="ob-next-btn" id="ob-next-btn" onclick="obNext()">Next</button>
-      <button class="ob-skip-btn" onclick="showObProfile()">Skip</button>
+      <button class="ob-skip-btn" onclick="showObLogin()">Skip</button>
     </div>
   </div>
 
   <!-- Profile setup -->
-  <div class="ob-profile" id="ob-profile">
-    <div class="ob-profile-header">
-      <div class="ob-profile-logo">Château <span>Gustav</span></div>
-      <div class="ob-profile-welcome">Welcome.<br>Let's get to know you.</div>
-    </div>
-    <div class="ob-profile-body">
-      <div>
-        <div class="ob-field-label">What should we call you?</div>
-        <input class="ob-name-input" id="ob-name" type="text" placeholder="Your first name" autocomplete="given-name" autocorrect="off" />
+  <!-- ── LOGIN SCREEN ── -->
+  <div class="ob-login" id="ob-login">
+
+    <!-- Hero -->
+    <div class="ob-login-hero">
+      <div class="ob-login-bg-cg"><span>C</span><span>G</span></div>
+      <div class="ob-login-logo-wrap">
+        <div class="ob-login-chateau">CHÂTEAU</div>
+        <div class="ob-login-gustav">Gustav</div>
+        <div class="ob-login-tag">Your Personal Sommelier</div>
       </div>
-      <div>
-        <div class="ob-field-label">What do you love?</div>
-        <div class="ob-field-sub">Pick any that apply — we'll use this to personalise your recommendations.</div>
-        <div class="ob-style-grid">
+    </div>
+
+    <!-- Buttons -->
+    <div class="ob-login-body">
+      <div class="ob-login-headline">Get started</div>
+
+      <button class="ob-login-btn ob-login-primary" onclick="showObEmailForm()">
+        <span class="ob-login-btn-icon">✉</span> Continue with email
+      </button>
+
+      <div class="ob-login-divider"><span>or</span></div>
+
+      <button class="ob-login-btn ob-login-social" onclick="showComingSoon(this, 'Apple')">
+        <span class="ob-login-btn-icon"> </span> Continue with Apple
+      </button>
+      <button class="ob-login-btn ob-login-social" onclick="showComingSoon(this, 'Google')">
+        <span class="ob-login-btn-icon ob-g-icon">G</span> Continue with Google
+      </button>
+
+      <div class="ob-login-terms">
+        By continuing you agree to Château Gustav's Terms of Service and Privacy Policy.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── EMAIL FORM SCREEN ── -->
+  <div class="ob-email-screen" id="ob-email-screen">
+
+    <div class="ob-email-top">
+      <button class="ob-email-back" onclick="hideObEmailForm()">‹ Back</button>
+    </div>
+
+    <div class="ob-email-body">
+      <div class="ob-email-title">Create your profile</div>
+      <div class="ob-email-sub">Tell us a little about yourself so Gustav can tailor recommendations to your taste.</div>
+
+      <div class="ob-email-field">
+        <div class="ob-email-label">First name</div>
+        <input class="ob-email-input" id="ob-login-name" type="text" placeholder="e.g. Dele"
+          autocomplete="given-name" autocorrect="off" autocapitalize="words" />
+      </div>
+
+      <div class="ob-email-field">
+        <div class="ob-email-label">Email address</div>
+        <input class="ob-email-input" id="ob-login-email" type="email" placeholder="you@example.com"
+          autocomplete="email" autocorrect="off" />
+      </div>
+
+      <div class="ob-email-field">
+        <div class="ob-email-label">What do you love? <span style="font-weight:300;opacity:0.6;">(optional)</span></div>
+        <div class="ob-style-grid" style="margin-top:8px;">
           <button class="ob-style-pill" onclick="toggleObStyle(this)">Bold reds</button>
           <button class="ob-style-pill" onclick="toggleObStyle(this)">Light reds</button>
           <button class="ob-style-pill" onclick="toggleObStyle(this)">Crisp whites</button>
@@ -3111,15 +3391,18 @@ function resetScan() {
         </div>
       </div>
     </div>
-    <div class="ob-profile-cta">
+
+    <div class="ob-email-cta">
       <button class="ob-start-btn" onclick="finishOnboarding()">Start exploring →</button>
       <span class="ob-skip-link" onclick="finishOnboarding()">Skip for now</span>
     </div>
+
   </div>
 
 </div>
 
 <!-- ── GLOSSARY POPUP ── -->
+<div class="ob-coming-toast" id="ob-coming-toast"></div>
 <div class="glossary-overlay" id="glossary-overlay" onclick="closeGlossary()">
   <div class="glossary-card" onclick="event.stopPropagation()">
     <div class="glossary-term" id="glossary-term"></div>
@@ -3164,34 +3447,55 @@ function obNext() {
     current.classList.remove('active');
     current.classList.add('exit');
     setTimeout(function() { current.classList.remove('exit'); }, 350);
-
     obSlideIndex++;
-
     var next = document.getElementById('ob-slide-' + obSlideIndex);
     next.classList.add('active');
-
-    // Update dots
     document.querySelectorAll('.ob-dot').forEach(function(d, i) {
       d.classList.toggle('active', i === obSlideIndex);
     });
-
-    // Update button text on last slide
     if (obSlideIndex === OB_TOTAL - 1) {
       document.getElementById('ob-next-btn').textContent = 'Get started';
     }
   } else {
-    showObProfile();
+    showObLogin();
   }
 }
 
-function showObProfile() {
+function showObLogin() {
   document.getElementById('ob-slides').style.display = 'none';
-  var profile = document.getElementById('ob-profile');
-  profile.style.display = 'flex';
-  profile.style.flexDirection = 'column';
-  profile.style.flex = '1';
-  setTimeout(function() { profile.classList.add('active'); }, 20);
-  setTimeout(function() { document.getElementById('ob-name').focus(); }, 400);
+  var login = document.getElementById('ob-login');
+  login.style.display = 'flex';
+  login.style.flexDirection = 'column';
+  login.style.flex = '1';
+  setTimeout(function() { login.classList.add('active'); }, 20);
+}
+
+function showObEmailForm() {
+  document.getElementById('ob-login').classList.remove('active');
+  var form = document.getElementById('ob-email-screen');
+  form.style.display = 'flex';
+  form.style.flexDirection = 'column';
+  setTimeout(function() {
+    form.classList.add('active');
+    document.getElementById('ob-login-name').focus();
+  }, 30);
+}
+
+function hideObEmailForm() {
+  document.getElementById('ob-email-screen').classList.remove('active');
+  setTimeout(function() {
+    document.getElementById('ob-email-screen').style.display = 'none';
+    document.getElementById('ob-login').classList.add('active');
+  }, 340);
+}
+
+var comingSoonTimer = null;
+function showComingSoon(btn, provider) {
+  var toast = document.getElementById('ob-coming-toast');
+  toast.textContent = provider + ' sign-in coming soon — use email for now.';
+  toast.classList.add('show');
+  clearTimeout(comingSoonTimer);
+  comingSoonTimer = setTimeout(function() { toast.classList.remove('show'); }, 3000);
 }
 
 function toggleObStyle(btn) {
@@ -3199,30 +3503,27 @@ function toggleObStyle(btn) {
 }
 
 function finishOnboarding() {
-  // Collect whatever the user entered
-  var name = (document.getElementById('ob-name').value || '').trim();
+  var nameEl = document.getElementById('ob-login-name');
+  var emailEl = document.getElementById('ob-login-email');
+  var name = nameEl ? (nameEl.value || '').trim() : '';
+  var email = emailEl ? (emailEl.value || '').trim() : '';
   var selectedStyles = [];
   document.querySelectorAll('.ob-style-pill.selected').forEach(function(p) {
     selectedStyles.push(p.textContent.trim());
   });
-
-  // Save to preferences so the rest of the app picks it up
   var prefs = getPreferences() || {};
   if (name) prefs.name = name;
+  if (email) prefs.email = email;
   if (selectedStyles.length) prefs.styles = selectedStyles;
-  if (name || selectedStyles.length) setPreferences(prefs);
-
-  // Mark onboarded
+  if (name || email || selectedStyles.length) setPreferences(prefs);
   try { localStorage.setItem('cg_onboarded', '1'); } catch(e) {}
-
-  // Fade overlay out
   var overlay = document.getElementById('onboarding-overlay');
   overlay.classList.add('fade-out');
   setTimeout(function() {
     overlay.style.display = 'none';
-    // Update the hub to reflect new name if already initialised
     updateSavedBadge();
     updatePrefDot();
+    updateScanCount();
   }, 500);
 }
 
