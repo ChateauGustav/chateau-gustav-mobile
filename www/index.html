@@ -3318,7 +3318,7 @@ function resetScan() {
 
   <!-- Profile setup -->
   <!-- ── LOGIN SCREEN ── -->
-  <div class="ob-login" id="ob-login">
+  <div class="ob-login" id="ob-login" style="display:none;">
 
     <!-- Hero -->
     <div class="ob-login-hero">
@@ -3355,7 +3355,7 @@ function resetScan() {
   </div>
 
   <!-- ── EMAIL FORM SCREEN ── -->
-  <div class="ob-email-screen" id="ob-email-screen">
+  <div class="ob-email-screen" id="ob-email-screen" style="display:none;">
 
     <div class="ob-email-top">
       <button class="ob-email-back" onclick="hideObEmailForm()">‹ Back</button>
@@ -3417,15 +3417,15 @@ function resetScan() {
 var obSlideIndex = 0;
 var OB_TOTAL = 3;
 
+document.addEventListener('DOMContentLoaded', function() {
 (function initOnboarding() {
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
-  // v29: reset onboarding so the new login screen appears
+  // v30: reset onboarding so the new login screen appears
   localStorage.removeItem('cg_onboarded');
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
-    // Already onboarded — remove overlay immediately
     overlay.style.display = 'none';
     return;
   }
@@ -3442,6 +3442,7 @@ var OB_TOTAL = 3;
     }, 420);
   }, 2200);
 })();
+});
 
 function obNext() {
   if (obSlideIndex < OB_TOTAL - 1) {
