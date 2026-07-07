@@ -1592,6 +1592,91 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 /* Onboarding overlay fade */
 .onboarding-overlay { transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ── DRINKING WINDOW ─────────────────────────────────────────────── */
+.drink-window-card {
+  background: var(--card-bg);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.drink-window-title {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.drink-window-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.drink-window-item { flex: 1; }
+.drink-window-label { font-size: 0.62rem; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+.drink-window-value { font-size: 0.92rem; color: var(--ink); font-weight: 500; }
+.drink-window-value.gold { color: var(--gold); }
+.drink-window-advice { font-size: 0.82rem; color: var(--dim); line-height: 1.6; border-top: 1px solid var(--mist); padding-top: 8px; margin-top: 4px; }
+
+/* ── FRIDGE MODE ─────────────────────────────────────────────────── */
+.fridge-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 16px 10px;
+  color: var(--dim); font-size: 0.75rem;
+}
+.fridge-divider::before, .fridge-divider::after {
+  content: ''; flex: 1; height: 0.5px; background: var(--mist);
+}
+.fridge-btn {
+  width: 100%; padding: 13px;
+  background: transparent; border: 1.5px solid var(--mist);
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--dim);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+  -webkit-tap-highlight-color: transparent; transition: border-color 0.18s ease, color 0.18s ease;
+}
+.fridge-btn:active { border-color: var(--gold); color: var(--gold); }
+.fridge-btn-wrap { padding: 0 16px; }
+.fridge-screen { display: none; flex-direction: column; padding-bottom: 24px; animation: screenEnter 0.28s cubic-bezier(0.4,0,0.2,1) forwards; }
+.fridge-screen.active { display: flex; }
+.fridge-back-row { display: flex; align-items: center; gap: 6px; padding: 14px 16px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.fridge-back-label { font-size: 0.78rem; color: var(--gold); font-weight: 500; }
+.fridge-hero { padding: 12px 16px 4px; }
+.fridge-headline { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 400; color: var(--ink); margin-bottom: 4px; }
+.fridge-sub { font-size: 0.82rem; color: var(--dim); line-height: 1.6; margin-bottom: 16px; }
+.fridge-sect { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; padding: 0 16px; }
+.fridge-recent-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px; margin-bottom: 12px; max-height: 200px; overflow-y: auto; }
+.fridge-recent-item {
+  background: var(--card-bg); border: 1px solid var(--mist); border-radius: var(--radius);
+  padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color 0.15s ease;
+}
+.fridge-recent-item.added { border-color: var(--gold); background: var(--parchment2); }
+.fridge-recent-name { font-size: 0.88rem; color: var(--ink); }
+.fridge-recent-meta { font-size: 0.72rem; color: var(--dim); margin-top: 1px; }
+.fridge-recent-add { font-size: 1rem; color: var(--gold); flex-shrink: 0; }
+.fridge-manual { padding: 0 16px; margin-bottom: 14px; display: flex; gap: 8px; }
+.fridge-manual-select {
+  flex: 1; background: var(--card-bg); border: 1px solid var(--mist);
+  border-radius: var(--radius); padding: 11px 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+  appearance: none; -webkit-appearance: none; outline: none;
+}
+.fridge-manual-add {
+  padding: 11px 16px; background: var(--rouge); color: #f8f4ee;
+  border: none; border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+}
+.fridge-selected-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px; margin-bottom: 14px; }
+.fridge-empty-note { font-size: 0.82rem; color: var(--dim); font-style: italic; padding: 0 16px; margin-bottom: 14px; }
+.fridge-selected-item {
+  background: var(--parchment2); border: 1px solid var(--gold); border-radius: var(--radius);
+  padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;
+  animation: cardEnter 0.22s ease both;
+}
+.fridge-selected-name { font-size: 0.88rem; color: var(--ink); }
+.fridge-selected-remove { background: none; border: none; font-size: 1.1rem; color: var(--dim); cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent; }
+.fridge-cta { padding: 0 16px; }
+
 .glossary-overlay {
   position: fixed;
   inset: 0;
@@ -2084,6 +2169,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
       <div class="cta-wrap">
         <button class="cta-btn" id="food-submit" onclick="getPairings('food')">Find my pairings</button>
       </div>
+      <div class="fridge-divider"><span>or</span></div>
+      <div class="fridge-btn-wrap">
+        <button class="fridge-btn" onclick="openFridgeMode()">🍷 Start with wines I have</button>
+      </div>
     </div>
 
     <div class="loading-state" id="food-loading">
@@ -2091,6 +2180,65 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     </div>
 
     <div class="results-area" id="food-results"></div>
+
+    <!-- ── FRIDGE MODE SCREEN ── -->
+    <div class="fridge-screen" id="fridge-screen">
+      <div class="fridge-back-row" onclick="closeFridgeMode()">
+        <span style="font-size:1.1rem;color:var(--gold);">‹</span>
+        <span class="fridge-back-label">Back to food search</span>
+      </div>
+      <div class="fridge-hero">
+        <div class="fridge-headline">What's in your fridge?</div>
+        <div class="fridge-sub">Select up to 3 wines you have open or available. Gustav will recommend the perfect dish for what you've already got.</div>
+      </div>
+
+      <div class="fridge-sect" id="fridge-recent-label">From your scan history</div>
+      <div class="fridge-recent-list" id="fridge-recent-list">
+        <div class="fridge-empty-note" style="padding:0;">No scanned wines yet — add one below.</div>
+      </div>
+
+      <div class="fridge-sect">Add a wine manually</div>
+      <div class="fridge-manual">
+        <select class="fridge-manual-select" id="fridge-manual-grape">
+          <option value="">Select a grape…</option>
+          <optgroup label="Red">
+            <option>Cabernet Sauvignon</option><option>Merlot</option><option>Pinot Noir</option>
+            <option>Syrah / Shiraz</option><option>Zinfandel</option><option>Malbec</option>
+            <option>Tempranillo</option><option>Nebbiolo</option><option>Sangiovese</option>
+            <option>Grenache</option><option>Barbera</option><option>Montepulciano</option>
+            <option>Cabernet Franc</option><option>Gamay (Beaujolais)</option><option>Petite Sirah</option>
+            <option>Carménère</option><option>Pinotage</option><option>Primitivo</option>
+          </optgroup>
+          <optgroup label="White">
+            <option>Chardonnay</option><option>Sauvignon Blanc</option><option>Riesling</option>
+            <option>Pinot Grigio</option><option>Albariño</option><option>Viognier</option>
+            <option>Gewürztraminer</option><option>Grüner Veltliner</option>
+            <option>Chenin Blanc</option><option>Vermentino</option><option>Moscato / Muscat</option>
+            <option>Verdejo</option>
+          </optgroup>
+          <optgroup label="Sparkling / Other">
+            <option>Champagne / Sparkling</option><option>Rosé</option>
+            <option>Prosecco</option><option>Orange Wine</option><option>Cava</option>
+          </optgroup>
+        </select>
+        <button class="fridge-manual-add" onclick="addFridgeWineManual()">Add</button>
+      </div>
+
+      <div class="fridge-sect" id="fridge-selected-label">Your selection <span id="fridge-count" style="color:var(--dim);font-weight:300;">(0/3)</span></div>
+      <div class="fridge-selected-list" id="fridge-selected-list">
+        <div class="fridge-empty-note" id="fridge-empty-note">Add wines above to get started.</div>
+      </div>
+
+      <div class="fridge-cta">
+        <button class="cta-btn" id="fridge-submit" onclick="getFridgePairings()" disabled>What should I cook?</button>
+      </div>
+
+      <div class="loading-state" id="fridge-loading">
+        <div class="loading-text">Finding the perfect match…</div>
+      </div>
+      <div class="results-area" id="fridge-results"></div>
+    </div>
+
   </div>
 
   <!-- ── WINE TAB ── -->
@@ -2931,6 +3079,137 @@ function removeSaved(idx) {
 
 updateSavedBadge();
 
+// ── FRIDGE MODE ───────────────────────────────────────────────────
+var fridgeWines = [];
+
+function openFridgeMode() {
+  document.getElementById('food-form').style.display = 'none';
+  document.getElementById('food-results').classList.remove('visible');
+  document.getElementById('food-results').innerHTML = '';
+  var screen = document.getElementById('fridge-screen');
+  screen.classList.add('active');
+  renderFridgeRecent();
+  renderFridgeSelected();
+  document.getElementById('app-body').scrollTop = 0;
+}
+function closeFridgeMode() {
+  document.getElementById('fridge-screen').classList.remove('active');
+  document.getElementById('fridge-results').classList.remove('visible');
+  document.getElementById('fridge-results').innerHTML = '';
+  document.getElementById('food-form').style.display = 'block';
+  document.getElementById('app-body').scrollTop = 0;
+}
+function renderFridgeRecent() {
+  var list = document.getElementById('fridge-recent-list');
+  var history = getScanHistory().slice(0, 8);
+  if (history.length === 0) {
+    list.innerHTML = '<div style="font-size:0.82rem;color:var(--dim);font-style:italic;padding:0 0 4px;">No scanned wines yet — add one below.</div>';
+    return;
+  }
+  list.innerHTML = history.map(function(s, i) {
+    var meta = [s.grape, s.vintage].filter(Boolean).join(' · ');
+    var added = fridgeWines.some(function(w) { return w.name === s.name; });
+    return '<div class="fridge-recent-item' + (added ? ' added' : '') + '" onclick="addFridgeWineFromScan(' + i + ')">' +
+      '<div><div class="fridge-recent-name">' + s.name + '</div>' +
+      (meta ? '<div class="fridge-recent-meta">' + meta + '</div>' : '') + '</div>' +
+      '<div class="fridge-recent-add">' + (added ? '✓' : '+') + '</div></div>';
+  }).join('');
+}
+function addFridgeWineFromScan(i) {
+  if (fridgeWines.length >= 3) { showFridgeToast('Maximum 3 wines — remove one first.'); return; }
+  var s = getScanHistory()[i];
+  if (!s) return;
+  if (fridgeWines.some(function(w) { return w.name === s.name; })) { showFridgeToast('Already added.'); return; }
+  fridgeWines.push({ name: s.name, grape: s.grape, region: s.region, vintage: s.vintage });
+  renderFridgeRecent(); renderFridgeSelected();
+}
+function addFridgeWineManual() {
+  if (fridgeWines.length >= 3) { showFridgeToast('Maximum 3 wines — remove one first.'); return; }
+  var grape = document.getElementById('fridge-manual-grape').value;
+  if (!grape) { showFridgeToast('Please select a grape first.'); return; }
+  if (fridgeWines.some(function(w) { return w.grape === grape; })) { showFridgeToast('Already added.'); return; }
+  fridgeWines.push({ name: grape, grape: grape });
+  document.getElementById('fridge-manual-grape').value = '';
+  renderFridgeSelected();
+}
+function removeFridgeWine(i) {
+  fridgeWines.splice(i, 1); renderFridgeRecent(); renderFridgeSelected();
+}
+function renderFridgeSelected() {
+  var list = document.getElementById('fridge-selected-list');
+  var count = document.getElementById('fridge-count');
+  var btn = document.getElementById('fridge-submit');
+  var empty = document.getElementById('fridge-empty-note');
+  count.textContent = '(' + fridgeWines.length + '/3)';
+  btn.disabled = fridgeWines.length === 0;
+  if (fridgeWines.length === 0) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = 'block'; return;
+  }
+  if (empty) empty.style.display = 'none';
+  list.innerHTML = fridgeWines.map(function(w, i) {
+    return '<div class="fridge-selected-item"><div class="fridge-selected-name">' + w.name + (w.vintage ? ' ' + w.vintage : '') + '</div>' +
+      '<button class="fridge-selected-remove" onclick="removeFridgeWine(' + i + ')">×</button></div>';
+  }).join('');
+}
+var fridgeToastTimer = null;
+function showFridgeToast(msg) {
+  var t = document.getElementById('ob-coming-toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(fridgeToastTimer);
+  fridgeToastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+async function getFridgePairings() {
+  if (fridgeWines.length === 0) return;
+  var btn = document.getElementById('fridge-submit');
+  var loading = document.getElementById('fridge-loading');
+  var results = document.getElementById('fridge-results');
+  btn.disabled = true; loading.classList.add('visible');
+  results.classList.remove('visible'); results.innerHTML = '';
+  try {
+    var r = await fetch('https://chateau-gustav-app.vercel.app/api/pair', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'fridge', inputs: { wines: fridgeWines }, preferences: getPreferences() || null })
+    });
+    if (!r.ok) throw new Error('failed');
+    renderFridgeResults(await r.json());
+  } catch(e) {
+    results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--rouge);font-size:0.9rem;">Something went wrong. Please try again.</div>';
+    results.classList.add('visible');
+  } finally { btn.disabled = false; loading.classList.remove('visible'); }
+}
+function renderFridgeResults(data) {
+  var results = document.getElementById('fridge-results');
+  var html = '';
+  if (data.intro) html += '<div class="sommelier-note" style="margin:16px 16px 0;"><div class="sommelier-title">✦ Your wines tonight</div><div class="sommelier-text">' + data.intro + '</div></div>';
+  html += '<div style="padding:16px 16px 0;">';
+  (data.pairings || []).forEach(function(p, i) {
+    var rc = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : 'rank-3';
+    var attrs = (p.attributes || []).map(function(a) {
+      return '<span class="pill' + (i===0?' gold':'') + '" onclick="event.stopPropagation();showTermDef(\'' + a.replace(/'/g,"\\'") + '\',event)">' + a + '</span>';
+    }).join('');
+    html += '<div class="pairing-card ' + rc + '"><div class="pairing-card-accent"></div>' +
+      '<div class="pairing-card-inner"><div class="pairing-top"><div><div class="pairing-name">' + p.food + '</div></div>' +
+      '<div class="score-block"><div class="score-num">' + p.score + '</div><div class="score-label">Match</div></div></div>' +
+      '<div class="pairing-why">' + p.why + '</div><div class="attr-pills">' + attrs + '</div></div></div>';
+  });
+  if (data.avoid && data.avoid.length) {
+    html += '<div class="avoid-section"><div class="avoid-label">Skip these</div><div class="avoid-pills">' +
+      data.avoid.map(function(a) { return '<span class="avoid-pill" style="cursor:pointer;" onclick="showTermDef(\'' + a.replace(/'/g,"\\'") + '\',event)">' + a + '</span>'; }).join('') + '</div></div>';
+  }
+  if (data.sommelierNote) html += '<div class="sommelier-note"><div class="sommelier-title">✦ Sommelier\'s note</div><div class="sommelier-text">' + data.sommelierNote + '</div></div>';
+  html += '<button class="scan-again-btn" onclick="resetFridgeResults()" style="margin-top:8px;">Search again</button></div>';
+  results.innerHTML = html; results.classList.add('visible');
+  setTimeout(function() { results.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+}
+function resetFridgeResults() {
+  fridgeWines = [];
+  document.getElementById('fridge-results').classList.remove('visible');
+  document.getElementById('fridge-results').innerHTML = '';
+  renderFridgeRecent(); renderFridgeSelected();
+  document.getElementById('app-body').scrollTop = 0;
+}
+
 // ── SCANNED WINES ─────────────────────────────────────────────────
 function getScanHistory() {
   try { return JSON.parse(localStorage.getItem('cg_scanned') || '[]'); } catch(e) { return []; }
@@ -3169,6 +3448,19 @@ function renderScanResults(data) {
   }
 
   // "Pair this wine" button — switches to wine tab with grape pre-filled
+  // Drinking window card
+  if (data.drinkingWindow || data.peakDate || data.agingAdvice) {
+    html += '<div class="drink-window-card"><div class="drink-window-title">✦ When to drink</div>';
+    if (data.drinkingWindow || data.peakDate) {
+      html += '<div class="drink-window-row">';
+      if (data.drinkingWindow) html += '<div class="drink-window-item"><div class="drink-window-label">Drinking window</div><div class="drink-window-value gold">' + data.drinkingWindow + '</div></div>';
+      if (data.peakDate) html += '<div class="drink-window-item"><div class="drink-window-label">Peak</div><div class="drink-window-value">' + data.peakDate + '</div></div>';
+      html += '</div>';
+    }
+    if (data.agingAdvice) html += '<div class="drink-window-advice">' + data.agingAdvice + '</div>';
+    html += '</div>';
+  }
+
   var grape = data.grapeNormalized || (data.grape ? data.grape.toLowerCase() : '');
   if (grape) {
     html += '<button class="pair-this-btn" onclick="pairScannedWine(\'' + grape.replace(/'/g, "\\'") + '\')">Find food pairings for this wine →</button>';
