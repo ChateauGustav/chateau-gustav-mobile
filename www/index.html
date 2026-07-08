@@ -3870,11 +3870,9 @@ async function sendMessage() {
   document.getElementById('chat-suggestions').style.display = 'none';
   document.getElementById('chat-send').disabled = true;
 
-  // Add user message to UI and history
   appendUserMessage(text);
   chatHistory.push({ role: 'user', content: text });
 
-  // Show typing indicator
   chatTyping = true;
   var typingEl = showTyping();
 
@@ -3889,17 +3887,45 @@ async function sendMessage() {
     removeTyping(typingEl);
 
     if (response.status === 429) {
-      var errData = await response.json().catch(() => ({}));
-      appendGustavMessage(errData.error || "You've been chatting a lot — give it a few minutes and come back.");
+      var errData = await response.json().catch(function() { return {}; });
+      appendGustavMessage(errData.error || "You've been chatting a lot — give it a few minutes.");
     } else if (!response.ok) {
       appendGustavMessage("Something went wrong on my end. Please try again.");
     } else {
-      var data = await response.json();
-      var reply = data.reply || "I'm not sure I caught that — could you rephrase?";
-      appendGustavMessage(reply);
-      chatHistory.push({ role: 'assistant', content: reply });
-      // Cap history at 20 messages to keep costs manageable
-      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+      // ── Streaming: show text as it arrives ──────────────────────
+      var msgEl = document.createElement('div');
+      msgEl.className = 'msg gustav';
+      var bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      var avatar = document.createElement('div');
+      avatar.className = 'msg-avatar';
+      avatar.textContent = 'G';
+      msgEl.appendChild(avatar);
+      msgEl.appendChild(bubble);
+      document.getElementById('chat-messages').appendChild(msgEl);
+
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      var fullText = '';
+
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+        var text2 = decoder.decode(chunk.value, { stream: true });
+        fullText += text2;
+        // Render with basic line-break support
+        bubble.innerHTML = escapeHtml(fullText)
+          .replace(/\n\n/g, '<br><br>')
+          .replace(/\n/g, '<br>');
+        scrollChatToBottom();
+      }
+
+      if (fullText) {
+        chatHistory.push({ role: 'assistant', content: fullText });
+        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+      } else {
+        appendGustavMessage("I didn't catch that — could you rephrase?");
+      }
     }
   } catch (err) {
     removeTyping(typingEl);
