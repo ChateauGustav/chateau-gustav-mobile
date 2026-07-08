@@ -26,7 +26,7 @@ workflows:
         BUNDLE_ID: "com.chateaugustav.pairing"
       xcode: latest
       cocoapods: default
-      node: "20"
+      node: "22"
     scripts:
       - name: Install npm dependencies
         script: npm install
@@ -67,7 +67,7 @@ workflows:
         #   CM_KEY_PASSWORD
         #   CM_KEY_ALIAS
         - keystore_credentials
-      node: "20"
+      node: "22"
     scripts:
       - name: Install npm dependencies
         script: npm install
