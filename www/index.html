@@ -1593,6 +1593,48 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 /* Onboarding overlay fade */
 .onboarding-overlay { transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
 
+/* ── RESTAURANT MODE ─────────────────────────────────────────────── */
+.resto-step-label {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.resto-rec-card {
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.resto-rec-card.top { border-color: var(--gold); }
+.resto-rec-header {
+  background: var(--rouge);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.resto-rec-card.top .resto-rec-header { background: var(--rouge); }
+.resto-rec-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f8f4ee;
+  line-height: 1.2;
+  flex: 1;
+}
+.resto-rec-meta { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 3px; }
+.resto-rec-price { font-size: 0.88rem; font-weight: 500; color: var(--gold-lt); }
+.resto-rec-score { font-size: 0.62rem; color: rgba(248,244,238,0.6); letter-spacing: 0.1em; }
+.resto-rec-body { padding: 12px 14px; }
+.resto-rec-type { font-size: 0.68rem; color: var(--gold); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.resto-rec-why { font-size: 0.85rem; color: var(--ink); line-height: 1.65; margin-bottom: 8px; }
+.resto-wines-read { font-size: 0.72rem; color: var(--dim); text-align: center; padding: 8px 0 4px; }
+
 /* ── DRINKING WINDOW ─────────────────────────────────────────────── */
 .drink-window-card {
   background: var(--card-bg);
@@ -2407,6 +2449,97 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <div class="scan-results" id="scan-results"></div>
   </div>
 
+  <!-- ── RESTAURANT TAB ── -->
+  <div class="screen" id="screen-restaurant">
+
+    <div class="scan-header">
+      <div class="scan-title">Restaurant mode</div>
+      <div class="scan-sub">Photograph the wine list, describe your dish, and Gustav will recommend specific bottles from that list.</div>
+    </div>
+
+    <input type="file" id="resto-file-input" accept="image/*" capture="environment" />
+
+    <!-- Step 1: Wine list photo -->
+    <div style="padding:0 16px 12px;">
+      <div class="resto-step-label">① Photograph the wine list</div>
+      <div class="camera-area" id="resto-camera-area" onclick="triggerRestoCamera()">
+        <div class="camera-placeholder" id="resto-placeholder">
+          <div class="camera-icon">📋</div>
+          <div class="camera-prompt"><strong>Tap to photograph the wine list</strong><br>Good lighting gives the best results</div>
+        </div>
+        <img class="photo-preview" id="resto-preview" alt="Wine list photo" />
+        <div class="retake-overlay" id="resto-retake">Tap to retake</div>
+      </div>
+    </div>
+
+    <!-- Step 2: Dish description -->
+    <div id="resto-dish-section" style="display:none; padding:0 16px 12px;">
+      <div class="resto-step-label">② What are you ordering?</div>
+
+      <div class="row-field" style="margin-bottom:8px;">
+        <div class="row-dot"></div>
+        <div class="row-text">
+          <div class="row-label">Protein</div>
+          <select class="row-select" id="resto-protein" onchange="updateRestoForm()">
+            <option value="">Select...</option>
+            <optgroup label="Meat">
+              <option>Beef</option><option>Lamb</option><option>Pork</option>
+              <option>Chicken</option><option>Duck</option><option>Turkey</option>
+              <option>Game / Venison</option>
+            </optgroup>
+            <optgroup label="Seafood">
+              <option>Salmon</option><option>Tuna</option><option>Halibut</option>
+              <option>Sea bass</option><option>Cod</option><option>Swordfish</option>
+              <option>Shrimp / Prawns</option><option>Scallops</option>
+              <option>Lobster</option><option>Crab</option><option>Mussels / Oysters</option>
+            </optgroup>
+            <optgroup label="Plant-based">
+              <option>Vegetarian</option><option>Vegan</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option>Pasta / Grains</option><option>Cheese / Charcuterie</option><option>Eggs</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="row-chev">›</div>
+      </div>
+
+      <div class="row-field" style="margin-bottom:8px;">
+        <div class="row-dot"></div>
+        <div class="row-text">
+          <div class="row-label">Cut or style</div>
+          <select class="row-select" id="resto-cut">
+            <option value="">Select a protein first...</option>
+          </select>
+        </div>
+        <div class="row-chev">›</div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="row-label" style="margin-bottom:6px;padding-left:2px;">Or describe your dish freely</div>
+        <textarea id="resto-dish-text"
+          style="width:100%;background:var(--card-bg);border:1px solid var(--mist);border-radius:var(--radius);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--ink);resize:none;outline:none;-webkit-appearance:none;line-height:1.5;transition:border-color 0.18s ease;"
+          rows="2"
+          placeholder="e.g. Rack of lamb with rosemary jus and pommes dauphinoise…"
+          onfocus="this.style.borderColor='var(--gold)'"
+          onblur="this.style.borderColor='var(--mist)'"
+        ></textarea>
+        <div style="font-size:0.68rem;color:var(--dim);margin-top:4px;padding-left:2px;">If filled, this overrides the dropdowns above.</div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <button class="cta-btn" id="resto-submit" onclick="submitRestaurant()">Find wines on this list →</button>
+      </div>
+    </div>
+
+    <div class="loading-state" id="resto-loading">
+      <div class="loading-text">Reading the wine list…</div>
+    </div>
+
+    <div class="scan-results" id="resto-results"></div>
+
+  </div>
+
   <!-- ── SAVED TAB ── -->
   <div class="screen" id="screen-saved">
     <div class="saved-header">
@@ -2430,6 +2563,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <button class="tab-btn" data-active="false" onclick="setTab('scan')" aria-label="Scan a label">
     <span class="tab-icon">📷</span>
     <span class="tab-label">Scan</span>
+  </button>
+  <button class="tab-btn" data-active="false" onclick="setTab('restaurant')" aria-label="Restaurant mode">
+    <span class="tab-icon">📋</span>
+    <span class="tab-label">Menu</span>
   </button>
   <button class="tab-btn" data-active="false" onclick="setTab('saved')" aria-label="Saved pairings">
     <span class="tab-icon">♡</span>
@@ -2712,7 +2849,7 @@ function setTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('screen-' + tab).classList.add('active');
-  var tabs = ['food','wine','scan','saved'];
+  var tabs = ['food','wine','scan','restaurant','saved'];
   document.querySelectorAll('.tab-btn').forEach(function(b, i) {
     b.setAttribute('data-active', tabs[i] === tab ? 'true' : 'false');
   });
@@ -3055,7 +3192,7 @@ function toggleSave(btn) {
 
 function updateSavedBadge() {
   var count = getSaved().length;
-  var tabBtn = document.querySelectorAll('.tab-btn')[3]; // index 3 = Saved (Food/Wine/Scan/Saved)
+  var tabBtn = document.querySelectorAll('.tab-btn')[4]; // index 4 = Saved (Food/Wine/Scan/Restaurant/Saved)
   var icon = tabBtn.querySelector('.tab-icon');
   icon.textContent = count > 0 ? '♥' : '♡';
 }
@@ -3379,6 +3516,162 @@ function renderScannedWines() {
   }).join('');
 }
 updateScanCount();
+
+// ── RESTAURANT MODE ───────────────────────────────────────────────
+var restoImageData = null;
+var restoMediaType = null;
+
+function triggerRestoCamera() {
+  document.getElementById('resto-file-input').click();
+}
+
+document.getElementById('resto-file-input').addEventListener('change', function(e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  restoMediaType = file.type || 'image/jpeg';
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var maxDim = 1600; // higher res for wine lists — more text to read
+      var w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.92); // higher quality for text clarity
+      restoImageData = dataUrl.split(',')[1];
+      restoMediaType = 'image/jpeg';
+      var preview = document.getElementById('resto-preview');
+      preview.src = dataUrl;
+      preview.classList.add('visible');
+      document.getElementById('resto-placeholder').style.display = 'none';
+      document.getElementById('resto-retake').classList.add('visible');
+      document.getElementById('resto-camera-area').classList.add('has-photo');
+      document.getElementById('resto-dish-section').style.display = 'block';
+      document.getElementById('resto-results').classList.remove('visible');
+      document.getElementById('resto-results').innerHTML = '';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+function updateRestoForm() {
+  var protein = document.getElementById('resto-protein').value;
+  var cutSelect = document.getElementById('resto-cut');
+  cutSelect.innerHTML = '';
+  if (!protein || !CUT_OPTIONS[protein]) {
+    var def = document.createElement('option');
+    def.value = ''; def.textContent = protein ? 'Any style' : 'Select a protein first...';
+    cutSelect.appendChild(def); return;
+  }
+  var placeholder = document.createElement('option');
+  placeholder.value = ''; placeholder.textContent = 'Any ' + protein.toLowerCase() + ' style';
+  cutSelect.appendChild(placeholder);
+  CUT_OPTIONS[protein].forEach(function(c) {
+    var opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+    cutSelect.appendChild(opt);
+  });
+}
+updateRestoForm();
+
+async function submitRestaurant() {
+  if (!restoImageData) return;
+  var freeText = (document.getElementById('resto-dish-text').value || '').trim();
+  var protein = document.getElementById('resto-protein').value;
+  var cut = document.getElementById('resto-cut').value;
+  var dish = freeText || [protein, cut].filter(Boolean).join(' — ');
+  if (!dish) { document.getElementById('resto-dish-text').focus(); return; }
+  var btn = document.getElementById('resto-submit');
+  var loading = document.getElementById('resto-loading');
+  var results = document.getElementById('resto-results');
+  btn.disabled = true;
+  loading.classList.add('visible');
+  results.classList.remove('visible'); results.innerHTML = '';
+  try {
+    var prefs = getPreferences() || null;
+    var r = await fetch('https://chateau-gustav-app.vercel.app/api/restaurant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageData: restoImageData, mediaType: restoMediaType, dish: dish, preferences: prefs })
+    });
+    if (!r.ok) throw new Error('failed');
+    renderRestoResults(await r.json(), dish);
+  } catch(e) {
+    results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--rouge);font-size:0.9rem;">Something went wrong. Please try again.</div>';
+    results.classList.add('visible');
+  } finally {
+    btn.disabled = false;
+    loading.classList.remove('visible');
+  }
+}
+
+function renderRestoResults(data, dish) {
+  var results = document.getElementById('resto-results');
+  if (!data.found) {
+    results.innerHTML = '<div style="padding:20px;text-align:center;">' +
+      '<div style="font-size:2rem;margin-bottom:12px;opacity:0.4;">📋</div>' +
+      '<div style="font-size:0.9rem;color:var(--dim);line-height:1.6;">' + (data.message || "Couldn't read the wine list clearly. Try a well-lit photo with flash.") + '</div></div>';
+    results.classList.add('visible');
+    return;
+  }
+  var html = '';
+  if (data.winesRead) {
+    html += '<div class="resto-wines-read">Gustav read ' + data.winesRead + ' wine' + (data.winesRead === 1 ? '' : 's') + ' from this list</div>';
+  }
+  html += '<div style="padding:0 16px;">';
+  (data.recommendations || []).forEach(function(r, i) {
+    var attrs = (r.attributes || []).map(function(a) {
+      var aEsc = a.replace(/'/g, "\\'");
+      return '<span class="pill' + (i===0?' gold':'') + '" onclick="event.stopPropagation();showTermDef(\'' + aEsc + '\',event)">' + a + '</span>';
+    }).join('');
+    html += '<div class="resto-rec-card' + (i===0?' top':'') + '">' +
+      '<div class="resto-rec-header">' +
+        '<div class="resto-rec-name">' + r.name + (r.vintage ? ' ' + r.vintage : '') + '</div>' +
+        '<div class="resto-rec-meta">' +
+          (r.price ? '<div class="resto-rec-price">' + r.price + '</div>' : '') +
+          '<div class="resto-rec-score">' + r.score + ' match</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="resto-rec-body">' +
+        (r.type ? '<div class="resto-rec-type">' + r.type + '</div>' : '') +
+        '<div class="resto-rec-why">' + r.why + '</div>' +
+        (attrs ? '<div class="attr-pills">' + attrs + '</div>' : '') +
+      '</div></div>';
+  });
+  if (data.sommelierNote) {
+    html += '<div class="sommelier-note"><div class="sommelier-title">✦ Sommelier\'s note</div><div class="sommelier-text">' + data.sommelierNote + '</div></div>';
+  }
+  if (data.budgetNote) {
+    html += '<div class="scan-card" style="margin-top:8px;"><div class="scan-card-title">Value pick</div><div class="scan-card-text">' + data.budgetNote + '</div></div>';
+  }
+  html += '<button class="scan-again-btn" onclick="resetRestaurant()" style="margin-top:8px;">Try another list</button>';
+  html += '</div>';
+  results.innerHTML = html;
+  results.classList.add('visible');
+  setTimeout(function() { results.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+}
+
+function resetRestaurant() {
+  restoImageData = null; restoMediaType = null;
+  var preview = document.getElementById('resto-preview');
+  preview.src = ''; preview.classList.remove('visible');
+  document.getElementById('resto-placeholder').style.display = '';
+  document.getElementById('resto-retake').classList.remove('visible');
+  document.getElementById('resto-camera-area').classList.remove('has-photo');
+  document.getElementById('resto-dish-section').style.display = 'none';
+  document.getElementById('resto-results').classList.remove('visible');
+  document.getElementById('resto-results').innerHTML = '';
+  document.getElementById('resto-protein').value = '';
+  document.getElementById('resto-dish-text').value = '';
+  updateRestoForm();
+  document.getElementById('app-body').scrollTop = 0;
+}
 
 // ── CASCADING FOOD FORM ───────────────────────────────────────────
 var CUT_OPTIONS = {
