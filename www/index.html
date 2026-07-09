@@ -807,17 +807,22 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 /* ── PROFILE PANEL ──────────────────────────────────────────────── */
 .settings-btn {
   position: absolute;
-  right: 16px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   cursor: pointer;
   color: var(--dim);
-  padding: 4px;
+  padding: 12px;
   -webkit-tap-highlight-color: transparent;
   line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .settings-btn:active { color: var(--gold); }
 
@@ -3139,8 +3144,8 @@ function setPreferences(p) {
 }
 
 function openProfile() {
-  loadProfileIntoHub();
-  loadProfileIntoUI();
+  try { loadProfileIntoHub(); } catch(e) { console.warn('loadProfileIntoHub error:', e); }
+  try { loadProfileIntoUI(); } catch(e) { console.warn('loadProfileIntoUI error:', e); }
   document.getElementById('profile-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -3901,41 +3906,45 @@ var restoImageData = null;
 var restoMediaType = null;
 
 function triggerRestoCamera() {
-  document.getElementById('resto-file-input').click();
+  captureNativeCamera(function(base64, mediaType) {
+    handleRestoImage(base64, mediaType);
+  }, 'resto-file-input');
+}
+
+function handleRestoImage(base64Data, mediaType) {
+  var rawBase64 = base64Data.indexOf(',') !== -1 ? base64Data.split(',')[1] : base64Data;
+  var img = new Image();
+  img.onload = function() {
+    var maxDim = 1600;
+    var w = img.width, h = img.height;
+    if (w > maxDim || h > maxDim) {
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    var canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    restoImageData = dataUrl.split(',')[1];
+    restoMediaType = 'image/jpeg';
+    var preview = document.getElementById('resto-preview');
+    preview.src = dataUrl;
+    preview.classList.add('visible');
+    document.getElementById('resto-placeholder').style.display = 'none';
+    document.getElementById('resto-retake').classList.add('visible');
+    document.getElementById('resto-camera-area').classList.add('has-photo');
+    document.getElementById('resto-dish-section').style.display = 'block';
+    document.getElementById('resto-results').classList.remove('visible');
+    document.getElementById('resto-results').innerHTML = '';
+  };
+  img.src = 'data:' + (mediaType || 'image/jpeg') + ';base64,' + rawBase64;
 }
 
 document.getElementById('resto-file-input').addEventListener('change', function(e) {
   var file = e.target.files && e.target.files[0];
   if (!file) return;
-  restoMediaType = file.type || 'image/jpeg';
   var reader = new FileReader();
-  reader.onload = function(ev) {
-    var img = new Image();
-    img.onload = function() {
-      var maxDim = 1600; // higher res for wine lists — more text to read
-      var w = img.width, h = img.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-        else { w = Math.round(w * maxDim / h); h = maxDim; }
-      }
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.92); // higher quality for text clarity
-      restoImageData = dataUrl.split(',')[1];
-      restoMediaType = 'image/jpeg';
-      var preview = document.getElementById('resto-preview');
-      preview.src = dataUrl;
-      preview.classList.add('visible');
-      document.getElementById('resto-placeholder').style.display = 'none';
-      document.getElementById('resto-retake').classList.add('visible');
-      document.getElementById('resto-camera-area').classList.add('has-photo');
-      document.getElementById('resto-dish-section').style.display = 'block';
-      document.getElementById('resto-results').classList.remove('visible');
-      document.getElementById('resto-results').innerHTML = '';
-    };
-    img.src = ev.target.result;
-  };
+  reader.onload = function(ev) { handleRestoImage(ev.target.result, file.type); };
   reader.readAsDataURL(file);
   e.target.value = '';
 });
@@ -4193,55 +4202,87 @@ function updateSideOptions() {
 updateFoodForm();
 
 // ── SCANNED WINES ─────────────────────────────────────────────────
+// ── NATIVE CAMERA HELPER ─────────────────────────────────────────
+// Uses @capacitor/camera plugin for reliable native camera access.
+// Falls back to file input on web or if plugin unavailable.
+async function captureNativeCamera(onImageReady, fallbackInputId) {
+  var cap = window.Capacitor;
+  if (cap && cap.Plugins && cap.Plugins.Camera) {
+    try {
+      var Camera = cap.Plugins.Camera;
+      await Camera.requestPermissions({ permissions: ['camera'] });
+      var result = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: 'base64',
+        source: 'CAMERA',
+        saveToGallery: false,
+        correctOrientation: true
+      });
+      if (result && result.base64String) {
+        onImageReady(result.base64String, 'image/jpeg');
+        return;
+      }
+    } catch(e) {
+      // User cancelled — don't fall through
+      if (e && (e.message || '').toLowerCase().includes('cancel')) return;
+      console.warn('Capacitor Camera fallback to file input:', e);
+    }
+  }
+  // Fallback: file input
+  var el = document.getElementById(fallbackInputId);
+  if (el) el.click();
+}
+
 var scannedImageData = null;
 var scannedMediaType = null;
 var lastScanData = null;
 
 function triggerCamera() {
-  document.getElementById('scan-file-input').click();
+  captureNativeCamera(function(base64, mediaType) {
+    handleScanImage(base64, mediaType);
+  }, 'scan-file-input');
+}
+
+function handleScanImage(base64Data, mediaType) {
+  // base64Data may come from Capacitor Camera plugin directly
+  // or from a FileReader dataUrl (we strip the prefix below if needed)
+  var rawBase64 = base64Data.indexOf(',') !== -1 ? base64Data.split(',')[1] : base64Data;
+  // Resize via canvas
+  var img = new Image();
+  img.onload = function() {
+    var maxDim = 1024;
+    var w = img.width, h = img.height;
+    if (w > maxDim || h > maxDim) {
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    var canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    scannedImageData = dataUrl.split(',')[1];
+    scannedMediaType = 'image/jpeg';
+    var preview = document.getElementById('photo-preview');
+    preview.src = dataUrl;
+    preview.classList.add('visible');
+    document.getElementById('camera-placeholder').style.display = 'none';
+    document.getElementById('retake-overlay').classList.add('visible');
+    document.getElementById('camera-area').classList.add('has-photo');
+    document.getElementById('scan-submit').style.display = 'block';
+    var results = document.getElementById('scan-results');
+    results.classList.remove('visible');
+    results.innerHTML = '';
+  };
+  img.src = 'data:' + (mediaType || 'image/jpeg') + ';base64,' + rawBase64;
 }
 
 document.getElementById('scan-file-input').addEventListener('change', function(e) {
   var file = e.target.files && e.target.files[0];
   if (!file) return;
-  scannedMediaType = file.type || 'image/jpeg';
-
-  // Resize image before encoding to keep payload and cost reasonable
   var reader = new FileReader();
-  reader.onload = function(ev) {
-    var img = new Image();
-    img.onload = function() {
-      var maxDim = 1024;
-      var w = img.width, h = img.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-        else { w = Math.round(w * maxDim / h); h = maxDim; }
-      }
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-      scannedImageData = dataUrl.split(',')[1];
-      scannedMediaType = 'image/jpeg';
-
-      // Show preview
-      var preview = document.getElementById('photo-preview');
-      preview.src = dataUrl;
-      preview.classList.add('visible');
-      document.getElementById('camera-placeholder').style.display = 'none';
-      document.getElementById('retake-overlay').classList.add('visible');
-      document.getElementById('camera-area').classList.add('has-photo');
-      document.getElementById('scan-submit').style.display = 'block';
-
-      // Clear old results
-      var results = document.getElementById('scan-results');
-      results.classList.remove('visible');
-      results.innerHTML = '';
-    };
-    img.src = ev.target.result;
-  };
+  reader.onload = function(ev) { handleScanImage(ev.target.result, file.type); };
   reader.readAsDataURL(file);
-  // Reset input so same file can be selected again
   e.target.value = '';
 });
 
@@ -4717,7 +4758,7 @@ function finishOnboarding() {
   setTimeout(function() {
     overlay.style.display = 'none';
     updateSavedBadge();
-    updatePrefDot();
+    updatePrefIndicator();
     updateScanCount();
   }, 500);
 }
