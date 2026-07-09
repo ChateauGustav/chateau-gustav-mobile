@@ -3,6 +3,10 @@ const config = {
   appId: 'com.chateaugustav.pairing',
   appName: 'Château Gustav',
   webDir: 'www',
+  android: {
+    allowMixedContent: false,
+    webContentsDebuggingEnabled: false
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 1200,
