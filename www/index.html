@@ -2470,7 +2470,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <!-- ── HUB LEVEL (shown first) ── -->
   <div id="profile-hub">
     <div class="profile-top">
-      <button class="profile-back" onclick="closeProfile()" aria-label="Close" style="font-size:0.82rem;letter-spacing:0.04em;">✕</button>
+      <button class="profile-back" onclick="closeProfile()" aria-label="Close" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
       <div class="profile-title">Settings</div>
       <div style="width:44px"></div>
     </div>
@@ -2496,7 +2496,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
         </div>
         <div class="hub-row-chev">›</div>
       </div>
-      <div class="hub-row" onclick="closeProfile(); setTab('saved')">
+      <div class="hub-row" onclick="openSavedSubpanel()">
         <div class="hub-row-icon">♥</div>
         <div class="hub-row-text">
           <div class="hub-row-label">Saved Pairings</div>
@@ -2540,7 +2540,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <div id="prefs-subpanel" class="prefs-subpanel">
 
     <div class="profile-top">
-      <button class="profile-back" onclick="closePrefsSubpanel()" aria-label="Back to menu">‹</button>
+      <button class="profile-back" onclick="closePrefsSubpanel()" aria-label="Back to menu" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
       <div class="profile-title">Wine preferences</div>
       <button class="profile-save-top" onclick="saveProfile()">Save</button>
     </div>
@@ -2668,6 +2668,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 
   </div><!-- end prefs-subpanel -->
 
+  <!-- ── SAVED PAIRINGS SUB-PANEL ── -->
+  <div id="saved-subpanel" class="prefs-subpanel">
+    <div class="profile-top">
+      <button class="profile-back" onclick="closeSavedSubpanel()" aria-label="Back to menu" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
+      <div class="profile-title">Saved pairings</div>
+      <div style="width:60px"></div>
+    </div>
+    <div id="saved-subpanel-list" style="padding:16px;"></div>
+  </div>
+
   <!-- ── SCANNED WINES SUB-PANEL ── -->
   <div id="scanned-subpanel" class="prefs-subpanel">
     <div class="profile-top">
@@ -2739,16 +2749,19 @@ function openProfile() {
   document.body.style.overflow = 'hidden';
 }
 function closeProfile() {
-  // Don't close the whole panel if a sub-panel is open — go back instead
   if (document.getElementById('scanned-subpanel').classList.contains('open')) {
     closeScannedWines(); return;
   }
   if (document.getElementById('prefs-subpanel').classList.contains('open')) {
     closePrefsSubpanel(); return;
   }
+  if (document.getElementById('saved-subpanel').classList.contains('open')) {
+    closeSavedSubpanel(); return;
+  }
   document.getElementById('profile-panel').classList.remove('open');
   document.getElementById('prefs-subpanel').classList.remove('open');
   document.getElementById('scanned-subpanel').classList.remove('open');
+  document.getElementById('saved-subpanel').classList.remove('open');
   document.getElementById('hub-about').style.display = 'none';
   document.body.style.overflow = '';
 }
@@ -3247,6 +3260,54 @@ function updateScanCount() {
   var el = document.getElementById('hub-scan-count');
   if (el) el.textContent = count > 0 ? count + ' bottle' + (count === 1 ? '' : 's') + ' scanned' : 'Your label scan history';
 }
+function openSavedSubpanel() {
+  renderSavedSubpanel();
+  document.getElementById('saved-subpanel').classList.add('open');
+}
+function closeSavedSubpanel() {
+  document.getElementById('saved-subpanel').classList.remove('open');
+  var hub = document.getElementById('profile-hub');
+  if (hub) { hub.style.pointerEvents = 'none'; setTimeout(function() { hub.style.pointerEvents = ''; }, 400); }
+}
+function renderSavedSubpanel() {
+  var list = document.getElementById('saved-subpanel-list');
+  var saved = getSaved();
+  if (saved.length === 0) {
+    list.innerHTML = '<div class="scanned-empty"><div class="scanned-empty-icon">♡</div>' +
+      '<div class="scanned-empty-text">No saved pairings yet.<br>Search for a dish or wine and tap "Save pairing."</div></div>';
+    return;
+  }
+  list.innerHTML = saved.map(function(s, i) {
+    var attrs = (s.attributes || []).map(function(a) {
+      var aEsc = a.replace(/'/g, "\\'");
+      return '<span class="saved-attr-pill" onclick="event.stopPropagation();showTermDef(\'' + aEsc + '\',event)">' + a + '</span>';
+    }).join('');
+    return '<div class="saved-item" id="sp-card-' + i + '" onclick="toggleSpCard(' + i + ')">' +
+      '<div class="saved-item-top"><div class="saved-wine-name">' + s.title + '</div><div class="saved-score">' + Math.round(s.score) + '</div></div>' +
+      (s.dish ? '<div class="saved-dish">' + s.dish + '</div>' : '') +
+      (s.sub ? '<div class="saved-dish" style="color:var(--dim);margin-top:1px;">' + s.sub + '</div>' : '') +
+      '<div class="saved-expand-hint">Tap to see why →</div>' +
+      '<div class="saved-detail">' +
+        '<div class="saved-full-why">' + (s.why || '') + '</div>' +
+        (attrs ? '<div class="saved-attrs">' + attrs + '</div>' : '') +
+        '<button class="saved-remove" onclick="event.stopPropagation();removeSavedFromPanel(' + i + ')">Remove</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function toggleSpCard(i) {
+  var card = document.getElementById('sp-card-' + i);
+  if (card) card.classList.toggle('expanded');
+}
+function removeSavedFromPanel(i) {
+  removeSaved(i);
+  renderSavedSubpanel();
+  updateSavedBadge();
+  var count = getSaved().length;
+  var el = document.getElementById('hub-saved-count');
+  if (el) el.textContent = count > 0 ? count + ' pairing' + (count === 1 ? '' : 's') + ' saved' : 'Your favourited matches';
+}
+
 function openScannedWines() {
   renderScannedWines();
   document.getElementById('scanned-subpanel').classList.add('open');
