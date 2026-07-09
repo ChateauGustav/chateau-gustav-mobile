@@ -2072,7 +2072,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
           <div class="row-dot"></div>
           <div class="row-text">
             <div class="row-label">Protein</div>
-            <select class="row-select" id="f-protein" onchange="updateCutOptions()">
+            <select class="row-select" id="f-protein" onchange="updateFoodForm()">
               <option value="">Select a protein...</option>
               <optgroup label="Meat">
                 <option>Beef</option>
@@ -2127,10 +2127,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
             <div class="row-label">Sauce</div>
             <select class="row-select" id="f-sauce">
               <option value="">None / simple</option>
-              <option>Béarnaise</option><option>Chimichurri</option><option>Au jus / red wine</option>
-              <option>Cream sauce</option><option>Lemon butter</option><option>Tomato-based</option>
-              <option>Miso / soy glaze</option><option>BBQ / smoky</option>
-              <option>Herb crust</option><option>Mushroom / truffle</option><option>Peppercorn</option>
             </select>
           </div>
           <div class="row-chev">›</div>
@@ -2142,9 +2138,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
             <div class="row-label">Side</div>
             <select class="row-select" id="f-side">
               <option value="">None</option>
-              <option>Asparagus</option><option>Truffle fries</option><option>Roasted root veg</option>
-              <option>Creamed spinach</option><option>Risotto</option><option>Polenta</option>
-              <option>Salad / greens</option><option>Pasta</option><option>Potatoes</option>
             </select>
           </div>
           <div class="row-chev">›</div>
@@ -3163,7 +3156,8 @@ function addFridgeWineManual() {
   var grape = document.getElementById('fridge-manual-grape').value;
   if (!grape) { showFridgeToast('Please select a grape first.'); return; }
   if (fridgeWines.some(function(w) { return w.grape === grape; })) { showFridgeToast('Already added.'); return; }
-  fridgeWines.push({ name: grape, grape: grape });
+  // Store with a distinct name so the prompt builder knows it was manually added
+  fridgeWines.push({ name: null, grape: grape, manual: true });
   document.getElementById('fridge-manual-grape').value = '';
   renderFridgeSelected();
 }
@@ -3183,7 +3177,9 @@ function renderFridgeSelected() {
   }
   if (empty) empty.style.display = 'none';
   list.innerHTML = fridgeWines.map(function(w, i) {
-    return '<div class="fridge-selected-item"><div class="fridge-selected-name">' + w.name + (w.vintage ? ' ' + w.vintage : '') + '</div>' +
+    var displayName = w.name || w.grape;
+    var label = w.manual ? w.grape + ' (varietal)' : displayName + (w.vintage ? ' ' + w.vintage : '');
+    return '<div class="fridge-selected-item"><div class="fridge-selected-name">' + label + '</div>' +
       '<button class="fridge-selected-remove" onclick="removeFridgeWine(' + i + ')">×</button></div>';
   }).join('');
 }
@@ -3411,6 +3407,64 @@ var CUT_OPTIONS = {
   'Eggs': ['Scrambled','Poached','Fried','Omelette','Frittata','Shakshuka','Eggs Benedict','Quiche']
 };
 
+var SAUCE_OPTIONS = {
+  'Beef': ['Béarnaise','Chimichurri','Au jus / red wine reduction','Peppercorn','Mushroom / truffle','Bordelaise','Horseradish cream','Compound butter','BBQ / smoky','Dijon mustard crust','None'],
+  'Lamb': ['Mint sauce / jelly','Chimichurri','Red wine jus','Garlic herb','Tzatziki','Harissa','Pomegranate molasses','Rosemary jus','None'],
+  'Pork': ['BBQ / smoky','Apple sauce','Mustard cream','Honey glaze','Cider sauce','Chimichurri','Sage and brown butter','Dijon','None'],
+  'Chicken': ['Lemon herb','Cream sauce','Tarragon cream','Marsala','Dijon mustard','Tikka masala','Pan jus','Chimichurri','Lemon butter','None'],
+  'Duck': ['Orange glaze','Cherry / berry sauce','Red wine reduction','Plum sauce','Confit jus','Pomegranate','None'],
+  'Turkey': ['Cranberry sauce','Gravy','Herb butter','Pan jus','None'],
+  'Game / Venison': ['Red currant jus','Red wine reduction','Berry sauce','Mushroom cream','Wild herb sauce','None'],
+  'Salmon': ['Lemon butter','Dill cream','Hollandaise','Miso / soy glaze','Teriyaki','Herb oil','Capers and butter','None'],
+  'Tuna': ['Ponzu','Soy / sesame','Wasabi aioli','Nicoise dressing','Lemon herb','None'],
+  'Halibut': ['Lemon butter','Beurre blanc','Salsa verde','Capers and butter','Cream sauce','Herb oil','None'],
+  'Sea bass': ['Lemon butter','Beurre blanc','Salsa verde','Miso glaze','Herb oil','None'],
+  'Cod': ['Lemon butter','Herb oil','Tartare sauce','Cream sauce','Capers and butter','None'],
+  'Swordfish': ['Lemon herb','Salsa verde','Capers and butter','None'],
+  'Shrimp / Prawns': ['Garlic butter','Lemon herb','Cocktail sauce','Spicy tomato','Curry sauce','None'],
+  'Scallops': ['Brown butter','Lemon cream','Truffle butter','Pea puree','Cauliflower cream','None'],
+  'Lobster': ['Drawn butter','Thermidor cream','Champagne cream','Bisque sauce','None'],
+  'Crab': ['Drawn butter','Old Bay seasoning','Remoulade','Cocktail sauce','None'],
+  'Mussels / Oysters': ['White wine cream (marinière)','Garlic butter','Mignonette','Tomato broth','None'],
+  'Vegetarian': ['Tomato-based','Cream sauce','Pesto','Lemon herb oil','Tahini','Romesco','Miso glaze','Nut-based / cashew cream','None'],
+  'Vegan': ['Tomato-based','Tahini','Vegan pesto','Romesco','Cashew cream','Miso glaze','Avocado cream','None'],
+  'Pasta / Grains': ['Tomato / marinara','Cream / Alfredo','Pesto','Bolognese','Aglio e olio','Brown butter and sage','Cacio e pepe','None'],
+  'Cheese / Charcuterie': ['Honey','Fig jam / chutney','Quince paste','Mustard','None'],
+  'Eggs': ['Hollandaise','Salsa / hot sauce','Pesto','Brown butter','None']
+};
+
+var SIDE_OPTIONS = {
+  'Beef': ['Truffle fries','Roasted potatoes','Creamed spinach','Asparagus','Sautéed mushrooms','Onion rings','Mac and cheese','Roasted root vegetables','Caesar salad','Bone marrow','Corn on the cob'],
+  'Lamb': ['Roasted potatoes','Ratatouille','Tabbouleh','Couscous','Roasted asparagus','Green beans','Pommes dauphinoise','Mint pea puree','Roasted root vegetables'],
+  'Pork': ['Coleslaw','Mac and cheese','Baked beans','Roasted potatoes','Apple and fennel salad','Corn on the cob','Brussels sprouts','Fried rice','Kimchi'],
+  'Chicken': ['Roasted potatoes','Rice','Salad / greens','Asparagus','Corn','Mashed potatoes','Roasted vegetables','Pasta','Polenta'],
+  'Duck': ['Orange and fennel salad','Roasted root vegetables','Lentils','Pommes sarladaises','Red cabbage (braised)','Polenta','Roasted asparagus'],
+  'Turkey': ['Stuffing / dressing','Mashed potatoes','Green bean casserole','Roasted vegetables','Corn bread','Roasted sweet potato'],
+  'Game / Venison': ['Roasted root vegetables','Polenta','Braised red cabbage','Celeriac puree','Wild mushrooms','Pommes dauphinoise','Roasted beets'],
+  'Salmon': ['Asparagus','Rice','Roasted potatoes','Salad / greens','Cucumber dill salad','Quinoa','Capers and onions','Braised leeks'],
+  'Tuna': ['Salad Nicoise','Rice','Avocado','Edamame','Cucumber salad','Roasted potatoes'],
+  'Halibut': ['Asparagus','Roasted potatoes','Risotto','Salad / greens','Fennel salad','Rice','Braised leeks'],
+  'Sea bass': ['Asparagus','Risotto','Roasted potatoes','Salad / greens','Fennel salad','Capers'],
+  'Cod': ['Chips / fries','Mushy peas','Roasted potatoes','Salad / greens','Rice'],
+  'Swordfish': ['Roasted potatoes','Salad / greens','Asparagus','Grilled vegetables'],
+  'Shrimp / Prawns': ['Rice','Pasta','Grits','Salad / greens','Garlic bread','Corn','Crusty bread'],
+  'Scallops': ['Pea puree','Risotto','Corn puree','Cauliflower puree','Salad / greens','Roasted asparagus'],
+  'Lobster': ['Truffle fries','Corn on the cob','Risotto','Roasted asparagus','Crusty bread','Rice'],
+  'Crab': ['Corn on the cob','Coleslaw','Roasted potatoes','Garlic bread','Old Bay fries'],
+  'Mussels / Oysters': ['Crusty bread / baguette','Pommes frites / fries','Salad','Steamed rice'],
+  'Vegetarian': ['Salad / greens','Grain / rice','Roasted vegetables','Crusty bread','Legumes','Soup'],
+  'Vegan': ['Salad / greens','Grain / rice','Roasted vegetables','Crusty bread','Legumes','Roasted sweet potato'],
+  'Pasta / Grains': ['Salad / greens','Garlic bread','Roasted vegetables','None'],
+  'Cheese / Charcuterie': ['Crackers / artisan bread','Honey and jam','Fresh fruit / grapes','Pickles / cornichons','Nuts','Olives'],
+  'Eggs': ['Toast','Salad','Roasted potatoes','Roasted tomatoes','Avocado','Bacon / ham']
+};
+
+function updateFoodForm() {
+  updateCutOptions();
+  updateSauceOptions();
+  updateSideOptions();
+}
+
 function updateCutOptions() {
   var protein = document.getElementById('f-protein').value;
   var cutSelect = document.getElementById('f-cut');
@@ -3428,12 +3482,43 @@ function updateCutOptions() {
   cutSelect.appendChild(placeholder);
   CUT_OPTIONS[protein].forEach(function(cut) {
     var opt = document.createElement('option');
-    opt.value = cut;
-    opt.textContent = cut;
+    opt.value = cut; opt.textContent = cut;
     cutSelect.appendChild(opt);
   });
 }
-updateCutOptions();
+
+function updateSauceOptions() {
+  var protein = document.getElementById('f-protein').value;
+  var sauceSelect = document.getElementById('f-sauce');
+  sauceSelect.innerHTML = '';
+  var none = document.createElement('option');
+  none.value = ''; none.textContent = 'None / simple';
+  sauceSelect.appendChild(none);
+  var options = (protein && SAUCE_OPTIONS[protein]) ? SAUCE_OPTIONS[protein] : ['Béarnaise','Chimichurri','Cream sauce','Lemon butter','Tomato-based','Miso / soy glaze','BBQ / smoky','Mushroom / truffle','Peppercorn','Hollandaise'];
+  options.forEach(function(s) {
+    if (s === 'None') return; // already added as first option
+    var opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sauceSelect.appendChild(opt);
+  });
+}
+
+function updateSideOptions() {
+  var protein = document.getElementById('f-protein').value;
+  var sideSelect = document.getElementById('f-side');
+  sideSelect.innerHTML = '';
+  var none = document.createElement('option');
+  none.value = ''; none.textContent = 'None';
+  sideSelect.appendChild(none);
+  var options = (protein && SIDE_OPTIONS[protein]) ? SIDE_OPTIONS[protein] : ['Asparagus','Truffle fries','Roasted root veg','Creamed spinach','Risotto','Polenta','Salad / greens','Pasta','Potatoes'];
+  options.forEach(function(s) {
+    var opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sideSelect.appendChild(opt);
+  });
+}
+
+updateFoodForm();
 
 // ── SCANNED WINES ─────────────────────────────────────────────────
 var scannedImageData = null;
