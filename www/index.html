@@ -1593,6 +1593,159 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 /* Onboarding overlay fade */
 .onboarding-overlay { transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
 
+/* ── MENU TAB MODE SWITCHER ──────────────────────────────────────── */
+.menu-switcher {
+  display: flex;
+  margin: 16px 16px 4px;
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+.menu-mode-btn {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--dim);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-mode-btn.active {
+  background: var(--rouge);
+  color: #f8f4ee;
+  font-weight: 500;
+}
+
+/* ── MULTI-COURSE FORM ───────────────────────────────────────────── */
+.course-section {
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s ease;
+}
+.course-section:focus-within { border-color: var(--gold); }
+.course-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.course-emoji { font-size: 1.1rem; flex-shrink: 0; }
+.course-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+.course-optional {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  opacity: 0.7;
+}
+.course-assist-row {
+  margin-bottom: 8px;
+}
+.course-protein-select {
+  width: 100%;
+  background: var(--parchment2);
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  color: var(--dim);
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+.course-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--mist);
+  padding: 10px 0 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.55;
+  resize: none;
+  outline: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+}
+.course-textarea::placeholder { color: var(--dim); opacity: 0.5; }
+
+/* ── COURSE RESULTS ──────────────────────────────────────────────── */
+.course-result-card {
+  background: var(--card-bg);
+  border: 1px solid var(--mist);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.course-result-header {
+  background: var(--rouge);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.course-result-emoji { font-size: 1rem; flex-shrink: 0; }
+.course-result-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(248,244,238,0.7);
+  flex: 1;
+}
+.course-result-body { padding: 12px 14px; }
+.course-result-wine {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+.course-result-dish { font-size: 0.72rem; color: var(--dim); margin-bottom: 8px; }
+.course-result-why { font-size: 0.85rem; color: var(--ink); line-height: 1.65; margin-bottom: 8px; }
+.course-result-serve {
+  font-size: 0.72rem;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.course-result-serve::before { content: '🌡'; font-size: 0.8rem; }
+.progression-card {
+  background: var(--parchment2);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.progression-title {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.progression-text { font-size: 0.85rem; color: var(--ink); line-height: 1.7; }
+
 /* ── RESTAURANT MODE ─────────────────────────────────────────────── */
 .resto-step-label {
   font-size: 0.62rem;
@@ -2449,94 +2602,181 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <div class="scan-results" id="scan-results"></div>
   </div>
 
-  <!-- ── RESTAURANT TAB ── -->
+  <!-- ── MENU TAB ── -->
   <div class="screen" id="screen-restaurant">
 
-    <div class="scan-header">
-      <div class="scan-title">Restaurant mode</div>
-      <div class="scan-sub">Photograph the wine list, describe your dish, and Gustav will recommend specific bottles from that list.</div>
+    <!-- Mode switcher -->
+    <div class="menu-switcher">
+      <button class="menu-mode-btn active" id="mode-btn-restaurant" onclick="setMenuMode('restaurant')">Wine List</button>
+      <button class="menu-mode-btn" id="mode-btn-courses" onclick="setMenuMode('courses')">Multi-course</button>
     </div>
 
-    <input type="file" id="resto-file-input" accept="image/*" capture="environment" />
+    <!-- ── RESTAURANT MODE ── -->
+    <div id="menu-restaurant-view">
+      <div class="scan-header">
+        <div class="scan-title">Restaurant mode</div>
+        <div class="scan-sub">Photograph the wine list, describe your dish, and Gustav will recommend specific bottles from that list.</div>
+      </div>
 
-    <!-- Step 1: Wine list photo -->
-    <div style="padding:0 16px 12px;">
-      <div class="resto-step-label">① Photograph the wine list</div>
-      <div class="camera-area" id="resto-camera-area" onclick="triggerRestoCamera()">
-        <div class="camera-placeholder" id="resto-placeholder">
-          <div class="camera-icon">📋</div>
-          <div class="camera-prompt"><strong>Tap to photograph the wine list</strong><br>Good lighting gives the best results</div>
+      <input type="file" id="resto-file-input" accept="image/*" capture="environment" />
+
+      <div style="padding:0 16px 12px;">
+        <div class="resto-step-label">① Photograph the wine list</div>
+        <div class="camera-area" id="resto-camera-area" onclick="triggerRestoCamera()">
+          <div class="camera-placeholder" id="resto-placeholder">
+            <div class="camera-icon">📋</div>
+            <div class="camera-prompt"><strong>Tap to photograph the wine list</strong><br>Good lighting gives the best results</div>
+          </div>
+          <img class="photo-preview" id="resto-preview" alt="Wine list photo" />
+          <div class="retake-overlay" id="resto-retake">Tap to retake</div>
         </div>
-        <img class="photo-preview" id="resto-preview" alt="Wine list photo" />
-        <div class="retake-overlay" id="resto-retake">Tap to retake</div>
       </div>
-    </div>
 
-    <!-- Step 2: Dish description -->
-    <div id="resto-dish-section" style="display:none; padding:0 16px 12px;">
-      <div class="resto-step-label">② What are you ordering?</div>
-
-      <div class="row-field" style="margin-bottom:8px;">
-        <div class="row-dot"></div>
-        <div class="row-text">
-          <div class="row-label">Protein</div>
-          <select class="row-select" id="resto-protein" onchange="updateRestoForm()">
-            <option value="">Select...</option>
-            <optgroup label="Meat">
-              <option>Beef</option><option>Lamb</option><option>Pork</option>
-              <option>Chicken</option><option>Duck</option><option>Turkey</option>
-              <option>Game / Venison</option>
-            </optgroup>
-            <optgroup label="Seafood">
-              <option>Salmon</option><option>Tuna</option><option>Halibut</option>
-              <option>Sea bass</option><option>Cod</option><option>Swordfish</option>
-              <option>Shrimp / Prawns</option><option>Scallops</option>
-              <option>Lobster</option><option>Crab</option><option>Mussels / Oysters</option>
-            </optgroup>
-            <optgroup label="Plant-based">
-              <option>Vegetarian</option><option>Vegan</option>
-            </optgroup>
-            <optgroup label="Other">
-              <option>Pasta / Grains</option><option>Cheese / Charcuterie</option><option>Eggs</option>
-            </optgroup>
-          </select>
+      <div id="resto-dish-section" style="display:none; padding:0 16px 12px;">
+        <div class="resto-step-label">② What are you ordering?</div>
+        <div class="row-field" style="margin-bottom:8px;">
+          <div class="row-dot"></div>
+          <div class="row-text">
+            <div class="row-label">Protein</div>
+            <select class="row-select" id="resto-protein" onchange="updateRestoForm()">
+              <option value="">Select...</option>
+              <optgroup label="Meat"><option>Beef</option><option>Lamb</option><option>Pork</option><option>Chicken</option><option>Duck</option><option>Turkey</option><option>Game / Venison</option></optgroup>
+              <optgroup label="Seafood"><option>Salmon</option><option>Tuna</option><option>Halibut</option><option>Sea bass</option><option>Cod</option><option>Swordfish</option><option>Shrimp / Prawns</option><option>Scallops</option><option>Lobster</option><option>Crab</option><option>Mussels / Oysters</option></optgroup>
+              <optgroup label="Plant-based"><option>Vegetarian</option><option>Vegan</option></optgroup>
+              <optgroup label="Other"><option>Pasta / Grains</option><option>Cheese / Charcuterie</option><option>Eggs</option></optgroup>
+            </select>
+          </div>
+          <div class="row-chev">›</div>
         </div>
-        <div class="row-chev">›</div>
-      </div>
-
-      <div class="row-field" style="margin-bottom:8px;">
-        <div class="row-dot"></div>
-        <div class="row-text">
-          <div class="row-label">Cut or style</div>
-          <select class="row-select" id="resto-cut">
-            <option value="">Select a protein first...</option>
-          </select>
+        <div class="row-field" style="margin-bottom:8px;">
+          <div class="row-dot"></div>
+          <div class="row-text">
+            <div class="row-label">Cut or style</div>
+            <select class="row-select" id="resto-cut"><option value="">Select a protein first...</option></select>
+          </div>
+          <div class="row-chev">›</div>
         </div>
-        <div class="row-chev">›</div>
+        <div style="margin-top:10px;">
+          <div class="row-label" style="margin-bottom:6px;padding-left:2px;">Or describe your dish freely</div>
+          <textarea id="resto-dish-text" style="width:100%;background:var(--card-bg);border:1px solid var(--mist);border-radius:var(--radius);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--ink);resize:none;outline:none;-webkit-appearance:none;line-height:1.5;transition:border-color 0.18s ease;box-sizing:border-box;" rows="2" placeholder="e.g. Rack of lamb with rosemary jus and pommes dauphinoise…" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--mist)'"></textarea>
+          <div style="font-size:0.68rem;color:var(--dim);margin-top:4px;padding-left:2px;">If filled, this overrides the dropdowns above.</div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="cta-btn" id="resto-submit" onclick="submitRestaurant()">Find wines on this list →</button>
+        </div>
       </div>
 
-      <div style="margin-top:10px;">
-        <div class="row-label" style="margin-bottom:6px;padding-left:2px;">Or describe your dish freely</div>
-        <textarea id="resto-dish-text"
-          style="width:100%;background:var(--card-bg);border:1px solid var(--mist);border-radius:var(--radius);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--ink);resize:none;outline:none;-webkit-appearance:none;line-height:1.5;transition:border-color 0.18s ease;"
-          rows="2"
-          placeholder="e.g. Rack of lamb with rosemary jus and pommes dauphinoise…"
-          onfocus="this.style.borderColor='var(--gold)'"
-          onblur="this.style.borderColor='var(--mist)'"
-        ></textarea>
-        <div style="font-size:0.68rem;color:var(--dim);margin-top:4px;padding-left:2px;">If filled, this overrides the dropdowns above.</div>
-      </div>
-
-      <div style="margin-top:14px;">
-        <button class="cta-btn" id="resto-submit" onclick="submitRestaurant()">Find wines on this list →</button>
-      </div>
+      <div class="loading-state" id="resto-loading"><div class="loading-text">Reading the wine list…</div></div>
+      <div class="scan-results" id="resto-results"></div>
     </div>
 
-    <div class="loading-state" id="resto-loading">
-      <div class="loading-text">Reading the wine list…</div>
-    </div>
+    <!-- ── MULTI-COURSE MODE ── -->
+    <div id="menu-courses-view" style="display:none;">
+      <div class="scan-header">
+        <div class="scan-title">Multi-course pairing</div>
+        <div class="scan-sub">Describe each course and Gustav will recommend a wine per course, plus how to sequence them through the evening.</div>
+      </div>
 
-    <div class="scan-results" id="resto-results"></div>
+      <div style="padding:0 16px;">
+
+        <!-- Course sections -->
+        <div class="course-section" id="cs-aperitif">
+          <div class="course-header">
+            <span class="course-emoji">🥂</span>
+            <span class="course-label">Aperitif / Canapés</span>
+            <span class="course-optional">optional</span>
+          </div>
+          <div class="course-assist-row">
+            <select class="course-protein-select" onchange="assistCourse('aperitif', this.value)">
+              <option value="">Quick start…</option>
+              <optgroup label="Bites"><option value="Cheese / Charcuterie">Cheese / Charcuterie</option><option value="Seafood">Seafood</option><option value="Vegetarian">Vegetarian bites</option></optgroup>
+            </select>
+          </div>
+          <textarea class="course-textarea" id="dish-aperitif" placeholder="e.g. Smoked salmon blinis, parmesan crisps…" rows="2"></textarea>
+        </div>
+
+        <div class="course-section" id="cs-starter">
+          <div class="course-header">
+            <span class="course-emoji">🥗</span>
+            <span class="course-label">Starter</span>
+            <span class="course-optional">optional</span>
+          </div>
+          <div class="course-assist-row">
+            <select class="course-protein-select" onchange="assistCourse('starter', this.value)">
+              <option value="">Quick start…</option>
+              <optgroup label="Protein"><option value="Scallops">Scallops</option><option value="Salmon">Salmon</option><option value="Shrimp / Prawns">Shrimp / Prawns</option><option value="Chicken">Chicken</option><option value="Vegetarian">Vegetarian</option><option value="Eggs">Eggs</option><option value="Cheese / Charcuterie">Cheese / Charcuterie</option></optgroup>
+            </select>
+          </div>
+          <textarea class="course-textarea" id="dish-starter" placeholder="e.g. Pan-seared scallops with cauliflower puree and crispy capers…" rows="2"></textarea>
+        </div>
+
+        <div class="course-section" id="cs-fish">
+          <div class="course-header">
+            <span class="course-emoji">🐟</span>
+            <span class="course-label">Fish course</span>
+            <span class="course-optional">optional</span>
+          </div>
+          <div class="course-assist-row">
+            <select class="course-protein-select" onchange="assistCourse('fish', this.value)">
+              <option value="">Quick start…</option>
+              <optgroup label="Fish"><option value="Halibut">Halibut</option><option value="Sea bass">Sea bass</option><option value="Salmon">Salmon</option><option value="Tuna">Tuna</option><option value="Sole">Sole</option><option value="Cod">Cod</option><option value="Turbot">Turbot</option></optgroup>
+            </select>
+          </div>
+          <textarea class="course-textarea" id="dish-fish" placeholder="e.g. Turbot with beurre blanc and asparagus…" rows="2"></textarea>
+        </div>
+
+        <div class="course-section" id="cs-main">
+          <div class="course-header">
+            <span class="course-emoji">🥩</span>
+            <span class="course-label">Main course</span>
+            <span class="course-optional">optional</span>
+          </div>
+          <div class="course-assist-row">
+            <select class="course-protein-select" onchange="assistCourse('main', this.value)">
+              <option value="">Quick start…</option>
+              <optgroup label="Meat"><option value="Beef">Beef</option><option value="Lamb">Lamb</option><option value="Pork">Pork</option><option value="Duck">Duck</option><option value="Game / Venison">Game / Venison</option></optgroup>
+              <optgroup label="Other"><option value="Chicken">Chicken</option><option value="Vegetarian">Vegetarian</option></optgroup>
+            </select>
+          </div>
+          <textarea class="course-textarea" id="dish-main" placeholder="e.g. Rack of lamb with rosemary jus, pommes dauphinoise, and roasted asparagus…" rows="2"></textarea>
+        </div>
+
+        <div class="course-section" id="cs-cheese">
+          <div class="course-header">
+            <span class="course-emoji">🧀</span>
+            <span class="course-label">Cheese course</span>
+            <span class="course-optional">optional</span>
+          </div>
+          <div class="course-assist-row">
+            <select class="course-protein-select" onchange="assistCourse('cheese', this.value)">
+              <option value="">Quick start…</option>
+              <optgroup label="Cheese type"><option value="Aged hard cheese">Aged hard (Parm, Manchego)</option><option value="Blue cheese">Blue (Stilton, Roquefort)</option><option value="Soft-ripened cheese">Soft-ripened (Brie, Camembert)</option><option value="Fresh cheese">Fresh (burrata, chèvre)</option><option value="Mixed cheese board">Mixed board</option></optgroup>
+            </select>
+          </div>
+          <textarea class="course-textarea" id="dish-cheese" placeholder="e.g. Selection of aged hard cheeses with fig jam and walnuts…" rows="2"></textarea>
+        </div>
+
+        <div class="course-section" id="cs-dessert">
+          <div class="course-header">
+            <span class="course-emoji">🍮</span>
+            <span class="course-label">Dessert</span>
+            <span class="course-optional">optional</span>
+          </div>
+          <div class="course-assist-row">
+            <select class="course-protein-select" onchange="assistCourse('dessert', this.value)">
+              <option value="">Quick start…</option>
+              <optgroup label="Style"><option value="Chocolate">Chocolate</option><option value="Fruit-based">Fruit-based</option><option value="Cream / custard">Cream / custard</option><option value="Tart / pastry">Tart / pastry</option><option value="Ice cream / sorbet">Ice cream / sorbet</option></optgroup>
+            </select>
+          </div>
+          <textarea class="course-textarea" id="dish-dessert" placeholder="e.g. Dark chocolate fondant with salted caramel ice cream…" rows="2"></textarea>
+        </div>
+
+        <button class="cta-btn" id="courses-submit" onclick="submitCourses()" style="margin-bottom:16px;">Pair my menu →</button>
+      </div>
+
+      <div class="loading-state" id="courses-loading"><div class="loading-text">Planning your wine journey…</div></div>
+      <div class="scan-results" id="courses-results"></div>
+    </div>
 
   </div>
 
@@ -3517,6 +3757,141 @@ function renderScannedWines() {
 }
 updateScanCount();
 
+// ── MENU TAB MODE SWITCHER ────────────────────────────────────────
+function setMenuMode(mode) {
+  document.getElementById('menu-restaurant-view').style.display = mode === 'restaurant' ? 'block' : 'none';
+  document.getElementById('menu-courses-view').style.display = mode === 'courses' ? 'block' : 'none';
+  document.getElementById('mode-btn-restaurant').classList.toggle('active', mode === 'restaurant');
+  document.getElementById('mode-btn-courses').classList.toggle('active', mode === 'courses');
+  document.getElementById('app-body').scrollTop = 0;
+}
+
+// ── MULTI-COURSE PAIRING ──────────────────────────────────────────
+var COURSE_DEFS = [
+  { id: 'aperitif', label: 'Aperitif / Canapés', emoji: '🥂' },
+  { id: 'starter',  label: 'Starter',             emoji: '🥗' },
+  { id: 'fish',     label: 'Fish course',          emoji: '🐟' },
+  { id: 'main',     label: 'Main course',          emoji: '🥩' },
+  { id: 'cheese',   label: 'Cheese course',        emoji: '🧀' },
+  { id: 'dessert',  label: 'Dessert',              emoji: '🍮' }
+];
+
+function assistCourse(courseId, protein) {
+  if (!protein) return;
+  var ta = document.getElementById('dish-' + courseId);
+  if (!ta) return;
+  // Only pre-fill if textarea is empty
+  if (!ta.value.trim()) {
+    ta.value = protein + ' — ';
+    ta.focus();
+    // Move cursor to end
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+  }
+}
+
+async function submitCourses() {
+  var courses = COURSE_DEFS
+    .map(function(c) {
+      var dish = (document.getElementById('dish-' + c.id).value || '').trim();
+      return dish ? { label: c.label, dish: dish, emoji: c.emoji } : null;
+    })
+    .filter(Boolean);
+
+  if (courses.length === 0) {
+    showFridgeToast('Please describe at least one course.');
+    return;
+  }
+
+  var btn = document.getElementById('courses-submit');
+  var loading = document.getElementById('courses-loading');
+  var results = document.getElementById('courses-results');
+  btn.disabled = true;
+  loading.classList.add('visible');
+  results.classList.remove('visible'); results.innerHTML = '';
+
+  try {
+    var prefs = getPreferences() || null;
+    var r = await fetch('https://chateau-gustav-app.vercel.app/api/courses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courses: courses, preferences: prefs })
+    });
+    if (!r.ok) throw new Error('failed');
+    renderCourseResults(await r.json(), courses);
+  } catch(e) {
+    results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--rouge);font-size:0.9rem;">Something went wrong. Please try again.</div>';
+    results.classList.add('visible');
+  } finally {
+    btn.disabled = false;
+    loading.classList.remove('visible');
+  }
+}
+
+function renderCourseResults(data, courses) {
+  var results = document.getElementById('courses-results');
+  var html = '<div style="padding:0 16px;">';
+
+  // Per-course cards
+  (data.courses || []).forEach(function(c) {
+    var courseDef = COURSE_DEFS.find(function(d) { return d.label === c.label; }) || {};
+    var attrs = (c.attributes || []).map(function(a) {
+      var aEsc = a.replace(/'/g, "\\'");
+      return '<span class="pill" onclick="event.stopPropagation();showTermDef(\'' + aEsc + '\',event)">' + a + '</span>';
+    }).join('');
+    html += '<div class="course-result-card">' +
+      '<div class="course-result-header">' +
+        '<span class="course-result-emoji">' + (courseDef.emoji || '🍽') + '</span>' +
+        '<span class="course-result-label">' + c.label + '</span>' +
+      '</div>' +
+      '<div class="course-result-body">' +
+        '<div class="course-result-wine">' + c.wine + '</div>' +
+        '<div class="course-result-dish">' + c.dish + '</div>' +
+        '<div class="course-result-why">' + c.why + '</div>' +
+        (c.serve ? '<div class="course-result-serve">' + c.serve + '</div>' : '') +
+        (attrs ? '<div class="attr-pills" style="margin-top:8px;">' + attrs + '</div>' : '') +
+      '</div></div>';
+  });
+
+  // Progression
+  if (data.progression) {
+    html += '<div class="progression-card"><div class="progression-title">✦ Wine progression</div><div class="progression-text">' + data.progression + '</div></div>';
+  }
+
+  // Versatile option
+  if (data.versatileOption) {
+    html += '<div class="scan-card"><div class="scan-card-title">One bottle for the table</div><div class="scan-card-text">' + data.versatileOption + '</div></div>';
+  }
+
+  // Host note
+  if (data.hostNote) {
+    html += '<div class="scan-card"><div class="scan-card-title">Host\'s note</div><div class="scan-card-text">' + data.hostNote + '</div></div>';
+  }
+
+  // Sommelier note
+  if (data.sommelierNote) {
+    html += '<div class="sommelier-note"><div class="sommelier-title">✦ Sommelier\'s note</div><div class="sommelier-text">' + data.sommelierNote + '</div></div>';
+  }
+
+  html += '<button class="scan-again-btn" onclick="resetCourses()" style="margin-top:8px;margin-bottom:24px;">Plan another menu</button>';
+  html += '</div>';
+
+  results.innerHTML = html;
+  results.classList.add('visible');
+  setTimeout(function() { results.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+}
+
+function resetCourses() {
+  COURSE_DEFS.forEach(function(c) {
+    var ta = document.getElementById('dish-' + c.id);
+    if (ta) ta.value = '';
+    var sel = document.querySelector('#cs-' + c.id + ' .course-protein-select');
+    if (sel) sel.value = '';
+  });
+  document.getElementById('courses-results').classList.remove('visible');
+  document.getElementById('courses-results').innerHTML = '';
+  document.getElementById('app-body').scrollTop = 0;
+}
+
 // ── RESTAURANT MODE ───────────────────────────────────────────────
 var restoImageData = null;
 var restoMediaType = null;
@@ -4347,13 +4722,15 @@ function finishOnboarding() {
 var chatHistory = []; // { role: 'user'|'assistant', content: '...' }
 var chatOpen = false;
 var chatTyping = false;
+var chatInitialized = false;
 
 function openChat() {
   chatOpen = true;
   document.getElementById('chat-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
-  // Show welcome message if first open
-  if (chatHistory.length === 0) {
+  // Only show welcome message once per session, regardless of history
+  if (!chatInitialized) {
+    chatInitialized = true;
     appendGustavMessage("Hello! I'm Gustav, your Château Gustav sommelier. Ask me anything about wine — pairing, varietals, regions, how to read a wine list, or just where to start if you're new to wine. What's on your mind?");
   }
   setTimeout(function() {
