@@ -2072,13 +2072,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
           <div class="row-dot"></div>
           <div class="row-text">
             <div class="row-label">Protein</div>
-            <select class="row-select" id="f-protein">
+            <select class="row-select" id="f-protein" onchange="updateCutOptions()">
               <option value="">Select a protein...</option>
-              <option>Beef</option><option>Lamb</option><option>Pork</option>
-              <option>Chicken</option><option>Duck</option><option>Turkey</option>
-              <option>Salmon</option><option>Tuna</option><option>Halibut</option>
-              <option>Shrimp</option><option>Scallops</option><option>Lobster</option>
-              <option>Vegetarian</option><option>Pasta</option><option>Cheese</option>
+              <optgroup label="Meat">
+                <option>Beef</option>
+                <option>Lamb</option>
+                <option>Pork</option>
+                <option>Chicken</option>
+                <option>Duck</option>
+                <option>Turkey</option>
+                <option>Game / Venison</option>
+              </optgroup>
+              <optgroup label="Seafood">
+                <option>Salmon</option>
+                <option>Tuna</option>
+                <option>Halibut</option>
+                <option>Sea bass</option>
+                <option>Cod</option>
+                <option>Swordfish</option>
+                <option>Shrimp / Prawns</option>
+                <option>Scallops</option>
+                <option>Lobster</option>
+                <option>Crab</option>
+                <option>Mussels / Oysters</option>
+              </optgroup>
+              <optgroup label="Plant-based">
+                <option>Vegetarian</option>
+                <option>Vegan</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option>Pasta / Grains</option>
+                <option>Cheese / Charcuterie</option>
+                <option>Eggs</option>
+              </optgroup>
             </select>
           </div>
           <div class="row-chev">›</div>
@@ -2089,11 +2115,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
           <div class="row-text">
             <div class="row-label">Cut or style</div>
             <select class="row-select" id="f-cut">
-              <option value="">Select a style...</option>
-              <option>Ribeye</option><option>Filet</option><option>Strip</option>
-              <option>Braised</option><option>Smoked / BBQ</option><option>Grilled</option>
-              <option>Roasted</option><option>Pan-seared</option><option>Poached</option>
-              <option>Fried</option><option>Raw / Crudo</option>
+              <option value="">Select a protein first...</option>
             </select>
           </div>
           <div class="row-chev">›</div>
@@ -3361,6 +3383,57 @@ function renderScannedWines() {
   }).join('');
 }
 updateScanCount();
+
+// ── CASCADING FOOD FORM ───────────────────────────────────────────
+var CUT_OPTIONS = {
+  'Beef': ['Ribeye','T-bone','NY Strip','Filet mignon','Sirloin','Brisket','Short ribs','Flank / Skirt steak','Burger','Meatballs','Chuck roast','Wagyu','Tartare / Crudo'],
+  'Lamb': ['Rack of lamb','Lamb chops','Leg of lamb','Lamb shoulder','Lamb shank','Ground lamb / Kebab','Braised lamb'],
+  'Pork': ['Tenderloin','Pork chops','Baby back ribs','Spare ribs','Pork belly','Pulled pork shoulder','Ham','Sausage / Bratwurst','Prosciutto / Cured','Schnitzel'],
+  'Chicken': ['Breast (grilled)','Breast (pan-seared)','Thighs (braised)','Thighs (roasted)','Whole roasted','Fried chicken','Poached','Stuffed chicken','Wings'],
+  'Duck': ['Duck breast','Duck confit','Whole roasted duck','Duck leg (braised)','Duck liver pâté'],
+  'Turkey': ['Whole roasted','Turkey breast','Turkey leg','Stuffed turkey','Ground turkey'],
+  'Game / Venison': ['Venison steak','Venison stew','Wild boar','Pheasant','Rabbit','Elk','Bison burger'],
+  'Salmon': ['Grilled','Pan-seared','Poached','Baked','Smoked','Gravlax / Cured','Tartare','En papillote'],
+  'Tuna': ['Seared / Tataki','Grilled','Raw / Sashimi','Tartare','Nicoise salad','Tuna steak'],
+  'Halibut': ['Pan-seared','Baked','Poached','Grilled','En papillote'],
+  'Sea bass': ['Pan-seared','Baked','Grilled','Ceviche'],
+  'Cod': ['Baked','Fish & chips','Pan-seared','Poached','Salt cod'],
+  'Swordfish': ['Grilled','Pan-seared','Baked'],
+  'Shrimp / Prawns': ['Grilled','Sautéed in butter','Tempura','Scampi','Poached / Cocktail','Ceviche','Curry'],
+  'Scallops': ['Pan-seared','Grilled','Poached','Crudo','Ceviche'],
+  'Lobster': ['Steamed','Grilled','Butter-poached','Bisque','Lobster roll','Thermidor'],
+  'Crab': ['Steamed','Crab cakes','Crab dip','Soft-shell','Crab pasta'],
+  'Mussels / Oysters': ['Steamed mussels (moules)','Mussels in white wine','Raw oysters','Grilled oysters','Oysters Rockefeller'],
+  'Vegetarian': ['Pasta','Risotto','Mushroom dish','Grilled / Roasted vegetables','Salad','Soup','Pizza','Grain bowl','Egg dish / Frittata','Cheese-based dish','Lentils / Legumes','Stir-fry','Cauliflower steak','Veggie burger'],
+  'Vegan': ['Pasta / Grains','Roasted vegetables','Grain bowl','Lentils / Dal','Tofu (pan-fried)','Tempeh','Bean dish','Vegetable curry','Stir-fry','Soup','Mushroom dish','Jackfruit','Stuffed peppers / squash'],
+  'Pasta / Grains': ['Spaghetti Bolognese','Carbonara','Cacio e pepe','Pasta with tomato sauce','Pasta with cream sauce','Lasagne','Gnocchi','Ravioli / Tortellini','Risotto','Polenta','Couscous'],
+  'Cheese / Charcuterie': ['Aged hard cheese (Parm, Manchego)','Fresh cheese (burrata, ricotta)','Blue cheese (Gorgonzola, Roquefort)','Soft-ripened (Brie, Camembert)','Mixed cheese board','Cured meats / Salumi','Pâté / Terrine','Mixed charcuterie board'],
+  'Eggs': ['Scrambled','Poached','Fried','Omelette','Frittata','Shakshuka','Eggs Benedict','Quiche']
+};
+
+function updateCutOptions() {
+  var protein = document.getElementById('f-protein').value;
+  var cutSelect = document.getElementById('f-cut');
+  cutSelect.innerHTML = '';
+  if (!protein || !CUT_OPTIONS[protein]) {
+    var def = document.createElement('option');
+    def.value = '';
+    def.textContent = protein ? 'Any style' : 'Select a protein first...';
+    cutSelect.appendChild(def);
+    return;
+  }
+  var placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'Any ' + protein.toLowerCase() + ' style';
+  cutSelect.appendChild(placeholder);
+  CUT_OPTIONS[protein].forEach(function(cut) {
+    var opt = document.createElement('option');
+    opt.value = cut;
+    opt.textContent = cut;
+    cutSelect.appendChild(opt);
+  });
+}
+updateCutOptions();
 
 // ── SCANNED WINES ─────────────────────────────────────────────────
 var scannedImageData = null;
