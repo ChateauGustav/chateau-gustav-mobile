@@ -347,12 +347,12 @@ input[type="range"] {
 .score-block { text-align: right; flex-shrink: 0; margin-left: 8px; }
 .score-num {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.6rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--gold);
   line-height: 1;
 }
-.score-label { font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.score-label { font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
 .pairing-why { font-size: 0.82rem; color: var(--ink); line-height: 1.6; margin-bottom: 10px; }
 .attr-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
 .pill {
@@ -477,7 +477,7 @@ input[type="range"] {
   font-weight: 600;
   color: var(--ink);
 }
-.saved-score { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--gold); font-weight: 600; }
+.saved-score { font-family: 'Cormorant Garamond', serif; font-size: 0.92rem; color: var(--gold); font-weight: 600; }
 .saved-dish { font-size: 0.75rem; color: var(--dim); margin-bottom: 6px; }
 .saved-why { font-size: 0.78rem; color: var(--ink); line-height: 1.5; margin-bottom: 6px; }
 .saved-expand-hint {
@@ -3380,7 +3380,7 @@ function renderResults(data, mode, inputs) {
         '<div class="pairing-top">' +
           '<div><div class="pairing-name">' + title + '</div>' +
           (sub ? '<div class="pairing-region">' + sub + '</div>' : '') + '</div>' +
-          '<div class="score-block"><div class="score-num">' + p.score + '</div><div class="score-label">Match</div></div>' +
+          '<div class="score-block"><div class="score-num">' + p.score + '%</div><div class="score-label">Match</div></div>' +
         '</div>' +
         '<div class="pairing-why">' + p.why + '</div>' +
         '<div class="attr-pills">' + attrs + '</div>' +
@@ -3478,7 +3478,7 @@ function renderSaved() {
     return '<div class="saved-item" id="saved-card-' + i + '" onclick="toggleSavedCard(' + i + ')">' +
       '<div class="saved-item-top">' +
         '<div class="saved-wine-name">' + s.title + '</div>' +
-        '<div class="saved-score">' + Math.round(s.score) + '</div>' +
+        '<div class="saved-score">' + Math.round(s.score) + '%</div>' +
       '</div>' +
       (s.dish ? '<div class="saved-dish">' + s.dish + '</div>' : '') +
       (s.sub ? '<div class="saved-dish" style="color:var(--dim);margin-top:1px;">' + s.sub + '</div>' : '') +
@@ -3621,7 +3621,7 @@ function renderFridgeResults(data) {
     }).join('');
     html += '<div class="pairing-card ' + rc + '"><div class="pairing-card-accent"></div>' +
       '<div class="pairing-card-inner"><div class="pairing-top"><div><div class="pairing-name">' + p.food + '</div></div>' +
-      '<div class="score-block"><div class="score-num">' + p.score + '</div><div class="score-label">Match</div></div></div>' +
+      '<div class="score-block"><div class="score-num">' + p.score + '%</div><div class="score-label">Match</div></div></div>' +
       '<div class="pairing-why">' + p.why + '</div><div class="attr-pills">' + attrs + '</div></div></div>';
   });
   if (data.avoid && data.avoid.length) {
@@ -3701,7 +3701,7 @@ function renderSavedSubpanel() {
       return '<span class="saved-attr-pill" onclick="event.stopPropagation();showTermDef(\'' + aEsc + '\',event)">' + a + '</span>';
     }).join('');
     return '<div class="saved-item" id="sp-card-' + i + '" onclick="toggleSpCard(' + i + ')">' +
-      '<div class="saved-item-top"><div class="saved-wine-name">' + s.title + '</div><div class="saved-score">' + Math.round(s.score) + '</div></div>' +
+      '<div class="saved-item-top"><div class="saved-wine-name">' + s.title + '</div><div class="saved-score">' + Math.round(s.score) + '%</div></div>' +
       (s.dish ? '<div class="saved-dish">' + s.dish + '</div>' : '') +
       (s.sub ? '<div class="saved-dish" style="color:var(--dim);margin-top:1px;">' + s.sub + '</div>' : '') +
       '<div class="saved-expand-hint">Tap to see why →</div>' +
@@ -4037,7 +4037,7 @@ function renderRestoResults(data, dish) {
         '<div class="resto-rec-name">' + r.name + (r.vintage ? ' ' + r.vintage : '') + '</div>' +
         '<div class="resto-rec-meta">' +
           (r.price ? '<div class="resto-rec-price">' + r.price + '</div>' : '') +
-          '<div class="resto-rec-score">' + r.score + ' match</div>' +
+          '<div class="resto-rec-score">' + r.score + '% match</div>' +
         '</div>' +
       '</div>' +
       '<div class="resto-rec-body">' +
