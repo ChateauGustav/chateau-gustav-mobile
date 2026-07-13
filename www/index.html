@@ -1762,6 +1762,35 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 .progression-text { font-size: 0.85rem; color: var(--ink); line-height: 1.7; }
 
+.menu-action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+.menu-action-btn {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: 1.5px solid var(--mist);
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.18s ease;
+}
+.menu-action-btn:active { border-color: var(--gold); }
+.menu-action-btn.saved { background: var(--parchment2); border-color: var(--gold); color: var(--gold); }
+.menu-action-btn.primary {
+  background: var(--rouge);
+  border-color: var(--rouge);
+  color: #f8f4ee;
+}
+.menu-action-btn.primary:active { background: var(--rouge-deep); }
+
 /* ── RESTAURANT MODE ─────────────────────────────────────────────── */
 .resto-step-label {
   font-size: 0.62rem;
@@ -2927,6 +2956,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
         </div>
         <div class="hub-row-chev">›</div>
       </div>
+      <div class="hub-row" onclick="openMenusSubpanel()">
+        <div class="hub-row-icon">📖</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">My Menus</div>
+          <div class="hub-row-sub" id="hub-menu-count">Your saved multi-course pairings</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
     </div>
 
     <div class="hub-section">
@@ -3103,6 +3140,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <div id="scanned-list" style="padding:16px;"></div>
   </div>
 
+  <!-- ── MY MENUS SUB-PANEL ── -->
+  <div id="menus-subpanel" class="prefs-subpanel">
+    <div class="profile-top">
+      <button class="profile-back" onclick="closeMenusSubpanel()" aria-label="Back to menu" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
+      <div class="profile-title">My menus</div>
+      <div style="width:60px"></div>
+    </div>
+    <div id="menus-list" style="padding:16px;"></div>
+  </div>
+
 </div><!-- end profile-panel -->
 
 <script>
@@ -3173,10 +3220,14 @@ function closeProfile() {
   if (document.getElementById('saved-subpanel').classList.contains('open')) {
     closeSavedSubpanel(); return;
   }
+  if (document.getElementById('menus-subpanel').classList.contains('open')) {
+    closeMenusSubpanel(); return;
+  }
   document.getElementById('profile-panel').classList.remove('open');
   document.getElementById('prefs-subpanel').classList.remove('open');
   document.getElementById('scanned-subpanel').classList.remove('open');
   document.getElementById('saved-subpanel').classList.remove('open');
+  document.getElementById('menus-subpanel').classList.remove('open');
   document.getElementById('hub-about').style.display = 'none';
   document.body.style.overflow = '';
 }
@@ -3216,6 +3267,9 @@ function loadProfileIntoHub() {
 
   // Scan count
   updateScanCount();
+
+  // Menu count
+  updateMenuCount();
 }
 
 function loadProfileIntoUI() {
@@ -3740,6 +3794,80 @@ function closeScannedWines() {
     setTimeout(function() { hub.style.pointerEvents = ''; }, 400);
   }
 }
+
+// ── MY MENUS ───────────────────────────────────────────────────────
+function openMenusSubpanel() {
+  renderMenusSubpanel();
+  document.getElementById('menus-subpanel').classList.add('open');
+}
+function closeMenusSubpanel() {
+  document.getElementById('menus-subpanel').classList.remove('open');
+  var hub = document.getElementById('profile-hub');
+  if (hub) {
+    hub.style.pointerEvents = 'none';
+    setTimeout(function() { hub.style.pointerEvents = ''; }, 400);
+  }
+}
+function renderMenusSubpanel() {
+  var list = document.getElementById('menus-list');
+  var menus = getSavedMenus();
+  if (menus.length === 0) {
+    list.innerHTML = '<div class="scanned-empty"><div class="scanned-empty-icon">📖</div>' +
+      '<div class="scanned-empty-text">No saved menus yet.<br>Plan a multi-course menu and tap "Save menu."</div></div>';
+    return;
+  }
+  list.innerHTML = menus.map(function(m, i) {
+    var date = m.savedAt ? new Date(m.savedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    return '<div class="scanned-item" id="menu-card-' + i + '" onclick="toggleMenuCard(' + i + ')">' +
+      '<div class="scanned-item-top"><div class="scanned-wine-name">' + m.label + '</div></div>' +
+      '<div class="scanned-date">' + date + '</div>' +
+      '<div class="scanned-expand-hint">Tap to view →</div>' +
+      '<div class="scanned-detail">' +
+        buildMenuDetailHtml(m.data) +
+        '<div class="menu-action-row" style="margin-top:10px;">' +
+          '<button class="menu-action-btn" onclick="event.stopPropagation();shareSpecificMenu(' + i + ')">↗ Share</button>' +
+          '<button class="scanned-remove" style="flex:0 0 auto;padding:12px 16px;border:1.5px solid var(--mist);border-radius:var(--radius);" onclick="event.stopPropagation();removeSavedMenu(' + i + ')">Remove</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function buildMenuDetailHtml(data) {
+  var html = '';
+  (data.courses || []).forEach(function(c) {
+    html += '<div style="margin-bottom:10px;">' +
+      '<div class="scanned-detail-label">' + c.label + '</div>' +
+      '<div class="scanned-detail-text"><strong>' + c.wine + '</strong><br>' + c.dish + '</div>' +
+    '</div>';
+  });
+  if (data.progression) {
+    html += '<div class="scanned-detail-label">Progression</div><div class="scanned-detail-text">' + data.progression + '</div>';
+  }
+  return html;
+}
+function toggleMenuCard(i) {
+  var card = document.getElementById('menu-card-' + i);
+  if (card) card.classList.toggle('expanded');
+}
+function shareSpecificMenu(i) {
+  var menus = getSavedMenus();
+  var m = menus[i];
+  if (!m) return;
+  lastCourseData = m.data;
+  shareCurrentMenu();
+}
+function removeSavedMenu(i) {
+  var menus = getSavedMenus();
+  menus.splice(i, 1);
+  try { localStorage.setItem('cg_menus', JSON.stringify(menus)); } catch(e) {}
+  renderMenusSubpanel();
+  updateMenuCount();
+}
+function updateMenuCount() {
+  var count = getSavedMenus().length;
+  var el = document.getElementById('hub-menu-count');
+  if (el) el.textContent = count > 0 ? count + ' menu' + (count === 1 ? '' : 's') + ' saved' : 'Your saved multi-course pairings';
+}
 function toggleScannedCard(i) {
   var card = document.getElementById('scanned-card-' + i);
   if (card) card.classList.toggle('expanded');
@@ -3852,6 +3980,8 @@ async function submitCourses() {
 
 function renderCourseResults(data, courses) {
   var results = document.getElementById('courses-results');
+  lastCourseData = data; // store for save/share
+
   var html = '<div style="padding:0 16px;">';
 
   // Per-course cards
@@ -3895,6 +4025,12 @@ function renderCourseResults(data, courses) {
     html += '<div class="sommelier-note"><div class="sommelier-title">✦ Sommelier\'s note</div><div class="sommelier-text">' + data.sommelierNote + '</div></div>';
   }
 
+  // Save + Share row
+  html += '<div class="menu-action-row">' +
+    '<button class="menu-action-btn" id="menu-save-btn" onclick="saveCurrentMenu()">♡ Save menu</button>' +
+    '<button class="menu-action-btn primary" onclick="shareCurrentMenu()">↗ Share</button>' +
+    '</div>';
+
   html += '<button class="scan-again-btn" onclick="resetCourses()" style="margin-top:8px;margin-bottom:24px;">Plan another menu</button>';
   html += '</div>';
 
@@ -3913,6 +4049,102 @@ function resetCourses() {
   document.getElementById('courses-results').classList.remove('visible');
   document.getElementById('courses-results').innerHTML = '';
   document.getElementById('app-body').scrollTop = 0;
+}
+
+// ── MENU SAVE & SHARE ─────────────────────────────────────────────
+var lastCourseData = null;
+
+function buildMenuText(data) {
+  var lines = [];
+  lines.push('CHÂTEAU GUSTAV — Wine Pairing Menu');
+  lines.push('');
+  (data.courses || []).forEach(function(c) {
+    lines.push(c.label.toUpperCase());
+    lines.push(c.dish);
+    lines.push('→ ' + c.wine);
+    lines.push(c.why);
+    if (c.serve) lines.push('Serve: ' + c.serve);
+    lines.push('');
+  });
+  if (data.progression) {
+    lines.push('WINE PROGRESSION');
+    lines.push(data.progression);
+    lines.push('');
+  }
+  if (data.versatileOption) {
+    lines.push('ONE BOTTLE FOR THE TABLE');
+    lines.push(data.versatileOption);
+    lines.push('');
+  }
+  if (data.hostNote) {
+    lines.push("HOST'S NOTE");
+    lines.push(data.hostNote);
+    lines.push('');
+  }
+  if (data.sommelierNote) {
+    lines.push("SOMMELIER'S NOTE");
+    lines.push(data.sommelierNote);
+    lines.push('');
+  }
+  lines.push('— Planned with Château Gustav');
+  return lines.join('\n');
+}
+
+async function shareCurrentMenu() {
+  if (!lastCourseData) return;
+  var text = buildMenuText(lastCourseData);
+  var title = 'Château Gustav — Wine Pairing Menu';
+
+  var cap = window.Capacitor;
+  if (cap && cap.Plugins && cap.Plugins.Share) {
+    try {
+      await cap.Plugins.Share.share({ title: title, text: text, dialogTitle: 'Share your menu' });
+      return;
+    } catch(e) {
+      if (e && (e.message || '').toLowerCase().includes('cancel')) return;
+      console.warn('Native share failed, falling back:', e);
+    }
+  }
+  // Web Share API fallback
+  if (navigator.share) {
+    try { await navigator.share({ title: title, text: text }); return; } catch(e) {}
+  }
+  // Clipboard fallback
+  try {
+    await navigator.clipboard.writeText(text);
+    showFridgeToast('Menu copied to clipboard');
+  } catch(e) {
+    showFridgeToast('Unable to share on this device');
+  }
+}
+
+function getSavedMenus() {
+  try { return JSON.parse(localStorage.getItem('cg_menus') || '[]'); } catch(e) { return []; }
+}
+
+function saveCurrentMenu() {
+  if (!lastCourseData) return;
+  var menus = getSavedMenus();
+  var courseCount = (lastCourseData.courses || []).length;
+  var label = courseCount + '-course menu';
+  var firstWine = (lastCourseData.courses || [])[0];
+  if (firstWine) label += ' — starts with ' + firstWine.wine.split(',')[0];
+
+  menus.unshift({
+    label: label,
+    data: lastCourseData,
+    savedAt: new Date().toISOString()
+  });
+  if (menus.length > 20) menus = menus.slice(0, 20);
+  try { localStorage.setItem('cg_menus', JSON.stringify(menus)); } catch(e) {}
+
+  var btn = document.getElementById('menu-save-btn');
+  if (btn) {
+    btn.textContent = '♥ Saved';
+    btn.classList.add('saved');
+  }
+  updateMenuCount();
+  showFridgeToast('Menu saved — find it in Settings → My Menus');
 }
 
 // ── RESTAURANT MODE ───────────────────────────────────────────────
