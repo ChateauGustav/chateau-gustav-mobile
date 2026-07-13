@@ -1036,20 +1036,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 .profile-saved-indicator.visible { display: block; }
 
-/* Header preference indicator */
-.pref-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  margin-top: 4px;
-  display: none;
-}
-.pref-dot.visible { display: block; }
-
 /* ── ASK GUSTAV FAB ─────────────────────────────────────────────── */
 .gustav-fab {
   position: fixed;
@@ -2298,7 +2284,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 <header class="app-header" style="position:relative;">
   <div class="app-logo">Château <span>Gustav</span></div>
   <button class="settings-btn" onclick="openProfile()" aria-label="Open preferences">⚙️</button>
-  <div class="pref-dot" id="pref-dot"></div>
 </header>
 
 <main class="app-body" id="app-body">
@@ -3318,7 +3303,6 @@ function saveProfile() {
     dietaryNotes: document.getElementById('pref-dietary').value.trim()
   };
   setPreferences(prefs);
-  updatePrefIndicator();
 
   // Show confirmation
   var ind = document.getElementById('profile-saved-indicator');
@@ -3327,18 +3311,6 @@ function saveProfile() {
     ind.classList.remove('visible');
     closeProfile();
   }, 1200);
-}
-
-function updatePrefIndicator() {
-  var prefs = getPreferences();
-  var hasPrefs = prefs && (
-    prefs.name || (prefs.styles && prefs.styles.length) ||
-    (prefs.favoriteGrapes && prefs.favoriteGrapes.length) ||
-    (prefs.avoidGrapes && prefs.avoidGrapes.length) ||
-    prefs.budget || prefs.dietaryNotes
-  );
-  var dot = document.getElementById('pref-dot');
-  if (dot) dot.classList.toggle('visible', Boolean(hasPrefs));
 }
 
 // ── INPUT COLLECTION ──────────────────────────────────────────────
@@ -5042,7 +5014,6 @@ function finishOnboarding() {
   setTimeout(function() {
     overlay.style.display = 'none';
     updateSavedBadge();
-    updatePrefIndicator();
     updateScanCount();
   }, 500);
 }
