@@ -63,6 +63,7 @@ body {
   display: flex;
   flex-direction: column;
 }
+html, body { overflow-x: hidden; }
 /* ── APP SHELL ──────────────────────────────────────────────────── */
 .app-header {
   background: var(--header-bg);
@@ -527,6 +528,7 @@ input[type="range"] {
 #profile-hub {
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 40px;
 }
@@ -837,6 +839,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   transform: translateX(100%);
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding-bottom: calc(var(--safe-bottom) + 24px);
 }
@@ -2097,6 +2100,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   border-radius: 50%;
   background: var(--mist);
   transition: background 0.25s ease, transform 0.25s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 8px;
+  margin: -8px;
+  background-clip: content-box;
+  box-sizing: content-box;
 }
 .ob-dot.active { background: var(--rouge); transform: scale(1.2); }
 
@@ -4534,9 +4543,9 @@ function resetScan() {
     </div>
 
     <div class="ob-dots">
-      <div class="ob-dot active" id="dot-0"></div>
-      <div class="ob-dot" id="dot-1"></div>
-      <div class="ob-dot" id="dot-2"></div>
+      <div class="ob-dot active" id="dot-0" onclick="goToSlide(0)"></div>
+      <div class="ob-dot" id="dot-1" onclick="goToSlide(1)"></div>
+      <div class="ob-dot" id="dot-2" onclick="goToSlide(2)"></div>
     </div>
 
     <div class="ob-nav">
@@ -4682,25 +4691,63 @@ if (document.readyState === 'loading') {
   initOnboarding();
 }
 
+function goToSlide(newIndex) {
+  if (newIndex < 0 || newIndex >= OB_TOTAL || newIndex === obSlideIndex) return;
+  var current = document.getElementById('ob-slide-' + obSlideIndex);
+  current.classList.remove('active');
+  current.classList.add('exit');
+  setTimeout(function() { current.classList.remove('exit'); }, 350);
+  obSlideIndex = newIndex;
+  var next = document.getElementById('ob-slide-' + obSlideIndex);
+  next.classList.add('active');
+  document.querySelectorAll('.ob-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i === obSlideIndex);
+  });
+  document.getElementById('ob-next-btn').textContent =
+    obSlideIndex === OB_TOTAL - 1 ? 'Get started' : 'Next';
+}
+
 function obNext() {
   if (obSlideIndex < OB_TOTAL - 1) {
-    var current = document.getElementById('ob-slide-' + obSlideIndex);
-    current.classList.remove('active');
-    current.classList.add('exit');
-    setTimeout(function() { current.classList.remove('exit'); }, 350);
-    obSlideIndex++;
-    var next = document.getElementById('ob-slide-' + obSlideIndex);
-    next.classList.add('active');
-    document.querySelectorAll('.ob-dot').forEach(function(d, i) {
-      d.classList.toggle('active', i === obSlideIndex);
-    });
-    if (obSlideIndex === OB_TOTAL - 1) {
-      document.getElementById('ob-next-btn').textContent = 'Get started';
-    }
+    goToSlide(obSlideIndex + 1);
   } else {
     showObLogin();
   }
 }
+
+// ── SWIPE GESTURE SUPPORT ─────────────────────────────────────────
+(function initSlideSwipe() {
+  var slidesEl = document.getElementById('ob-slides');
+  if (!slidesEl) return;
+  var startX = 0, startY = 0, tracking = false;
+
+  slidesEl.addEventListener('touchstart', function(e) {
+    if (!e.touches || !e.touches[0]) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+
+  slidesEl.addEventListener('touchend', function(e) {
+    if (!tracking || !e.changedTouches || !e.changedTouches[0]) return;
+    tracking = false;
+    var endX = e.changedTouches[0].clientX;
+    var endY = e.changedTouches[0].clientY;
+    var dx = endX - startX;
+    var dy = endY - startY;
+    // Require a mostly-horizontal swipe of meaningful distance
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) {
+        // Swiped left → advance
+        if (obSlideIndex < OB_TOTAL - 1) goToSlide(obSlideIndex + 1);
+        else showObLogin();
+      } else {
+        // Swiped right → go back
+        goToSlide(obSlideIndex - 1);
+      }
+    }
+  }, { passive: true });
+})();
 
 function showObLogin() {
   document.getElementById('ob-slides').style.display = 'none';
