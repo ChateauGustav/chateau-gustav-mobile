@@ -2616,7 +2616,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
       <div class="scan-sub">Point your camera at any wine label. Gustav will identify the wine and tell you everything you need to know.</div>
     </div>
 
-    <input type="file" id="scan-file-input" accept="image/*" capture="environment" />
+    <input type="file" id="scan-file-input" accept="image/*" />
 
     <div class="camera-area" id="camera-area" onclick="triggerCamera()">
       <div class="camera-placeholder" id="camera-placeholder">
@@ -4125,7 +4125,7 @@ var restoMediaType = null;
 function triggerRestoCamera() {
   captureNativeCamera(function(base64, mediaType) {
     handleRestoImage(base64, mediaType);
-  }, 'resto-file-input');
+  }, 'resto-file-input', 'CAMERA');
 }
 
 function handleRestoImage(base64Data, mediaType) {
@@ -4422,17 +4422,19 @@ updateFoodForm();
 // ── NATIVE CAMERA HELPER ─────────────────────────────────────────
 // Uses @capacitor/camera plugin for reliable native camera access.
 // Falls back to file input on web or if plugin unavailable.
-async function captureNativeCamera(onImageReady, fallbackInputId) {
+async function captureNativeCamera(onImageReady, fallbackInputId, source) {
   var cap = window.Capacitor;
   if (cap && cap.Plugins && cap.Plugins.Camera) {
     try {
       var Camera = cap.Plugins.Camera;
-      await Camera.requestPermissions({ permissions: ['camera'] });
+      var perms = ['camera'];
+      if (source === 'PROMPT') perms.push('photos');
+      await Camera.requestPermissions({ permissions: perms });
       var result = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
         resultType: 'base64',
-        source: 'CAMERA',
+        source: source || 'CAMERA', // 'CAMERA' = camera only, 'PROMPT' = ask Camera or Gallery
         saveToGallery: false,
         correctOrientation: true
       });
@@ -4458,7 +4460,7 @@ var lastScanData = null;
 function triggerCamera() {
   captureNativeCamera(function(base64, mediaType) {
     handleScanImage(base64, mediaType);
-  }, 'scan-file-input');
+  }, 'scan-file-input', 'PROMPT');
 }
 
 function handleScanImage(base64Data, mediaType) {
