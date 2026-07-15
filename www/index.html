@@ -5083,9 +5083,6 @@ function initOnboarding() {
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
-  // Force onboarding to show for this build
-  localStorage.removeItem('cg_onboarded');
-
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
     overlay.style.display = 'none';
