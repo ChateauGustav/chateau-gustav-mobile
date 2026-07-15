@@ -4344,7 +4344,7 @@ var restoMediaType = null;
 function triggerRestoCamera() {
   captureNativeCamera(function(base64, mediaType) {
     handleRestoImage(base64, mediaType);
-  }, 'resto-file-input', 'CAMERA');
+  }, 'resto-file-input', 'CAMERA', 'restaurant');
 }
 
 function handleRestoImage(base64Data, mediaType) {
@@ -4379,6 +4379,7 @@ function handleRestoImage(base64Data, mediaType) {
 document.getElementById('resto-file-input').addEventListener('change', function(e) {
   var file = e.target.files && e.target.files[0];
   if (!file) return;
+  try { localStorage.removeItem('cg_camera_pending'); } catch(err) {}
   var reader = new FileReader();
   reader.onload = function(ev) { handleRestoImage(ev.target.result, file.type); };
   reader.readAsDataURL(file);
@@ -4641,7 +4642,17 @@ updateFoodForm();
 // ── NATIVE CAMERA HELPER ─────────────────────────────────────────
 // Uses @capacitor/camera plugin for reliable native camera access.
 // Falls back to file input on web or if plugin unavailable.
-async function captureNativeCamera(onImageReady, fallbackInputId, source) {
+async function captureNativeCamera(onImageReady, fallbackInputId, source, returnTab) {
+  // Stash which screen we launched the camera from. If Android kills
+  // the app to free memory for the native camera, this lets us return
+  // to the right tab with an explanation instead of silently resetting.
+  try {
+    localStorage.setItem('cg_camera_pending', JSON.stringify({
+      tab: returnTab || 'scan',
+      at: Date.now()
+    }));
+  } catch(e) {}
+
   var cap = window.Capacitor;
   if (cap && cap.Plugins && cap.Plugins.Camera) {
     try {
@@ -4657,11 +4668,14 @@ async function captureNativeCamera(onImageReady, fallbackInputId, source) {
         saveToGallery: false,
         correctOrientation: true
       });
+      // Capture completed without the app being killed — clear the flag
+      try { localStorage.removeItem('cg_camera_pending'); } catch(e) {}
       if (result && result.base64String) {
         onImageReady(result.base64String, 'image/jpeg');
         return;
       }
     } catch(e) {
+      try { localStorage.removeItem('cg_camera_pending'); } catch(e2) {}
       // User cancelled — don't fall through
       if (e && (e.message || '').toLowerCase().includes('cancel')) return;
       console.warn('Capacitor Camera fallback to file input:', e);
@@ -4679,7 +4693,7 @@ var lastScanData = null;
 function triggerCamera() {
   captureNativeCamera(function(base64, mediaType) {
     handleScanImage(base64, mediaType);
-  }, 'scan-file-input', 'PROMPT');
+  }, 'scan-file-input', 'PROMPT', 'scan');
 }
 
 function handleScanImage(base64Data, mediaType) {
@@ -4718,6 +4732,7 @@ function handleScanImage(base64Data, mediaType) {
 document.getElementById('scan-file-input').addEventListener('change', function(e) {
   var file = e.target.files && e.target.files[0];
   if (!file) return;
+  try { localStorage.removeItem('cg_camera_pending'); } catch(err) {}
   var reader = new FileReader();
   reader.onload = function(ev) { handleScanImage(ev.target.result, file.type); };
   reader.readAsDataURL(file);
@@ -5086,6 +5101,7 @@ function initOnboarding() {
   var onboarded = localStorage.getItem('cg_onboarded');
   if (onboarded) {
     overlay.style.display = 'none';
+    checkPendingCameraRecovery();
     return;
   }
 
@@ -5102,6 +5118,28 @@ function initOnboarding() {
       }
     }, 420);
   }, 3000);
+}
+
+// If the app reloaded while a camera capture was in progress (Android
+// reclaimed memory for the native camera app), return the user to the
+// screen they were on instead of silently landing on Food, and let
+// them know what happened so it doesn't feel like a random reset.
+function checkPendingCameraRecovery() {
+  var raw = null;
+  try { raw = localStorage.getItem('cg_camera_pending'); } catch(e) {}
+  if (!raw) return;
+  try { localStorage.removeItem('cg_camera_pending'); } catch(e) {}
+  var pending;
+  try { pending = JSON.parse(raw); } catch(e) { return; }
+  if (!pending || !pending.tab) return;
+  // Only recover if this looks recent (within 3 minutes) — otherwise
+  // it's a stale flag from a much older session and best ignored.
+  if (pending.at && (Date.now() - pending.at) > 3 * 60 * 1000) return;
+
+  setTimeout(function() {
+    setTab(pending.tab);
+    showFridgeToast('Camera was interrupted — please try again');
+  }, 200);
 }
 
 // Run immediately since script is at bottom of body (DOM is ready)
