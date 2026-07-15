@@ -88,37 +88,49 @@ html, body { overflow-x: hidden; }
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--safe-bottom) + 82px);
 }
 
 .tab-nav {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--safe-bottom) + 14px);
   background: var(--tab-bg);
-  border-top: 1px solid var(--mist);
+  border-radius: 999px;
+  box-shadow: 0 6px 24px rgba(26,22,18,0.18), 0 2px 8px rgba(26,22,18,0.1);
   display: flex;
-  padding: 8px 0 calc(var(--safe-bottom) + 8px);
-  flex-shrink: 0;
+  padding: 8px 6px;
+  z-index: 90;
 }
 .tab-btn {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  justify-content: center;
+  gap: 2px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 7px 2px;
+  border-radius: 999px;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease;
+}
+.tab-btn[data-active="true"] {
+  background: var(--parchment2);
 }
 .tab-icon {
-  font-size: 22px;
+  font-size: 19px;
   line-height: 1;
   transition: transform 0.15s ease;
 }
 .tab-label {
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.56rem;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .tab-btn[data-active="true"] .tab-icon,
@@ -810,16 +822,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 
 /* ── PROFILE PANEL ──────────────────────────────────────────────── */
-.settings-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+.menu-btn {
   background: none;
   border: none;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   cursor: pointer;
-  color: var(--dim);
+  color: var(--ink);
   padding: 12px;
   -webkit-tap-highlight-color: transparent;
   line-height: 1;
@@ -828,8 +836,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
-.settings-btn:active { color: var(--gold); }
+.menu-btn:active { color: var(--gold); }
 
 .profile-panel {
   position: fixed;
@@ -1040,14 +1049,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .gustav-fab {
   position: fixed;
   right: 16px;
-  bottom: calc(var(--safe-bottom) + 72px);
+  bottom: calc(var(--safe-bottom) + 82px);
   background: var(--rouge);
   border: none;
-  border-radius: 28px;
-  padding: 10px 16px 10px 12px;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
   box-shadow: 0 4px 20px rgba(124,45,62,0.4), 0 0 0 0 rgba(199,169,107,0);
   cursor: pointer;
   z-index: 100;
@@ -1062,16 +1073,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     box-shadow: 0 4px 24px rgba(124,45,62,0.5), 0 0 18px 6px rgba(199,169,107,0.35);
   }
 }
-.gustav-fab:active { transform: scale(0.96); animation: none; box-shadow: 0 2px 10px rgba(124,45,62,0.3); }
-.gustav-fab-icon { font-size: 1.1rem; line-height: 1; }
-.gustav-fab-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: #f8f4ee;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
+.gustav-fab:active { transform: scale(0.94); animation: none; box-shadow: 0 2px 10px rgba(124,45,62,0.3); }
+.gustav-fab-icon { font-size: 1.4rem; line-height: 1; }
 
 /* ── CHAT PANEL ─────────────────────────────────────────────────── */
 .chat-panel {
@@ -1819,6 +1822,71 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .resto-rec-why { font-size: 0.85rem; color: var(--ink); line-height: 1.65; margin-bottom: 8px; }
 .resto-wines-read { font-size: 0.72rem; color: var(--dim); text-align: center; padding: 8px 0 4px; }
 
+/* ── SETTINGS TOGGLES ────────────────────────────────────────────── */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--mist);
+}
+.settings-row-text { flex: 1; min-width: 0; }
+.settings-row-label { font-size: 0.9rem; color: var(--ink); margin-bottom: 2px; }
+.settings-row-sub { font-size: 0.72rem; color: var(--dim); line-height: 1.4; }
+
+/* iOS-style switch */
+.switch {
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--mist);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.switch.on { background: var(--rouge); }
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.switch.on .switch-knob { transform: translateX(20px); }
+
+/* Segmented unit toggle */
+.unit-toggle {
+  display: flex;
+  background: var(--parchment2);
+  border: 1px solid var(--mist);
+  border-radius: 8px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.unit-toggle-btn {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--dim);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.18s ease;
+}
+.unit-toggle-btn.active { background: var(--rouge); color: #f8f4ee; }
+
 /* ── DRINKING WINDOW ─────────────────────────────────────────────── */
 .drink-window-card {
   background: var(--card-bg);
@@ -2281,8 +2349,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 <body>
 
 <header class="app-header" style="position:relative;">
-  <div class="app-logo">Château <span>Gustav</span></div>
-  <button class="settings-btn" onclick="openProfile()" aria-label="Open preferences">⚙️</button>
+  <button class="menu-btn" onclick="openProfile()" aria-label="Open menu">☰</button>
+  <div class="app-logo" style="margin: 0 auto;">Château <span>Gustav</span></div>
+  <div style="width:44px;"></div>
 </header>
 
 <main class="app-body" id="app-body">
@@ -2853,7 +2922,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 <!-- ── ASK GUSTAV FAB ── -->
 <button class="gustav-fab" id="gustav-fab" onclick="openChat()" aria-label="Ask Gustav">
   <span class="gustav-fab-icon">💬</span>
-  <span class="gustav-fab-label">Ask Gustav</span>
 </button>
 
 <!-- ── ASK GUSTAV CHAT PANEL ── -->
@@ -2899,7 +2967,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   <div id="profile-hub">
     <div class="profile-top">
       <button class="profile-back" onclick="closeProfile()" aria-label="Close" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
-      <div class="profile-title">Settings</div>
+      <div class="profile-title">Menu</div>
       <div style="width:44px"></div>
     </div>
 
@@ -2945,6 +3013,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
         <div class="hub-row-text">
           <div class="hub-row-label">My Menus</div>
           <div class="hub-row-sub" id="hub-menu-count">Your saved multi-course pairings</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
+    </div>
+
+    <div class="hub-section">
+      <div class="hub-row" onclick="openSettingsSubpanel()">
+        <div class="hub-row-icon">⚙️</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">Settings</div>
+          <div class="hub-row-sub">Units, notifications, and app preferences</div>
         </div>
         <div class="hub-row-chev">›</div>
       </div>
@@ -3134,6 +3213,58 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <div id="menus-list" style="padding:16px;"></div>
   </div>
 
+  <!-- ── SETTINGS SUB-PANEL ── -->
+  <div id="settings-subpanel" class="prefs-subpanel">
+    <div class="profile-top">
+      <button class="profile-back" onclick="closeSettingsSubpanel()" aria-label="Back to menu" style="font-size:0.82rem;letter-spacing:0.04em;">‹ Back</button>
+      <div class="profile-title">Settings</div>
+      <div style="width:60px"></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-label">Preferences</div>
+
+      <div class="settings-row">
+        <div class="settings-row-text">
+          <div class="settings-row-label">Temperature units</div>
+          <div class="settings-row-sub">Celsius or Fahrenheit for serving suggestions</div>
+        </div>
+        <div class="unit-toggle" id="unit-toggle">
+          <button class="unit-toggle-btn" id="unit-c" onclick="setTempUnit('C')">°C</button>
+          <button class="unit-toggle-btn" id="unit-f" onclick="setTempUnit('F')">°F</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-text">
+          <div class="settings-row-label">Push notifications</div>
+          <div class="settings-row-sub">Reminders and updates from Château Gustav</div>
+        </div>
+        <button class="switch" id="switch-notifications" onclick="toggleSetting('notifications')" aria-label="Toggle push notifications"><span class="switch-knob"></span></button>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-text">
+          <div class="settings-row-label">Haptic feedback</div>
+          <div class="settings-row-sub">Subtle vibration when you tap and select</div>
+        </div>
+        <button class="switch" id="switch-haptics" onclick="toggleSetting('haptics')" aria-label="Toggle haptic feedback"><span class="switch-knob"></span></button>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-label">About this device</div>
+      <div class="settings-row" style="border-top:none;">
+        <div class="settings-row-text">
+          <div class="settings-row-label">App version</div>
+          <div class="settings-row-sub">Château Gustav for Android</div>
+        </div>
+        <div style="font-size:0.82rem;color:var(--dim);">1.0</div>
+      </div>
+    </div>
+
+  </div>
+
 </div><!-- end profile-panel -->
 
 <script>
@@ -3207,11 +3338,15 @@ function closeProfile() {
   if (document.getElementById('menus-subpanel').classList.contains('open')) {
     closeMenusSubpanel(); return;
   }
+  if (document.getElementById('settings-subpanel').classList.contains('open')) {
+    closeSettingsSubpanel(); return;
+  }
   document.getElementById('profile-panel').classList.remove('open');
   document.getElementById('prefs-subpanel').classList.remove('open');
   document.getElementById('scanned-subpanel').classList.remove('open');
   document.getElementById('saved-subpanel').classList.remove('open');
   document.getElementById('menus-subpanel').classList.remove('open');
+  document.getElementById('settings-subpanel').classList.remove('open');
   document.getElementById('hub-about').style.display = 'none';
   document.body.style.overflow = '';
 }
@@ -3779,6 +3914,80 @@ function closeMenusSubpanel() {
     setTimeout(function() { hub.style.pointerEvents = ''; }, 400);
   }
 }
+
+// ── APP SETTINGS ─────────────────────────────────────────────────
+function getAppSettings() {
+  try {
+    return Object.assign(
+      { tempUnit: 'F', notifications: true, haptics: true },
+      JSON.parse(localStorage.getItem('cg_settings') || '{}')
+    );
+  } catch(e) {
+    return { tempUnit: 'F', notifications: true, haptics: true };
+  }
+}
+function saveAppSettings(settings) {
+  try { localStorage.setItem('cg_settings', JSON.stringify(settings)); } catch(e) {}
+}
+function openSettingsSubpanel() {
+  renderSettingsSubpanel();
+  document.getElementById('settings-subpanel').classList.add('open');
+}
+function closeSettingsSubpanel() {
+  document.getElementById('settings-subpanel').classList.remove('open');
+  var hub = document.getElementById('profile-hub');
+  if (hub) {
+    hub.style.pointerEvents = 'none';
+    setTimeout(function() { hub.style.pointerEvents = ''; }, 400);
+  }
+}
+function renderSettingsSubpanel() {
+  var s = getAppSettings();
+  document.getElementById('unit-c').classList.toggle('active', s.tempUnit === 'C');
+  document.getElementById('unit-f').classList.toggle('active', s.tempUnit === 'F');
+  document.getElementById('switch-notifications').classList.toggle('on', !!s.notifications);
+  document.getElementById('switch-haptics').classList.toggle('on', !!s.haptics);
+}
+function setTempUnit(unit) {
+  var s = getAppSettings();
+  s.tempUnit = unit;
+  saveAppSettings(s);
+  renderSettingsSubpanel();
+  triggerHaptic();
+}
+function toggleSetting(key) {
+  var s = getAppSettings();
+  s[key] = !s[key];
+  saveAppSettings(s);
+  renderSettingsSubpanel();
+  triggerHaptic();
+}
+function triggerHaptic() {
+  var s = getAppSettings();
+  if (!s.haptics) return;
+  var cap = window.Capacitor;
+  if (cap && cap.Plugins && cap.Plugins.Haptics) {
+    try { cap.Plugins.Haptics.impact({ style: 'LIGHT' }); } catch(e) {}
+  } else if (navigator.vibrate) {
+    try { navigator.vibrate(10); } catch(e) {}
+  }
+}
+
+// Extracts just the preferred unit's portion from a combined temp
+// string like "16–18°C / 61–64°F". Falls back to the original text
+// if the expected pattern isn't found.
+function formatTemp(str) {
+  if (!str) return str;
+  var unit = getAppSettings().tempUnit;
+  var parts = str.split('/').map(function(s) { return s.trim(); });
+  if (parts.length === 2) {
+    var match = parts.find(function(p) {
+      return unit === 'C' ? p.indexOf('°C') !== -1 : p.indexOf('°F') !== -1;
+    });
+    if (match) return match;
+  }
+  return str;
+}
 function renderMenusSubpanel() {
   var list = document.getElementById('menus-list');
   var menus = getSavedMenus();
@@ -3869,7 +4078,7 @@ function renderScannedWines() {
       '<div class="scanned-expand-hint">Tap for details →</div>' +
       '<div class="scanned-detail">' +
         (s.tastingNotes ? '<div class="scanned-detail-label">Tasting notes</div><div class="scanned-detail-text">' + s.tastingNotes + '</div>' : '') +
-        (s.serveTemp ? '<div class="scanned-detail-label">Serve at</div><div class="scanned-detail-text">' + s.serveTemp + '</div>' : '') +
+        (s.serveTemp ? '<div class="scanned-detail-label">Serve at</div><div class="scanned-detail-text">' + formatTemp(s.serveTemp) + '</div>' : '') +
         (pairingRows ? '<div class="scanned-detail-label">Pairs with</div><div class="scanned-pairing-list">' + pairingRows + '</div>' : '') +
         (s.sommelierNote ? '<div class="scanned-detail-label">Sommelier\'s note</div><div class="scanned-detail-text">' + s.sommelierNote + '</div>' : '') +
         '<button class="scanned-remove" onclick="removeScanned(' + i + ', event)">Remove</button>' +
@@ -3971,7 +4180,7 @@ function renderCourseResults(data, courses) {
         '<div class="course-result-wine">' + c.wine + '</div>' +
         '<div class="course-result-dish">' + c.dish + '</div>' +
         '<div class="course-result-why">' + c.why + '</div>' +
-        (c.serve ? '<div class="course-result-serve">' + c.serve + '</div>' : '') +
+        (c.serve ? '<div class="course-result-serve">' + formatTemp(c.serve) + '</div>' : '') +
         (attrs ? '<div class="attr-pills" style="margin-top:8px;">' + attrs + '</div>' : '') +
       '</div></div>';
   });
@@ -4034,7 +4243,7 @@ function buildMenuText(data) {
     lines.push(c.dish);
     lines.push('→ ' + c.wine);
     lines.push(c.why);
-    if (c.serve) lines.push('Serve: ' + c.serve);
+    if (c.serve) lines.push('Serve: ' + formatTemp(c.serve));
     lines.push('');
   });
   if (data.progression) {
@@ -4577,7 +4786,7 @@ function renderScanResults(data) {
     html += '<div class="scan-serve-row">';
     if (data.serveTemp) {
       html += '<div class="scan-serve-item"><div class="scan-serve-icon">🌡</div>' +
-        '<div class="scan-serve-label">Serve</div><div class="scan-serve-value">' + data.serveTemp + '</div></div>';
+        '<div class="scan-serve-label">Serve</div><div class="scan-serve-value">' + formatTemp(data.serveTemp) + '</div></div>';
     }
     if (data.decant) {
       html += '<div class="scan-serve-item"><div class="scan-serve-icon">🫗</div>' +
