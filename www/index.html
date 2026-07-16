@@ -3145,7 +3145,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
         <div class="hub-row-icon">✦</div>
         <div class="hub-row-text">
           <div class="hub-row-label">About Château Gustav</div>
-          <div class="hub-row-sub">Sommelier-level pairing, built in Dallas</div>
+          <div class="hub-row-sub">Sommelier-level pairing</div>
         </div>
         <div class="hub-row-chev">›</div>
       </div>
@@ -3155,8 +3155,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
     <div class="hub-about" id="hub-about" style="display:none;">
       <div class="hub-about-inner">
         <div class="hub-about-logo">Château <span>Gustav</span></div>
-        <div class="hub-about-text">Château Gustav is a private wine tasting and consulting practice founded by Dele Faulkner, WSET Level 2 — based in Dallas, serving Dallas, Austin, and Houston.</div>
-        <div class="hub-about-text" style="margin-top:8px;">This app pairs your dish with the right wine using the same flavor chemistry principles taught in WSET — not generic lookup tables.</div>
+        <div class="hub-about-text">Château Gustav is a private wine tasting and consulting practice founded by WSET-trained wine connoisseur Dele Faulkner. Based in Dallas, we serve clients across Dallas, Austin, and Houston.</div>
+        <div class="hub-about-text" style="margin-top:8px;">This app pairs your dish with the right wine using the same flavor chemistry principles taught in WSET, not generic lookup tables.</div>
         <div class="hub-about-contact">chateaugustav@gmail.com</div>
       </div>
     </div>
@@ -3371,6 +3371,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
           <div class="settings-row-sub" id="settings-account-email"></div>
         </div>
         <button class="ob-login-btn ob-login-social" style="width:auto;padding:8px 16px;font-size:0.82rem;" onclick="signOutUser()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="profile-section" id="settings-guest-section" style="display:none;">
+      <div class="profile-section-label">Account</div>
+      <div class="settings-row" style="border-top:none;">
+        <div class="settings-row-text">
+          <div class="settings-row-label">You're browsing as a guest</div>
+          <div class="settings-row-sub">Sign in to back up your scans and sync across devices</div>
+        </div>
+        <button class="ob-login-btn ob-login-social" style="width:auto;padding:8px 16px;font-size:0.82rem;" onclick="showSignInFromSettings()">Sign in</button>
       </div>
     </div>
 
@@ -4244,13 +4255,16 @@ function renderSettingsSubpanel() {
 
   var user = getAuthUser();
   var accountSection = document.getElementById('settings-account-section');
-  if (accountSection) {
+  var guestSection = document.getElementById('settings-guest-section');
+  if (accountSection && guestSection) {
     if (user) {
       accountSection.style.display = '';
+      guestSection.style.display = 'none';
       document.getElementById('settings-account-name').textContent = user.name || 'Signed in with Google';
       document.getElementById('settings-account-email').textContent = user.email || '';
     } else {
       accountSection.style.display = 'none';
+      guestSection.style.display = '';
     }
   }
 }
@@ -5659,6 +5673,22 @@ async function restoreAuthSession() {
     }
   } catch (e) {}
   return false;
+}
+
+// Lets a guest jump back to the sign-in screen from Settings, without
+// re-running the splash/slides sequence they've already seen.
+function showSignInFromSettings() {
+  closeSettingsSubpanel();
+  closeProfile();
+  var overlay = document.getElementById('onboarding-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('fade-out');
+  overlay.style.display = 'flex';
+  var splash = document.getElementById('ob-splash');
+  if (splash) splash.style.display = 'none';
+  var slides = document.getElementById('ob-slides');
+  if (slides) slides.style.display = 'none';
+  showObLogin();
 }
 
 async function signOutUser() {
