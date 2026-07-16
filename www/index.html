@@ -4006,7 +4006,7 @@ function getScanHistory() {
 }
 function addToScanHistory(data) {
   var history = getScanHistory();
-  history.unshift({
+  var entry = {
     name: data.name || 'Unknown wine',
     producer: data.producer || null,
     vintage: data.vintage || null,
@@ -4017,20 +4017,115 @@ function addToScanHistory(data) {
     serveTemp: data.serveTemp || null,
     pairings: data.pairings || [],
     sommelierNote: data.sommelierNote || null,
+    drinkingWindow: data.drinkingWindow || null,
+    peakDate: data.peakDate || null,
+    agingAdvice: data.agingAdvice || null,
     scannedAt: new Date().toISOString()
-  });
+  };
+  history.unshift(entry);
   // Keep last 50 scans
   if (history.length > 50) history = history.slice(0, 50);
   try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
   updateScanCount();
+  // Best-effort — does nothing if signed out or offline; the local copy
+  // above is already saved either way.
+  syncScanToCloud(entry);
 }
 function removeScanned(i, event) {
   if (event) event.stopPropagation();
   var history = getScanHistory();
-  history.splice(i, 1);
+  var removed = history.splice(i, 1)[0];
   try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
   updateScanCount();
   renderScannedWines();
+  if (removed && removed.cloudId) deleteScanFromCloud(removed.cloudId);
+}
+
+// ── SCANNED WINES: CLOUD SYNC (signed-in users only) ────────────────
+// Guests keep working exactly as before, fully offline via localStorage.
+// Signed-in users additionally get their scans backed up to Firestore
+// and pulled down on other devices — this is also what will let a
+// future server-side job check drinking windows across all wines.
+async function getIdToken() {
+  if (!window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.FirebaseAuthentication) {
+    return null;
+  }
+  try {
+    var result = await window.Capacitor.Plugins.FirebaseAuthentication.getIdToken();
+    return (result && result.token) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function syncScanToCloud(wine) {
+  var token = await getIdToken();
+  if (!token) return;
+  try {
+    var response = await fetch('https://chateau-gustav-app.vercel.app/api/scanned-wines', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(wine)
+    });
+    if (!response.ok) return;
+    var result = await response.json();
+    if (result && result.id) {
+      // Tag the local copy with its cloud doc id so it can be deleted
+      // from Firestore later and won't be re-imported as a duplicate.
+      var history = getScanHistory();
+      var idx = history.findIndex(function(h) { return h.scannedAt === wine.scannedAt && h.name === wine.name; });
+      if (idx !== -1) {
+        history[idx].cloudId = result.id;
+        try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
+      }
+    }
+  } catch (e) {}
+}
+
+async function deleteScanFromCloud(cloudId) {
+  if (!cloudId) return;
+  var token = await getIdToken();
+  if (!token) return;
+  try {
+    await fetch('https://chateau-gustav-app.vercel.app/api/scanned-wines?id=' + encodeURIComponent(cloudId), {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+  } catch (e) {}
+}
+
+// Pulls scanned wines from Firestore and merges in any that aren't
+// already on this device (matched by cloud doc id) — so a wine scanned
+// on one phone shows up on another. Runs silently in the background;
+// whichever screen re-renders next just sees the updated list.
+async function syncScannedWinesFromCloud() {
+  var token = await getIdToken();
+  if (!token) return;
+  try {
+    var response = await fetch('https://chateau-gustav-app.vercel.app/api/scanned-wines', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!response.ok) return;
+    var data = await response.json();
+    var cloudWines = (data && data.wines) || [];
+    var local = getScanHistory();
+    var knownCloudIds = {};
+    local.forEach(function(w) { if (w.cloudId) knownCloudIds[w.cloudId] = true; });
+
+    var merged = local.slice();
+    cloudWines.forEach(function(cw) {
+      if (!knownCloudIds[cw.id]) {
+        merged.push(Object.assign({}, cw, { cloudId: cw.id }));
+      }
+    });
+    merged.sort(function(a, b) {
+      return new Date(b.scannedAt || 0) - new Date(a.scannedAt || 0);
+    });
+    if (merged.length > 50) merged = merged.slice(0, 50);
+    try { localStorage.setItem('cg_scanned', JSON.stringify(merged)); } catch(e) {}
+    updateScanCount();
+    renderScannedWines();
+  } catch (e) {}
 }
 function updateScanCount() {
   var count = getScanHistory().length;
@@ -5228,6 +5323,8 @@ function resetScan() {
       <div class="ob-login-terms">
         By continuing you agree to Château Gustav's Terms of Service and Privacy Policy.
       </div>
+
+      <div class="ob-skip-link" style="text-align:center;margin-top:14px;" onclick="finishOnboarding()">Continue as guest</div>
     </div>
 
   </div>
@@ -5506,6 +5603,10 @@ function applySignedInUser(user) {
   setPreferences(prefs);
 
   try { localStorage.setItem('cg_onboarded', '1'); } catch(e) {}
+
+  // Pull down any scans saved from other devices — runs in the
+  // background and doesn't block the UI either way.
+  syncScannedWinesFromCloud();
 
   var overlay = document.getElementById('onboarding-overlay');
   if (overlay) {
