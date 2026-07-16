@@ -26,10 +26,10 @@ workflows:
         BUNDLE_ID: "com.chateaugustav.pairing"
       xcode: latest
       cocoapods: default
-      node: "22"
+      node: latest
     scripts:
       - name: Install npm dependencies
-        script: npm install --legacy-peer-deps
+        script: npm install
       - name: Install CocoaPods dependencies
         script: cd ios/App && pod install
       - name: Sync web assets into the native project
@@ -82,6 +82,16 @@ workflows:
           keyAlias=$CM_KEY_ALIAS
           storeFile=keystore.jks
           EOF
+      - name: Print SHA-1 fingerprint for Firebase setup
+        script: |
+          echo "════════════════════════════════════════════════════"
+          echo "  COPY THE SHA-1 LINE BELOW INTO FIREBASE CONSOLE"
+          echo "════════════════════════════════════════════════════"
+          keytool -list -v \
+            -keystore "$CM_BUILD_DIR/android/app/keystore.jks" \
+            -storepass "$CM_KEYSTORE_PASSWORD" \
+            -alias "$CM_KEY_ALIAS" | grep "SHA1:"
+          echo "════════════════════════════════════════════════════"
       - name: Make gradlew executable
         script: chmod +x android/gradlew
       - name: Build Android release bundle
