@@ -5698,6 +5698,23 @@ async function signOutUser() {
     }
   } catch (e) {}
   clearAuthUser();
+
+  // Strip the name/email that came from the Google account — anything
+  // else (style preferences, etc.) can stay since it's just device
+  // settings, not account data.
+  var prefs = getPreferences();
+  if (prefs) {
+    delete prefs.name;
+    delete prefs.email;
+    setPreferences(prefs);
+  }
+
+  // Remove scanned wines that came from this account's cloud data,
+  // but keep any scanned before signing in (no cloudId) — those belong
+  // to this device/guest, not to the account that's signing out.
+  var history = getScanHistory().filter(function(w) { return !w.cloudId; });
+  try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
+
   try { localStorage.removeItem('cg_onboarded'); } catch(e) {}
   try { localStorage.setItem('cg_just_signed_out', '1'); } catch(e) {}
   // Reload so the onboarding overlay and all screen state reset cleanly.
