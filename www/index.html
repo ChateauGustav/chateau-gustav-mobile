@@ -3361,6 +3361,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
       </div>
     </div>
 
+    <div class="profile-section" id="settings-account-section" style="display:none;">
+      <div class="profile-section-label">Account</div>
+      <div class="settings-row" style="border-top:none;">
+        <div class="settings-row-text">
+          <div class="settings-row-label" id="settings-account-name">Signed in</div>
+          <div class="settings-row-sub" id="settings-account-email"></div>
+        </div>
+        <button class="ob-login-btn ob-login-social" style="width:auto;padding:8px 16px;font-size:0.82rem;" onclick="signOutUser()">Sign out</button>
+      </div>
+    </div>
+
     <div class="profile-section">
       <div class="profile-section-label">About this device</div>
       <div class="settings-row" style="border-top:none;">
@@ -4133,6 +4144,18 @@ function renderSettingsSubpanel() {
   document.getElementById('unit-f').classList.toggle('active', s.tempUnit === 'F');
   document.getElementById('switch-notifications').classList.toggle('on', !!s.notifications);
   document.getElementById('switch-haptics').classList.toggle('on', !!s.haptics);
+
+  var user = getAuthUser();
+  var accountSection = document.getElementById('settings-account-section');
+  if (accountSection) {
+    if (user) {
+      accountSection.style.display = '';
+      document.getElementById('settings-account-name').textContent = user.name || 'Signed in with Google';
+      document.getElementById('settings-account-email').textContent = user.email || '';
+    } else {
+      accountSection.style.display = 'none';
+    }
+  }
 }
 function setTempUnit(unit) {
   var s = getAppSettings();
@@ -5196,7 +5219,7 @@ function resetScan() {
       <button class="ob-login-btn ob-login-social" onclick="showComingSoon(this, 'Apple')">
         <span class="ob-login-btn-icon"> </span> Continue with Apple
       </button>
-      <button class="ob-login-btn ob-login-social" onclick="showComingSoon(this, 'Google')">
+      <button class="ob-login-btn ob-login-social" id="ob-google-btn" onclick="handleGoogleSignIn(this)">
         <span class="ob-login-btn-icon ob-g-icon">G</span> Continue with Google
       </button>
 
@@ -5282,7 +5305,7 @@ function resetScan() {
 var obSlideIndex = 0;
 var OB_TOTAL = 3;
 
-function initOnboarding() {
+async function initOnboarding() {
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
 
@@ -5292,6 +5315,12 @@ function initOnboarding() {
     checkPendingCameraRecovery();
     return;
   }
+
+  // Before showing onboarding, check whether Firebase already has a
+  // signed-in session for this device (e.g. re-installed app, same
+  // Google account still cached natively) — skip straight into the app.
+  var restored = await restoreAuthSession();
+  if (restored) return;
 
   // Overlay is visible by default — just handle the splash timing
   setTimeout(function() {
@@ -5431,6 +5460,102 @@ function showComingSoon(btn, provider) {
   toast.classList.add('show');
   clearTimeout(comingSoonTimer);
   comingSoonTimer = setTimeout(function() { toast.classList.remove('show'); }, 3000);
+}
+
+// ── GOOGLE SIGN-IN (Firebase Authentication) ──────────────────────
+function getAuthUser() {
+  try { return JSON.parse(localStorage.getItem('cg_user') || 'null'); } catch(e) { return null; }
+}
+function setAuthUser(u) {
+  try { localStorage.setItem('cg_user', JSON.stringify(u)); } catch(e) {}
+}
+function clearAuthUser() {
+  try { localStorage.removeItem('cg_user'); } catch(e) {}
+}
+
+// Normalizes the plugin's user object into what the rest of the app expects,
+// merges it into saved preferences, and drops the user straight into the app
+// (no manual name/email form needed — Google already gave us that).
+function applySignedInUser(user) {
+  if (!user) return;
+  var authUser = {
+    uid: user.uid,
+    email: user.email || '',
+    name: user.displayName || '',
+    photoUrl: user.photoUrl || ''
+  };
+  setAuthUser(authUser);
+
+  var prefs = getPreferences() || {};
+  if (authUser.name) prefs.name = authUser.name;
+  if (authUser.email) prefs.email = authUser.email;
+  setPreferences(prefs);
+
+  try { localStorage.setItem('cg_onboarded', '1'); } catch(e) {}
+
+  var overlay = document.getElementById('onboarding-overlay');
+  if (overlay) {
+    overlay.classList.add('fade-out');
+    setTimeout(function() {
+      overlay.style.display = 'none';
+      updateSavedBadge();
+      updateScanCount();
+      renderSettingsSubpanel();
+    }, 500);
+  }
+}
+
+async function handleGoogleSignIn(btn) {
+  if (!window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.FirebaseAuthentication) {
+    showComingSoon(btn, 'Google');
+    return;
+  }
+  var FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+  var originalLabel = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ob-login-btn-icon"></span> Signing in…';
+  try {
+    var result = await FirebaseAuthentication.signInWithGoogle();
+    applySignedInUser(result && result.user);
+  } catch (e) {
+    var toast = document.getElementById('ob-coming-toast');
+    toast.textContent = 'Google sign-in was cancelled or failed — please try again.';
+    toast.classList.add('show');
+    clearTimeout(comingSoonTimer);
+    comingSoonTimer = setTimeout(function() { toast.classList.remove('show'); }, 3000);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+  }
+}
+
+// Checks for a persisted native Firebase session (e.g. the user signed in
+// on a previous launch) so returning users skip onboarding entirely.
+// Returns true if a session was found and restored.
+async function restoreAuthSession() {
+  if (!window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.FirebaseAuthentication) {
+    return false;
+  }
+  try {
+    var result = await window.Capacitor.Plugins.FirebaseAuthentication.getCurrentUser();
+    if (result && result.user) {
+      applySignedInUser(result.user);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+async function signOutUser() {
+  try {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.FirebaseAuthentication) {
+      await window.Capacitor.Plugins.FirebaseAuthentication.signOut();
+    }
+  } catch (e) {}
+  clearAuthUser();
+  try { localStorage.removeItem('cg_onboarded'); } catch(e) {}
+  // Reload so the onboarding overlay and all screen state reset cleanly.
+  window.location.reload();
 }
 
 function toggleObStyle(btn) {
