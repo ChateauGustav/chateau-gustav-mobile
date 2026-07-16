@@ -4030,6 +4030,7 @@ function addToScanHistory(data) {
     sommelierNote: data.sommelierNote || null,
     drinkingWindow: data.drinkingWindow || null,
     peakDate: data.peakDate || null,
+    peakYear: (typeof data.peakYear === 'number' && data.peakYear > 0) ? data.peakYear : null,
     agingAdvice: data.agingAdvice || null,
     scannedAt: new Date().toISOString()
   };
@@ -4138,6 +4139,60 @@ async function syncScannedWinesFromCloud() {
     renderScannedWines();
   } catch (e) {}
 }
+
+// ── PUSH NOTIFICATIONS (drinking-window alerts) ─────────────────────
+// Only registered for signed-in users — a device token is only useful
+// if it's tied to an account the daily check can look up.
+var pushListenersAttached = false;
+
+async function registerPushNotifications() {
+  if (!window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.FirebaseMessaging) {
+    return;
+  }
+  var FirebaseMessaging = window.Capacitor.Plugins.FirebaseMessaging;
+  try {
+    var perm = await FirebaseMessaging.checkPermissions();
+    if (perm.receive !== 'granted') {
+      perm = await FirebaseMessaging.requestPermissions();
+    }
+    if (perm.receive !== 'granted') return; // user declined — respect it, don't nag
+
+    var tokenResult = await FirebaseMessaging.getToken();
+    if (tokenResult && tokenResult.token) {
+      await saveDeviceToken(tokenResult.token);
+    }
+    attachPushListeners(FirebaseMessaging);
+  } catch (e) {}
+}
+
+async function saveDeviceToken(fcmToken) {
+  var idToken = await getIdToken();
+  if (!idToken || !fcmToken) return;
+  try {
+    await fetch('https://chateau-gustav-app.vercel.app/api/device-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+      body: JSON.stringify({ fcmToken: fcmToken })
+    });
+  } catch (e) {}
+}
+
+function attachPushListeners(FirebaseMessaging) {
+  if (pushListenersAttached) return;
+  pushListenersAttached = true;
+
+  // Token can rotate (e.g. app reinstall) — keep Firestore in sync.
+  FirebaseMessaging.addListener('tokenReceived', function(event) {
+    if (event && event.token) saveDeviceToken(event.token);
+  });
+
+  // Tapping a notification while the app is backgrounded or closed —
+  // take them straight to Scanned Wines where the wine in question is.
+  FirebaseMessaging.addListener('notificationActionPerformed', function() {
+    try { openProfile(); openScannedWines(); } catch (e) {}
+  });
+}
+
 function updateScanCount() {
   var count = getScanHistory().length;
   var el = document.getElementById('hub-scan-count');
@@ -5621,6 +5676,7 @@ function applySignedInUser(user) {
   // Pull down any scans saved from other devices — runs in the
   // background and doesn't block the UI either way.
   syncScannedWinesFromCloud();
+  registerPushNotifications();
 
   var overlay = document.getElementById('onboarding-overlay');
   if (overlay) {
