@@ -4151,6 +4151,19 @@ async function registerPushNotifications() {
   }
   var FirebaseMessaging = window.Capacitor.Plugins.FirebaseMessaging;
   try {
+    // Without this, Android routes notifications through its default
+    // channel, which can be low-importance and just sit silently in the
+    // notification shade instead of showing a proper banner/sound.
+    try {
+      await FirebaseMessaging.createChannel({
+        id: 'drinking_window_alerts',
+        name: 'Drinking window alerts',
+        description: 'Lets you know when a scanned wine is entering its peak drinking window.',
+        importance: 4, // High — shows as a heads-up banner with sound
+        visibility: 1  // Public
+      });
+    } catch (e) {}
+
     var perm = await FirebaseMessaging.checkPermissions();
     if (perm.receive !== 'granted') {
       perm = await FirebaseMessaging.requestPermissions();
