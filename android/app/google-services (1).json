@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "877856083008",
+    "project_id": "chateau-gustav-9c2f4",
+    "storage_bucket": "chateau-gustav-9c2f4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:877856083008:android:1579afe1fc0657fffaa3a5",
+        "android_client_info": {
+          "package_name": "com.chateaugustav.pairing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "877856083008-169ulmg8oqgu09ggfo66cdsm7jk0kb7e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3bfRkiIIlk-K3Ndl20VQSnJQXWc5---Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "877856083008-169ulmg8oqgu09ggfo66cdsm7jk0kb7e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
