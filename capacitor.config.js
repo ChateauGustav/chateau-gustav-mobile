@@ -8,6 +8,10 @@ const config = {
     webContentsDebuggingEnabled: false
   },
   plugins: {
+    FirebaseAuthentication: {
+      skipNativeAuth: false,
+      providers: ['google.com']
+    },
     SplashScreen: {
       launchShowDuration: 1200,
       backgroundColor: '#f8f4ee',
