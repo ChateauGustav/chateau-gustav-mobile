@@ -34,8 +34,6 @@ workflows:
         script: cd ios/App && pod install
       - name: Sync web assets into the native project
         script: npx cap sync ios
-        name: Generate app icons from source image
-        script: npx capacitor-assets generate --android
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
       - name: Build ipa for distribution
@@ -75,6 +73,8 @@ workflows:
         script: npm install --legacy-peer-deps
       - name: Sync web assets into the native project
         script: npx cap sync android
+      - name: Generate app icons from source image
+        script: npx capacitor-assets generate --android
       - name: Decode keystore and write key.properties for signing
         script: |
           echo $CM_KEYSTORE | base64 --decode > $CM_BUILD_DIR/android/app/keystore.jks
