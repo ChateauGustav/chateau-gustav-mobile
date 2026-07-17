@@ -5053,7 +5053,13 @@ async function captureNativeCamera(onImageReady, fallbackInputId, source, return
         resultType: 'base64',
         source: source || 'CAMERA', // 'CAMERA' = camera only, 'PROMPT' = ask Camera or Gallery
         saveToGallery: false,
-        correctOrientation: true
+        correctOrientation: true,
+        width: 1600 // caps resolution before base64 encoding — full-sensor
+                     // photos (12MP+) require decoding + encoding a huge
+                     // bitmap in memory, which is a common trigger for
+                     // Android killing the app during the camera handoff.
+                     // 1600px is far more than legible enough for label/menu
+                     // text recognition, and cuts that memory pressure a lot.
       });
       // Capture completed without the app being killed — clear the flag
       try { localStorage.removeItem('cg_camera_pending'); } catch(e) {}
