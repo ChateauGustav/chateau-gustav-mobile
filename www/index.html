@@ -3404,6 +3404,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 // ── TAB NAVIGATION ────────────────────────────────────────────────
 var currentTab = 'food';
 function setTab(tab) {
+  triggerHaptic();
   currentTab = tab;
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('screen-' + tab).classList.add('active');
@@ -3681,6 +3682,7 @@ function collectInputs(mode) {
 
 // ── API CALL ──────────────────────────────────────────────────────
 async function getPairings(mode) {
+  triggerHaptic();
   var btn = document.getElementById(mode + '-submit');
   var form = document.getElementById(mode + '-form');
   var loading = document.getElementById(mode + '-loading');
@@ -3806,6 +3808,7 @@ function setSaved(arr) {
 }
 
 function toggleSave(btn) {
+  triggerHaptic();
   var dataStr = btn.getAttribute('data-save');
   var data = JSON.parse(dataStr);
   var saved = getSaved();
@@ -3868,6 +3871,7 @@ function toggleSavedCard(i) {
 }
 
 function removeSaved(idx) {
+  triggerHaptic();
   var saved = getSaved();
   saved.splice(idx, 1);
   setSaved(saved);
@@ -3962,6 +3966,7 @@ function showFridgeToast(msg) {
 }
 async function getFridgePairings() {
   if (fridgeWines.length === 0) return;
+  triggerHaptic();
   var btn = document.getElementById('fridge-submit');
   var loading = document.getElementById('fridge-loading');
   var results = document.getElementById('fridge-results');
@@ -4045,6 +4050,7 @@ function addToScanHistory(data) {
 }
 function removeScanned(i, event) {
   if (event) event.stopPropagation();
+  triggerHaptic();
   var history = getScanHistory();
   var removed = history.splice(i, 1)[0];
   try { localStorage.setItem('cg_scanned', JSON.stringify(history)); } catch(e) {}
@@ -4425,6 +4431,7 @@ function shareSpecificMenu(i) {
   shareCurrentMenu();
 }
 function removeSavedMenu(i) {
+  triggerHaptic();
   var menus = getSavedMenus();
   menus.splice(i, 1);
   try { localStorage.setItem('cg_menus', JSON.stringify(menus)); } catch(e) {}
@@ -4509,6 +4516,7 @@ function assistCourse(courseId, protein) {
 }
 
 async function submitCourses() {
+  triggerHaptic();
   var courses = COURSE_DEFS
     .map(function(c) {
       var dish = (document.getElementById('dish-' + c.id).value || '').trim();
@@ -4790,6 +4798,7 @@ async function submitRestaurant() {
   var cut = document.getElementById('resto-cut').value;
   var dish = freeText || [protein, cut].filter(Boolean).join(' — ');
   if (!dish) { document.getElementById('resto-dish-text').focus(); return; }
+  triggerHaptic();
   var btn = document.getElementById('resto-submit');
   var loading = document.getElementById('resto-loading');
   var results = document.getElementById('resto-results');
@@ -5119,6 +5128,7 @@ document.getElementById('scan-file-input').addEventListener('change', function(e
 
 async function scanLabel() {
   if (!scannedImageData) return;
+  triggerHaptic();
   var btn = document.getElementById('scan-submit');
   var loading = document.getElementById('scan-loading');
   var results = document.getElementById('scan-results');
