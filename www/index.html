@@ -5029,6 +5029,29 @@ updateFoodForm();
 // ── NATIVE CAMERA HELPER ─────────────────────────────────────────
 // Uses @capacitor/camera plugin for reliable native camera access.
 // Falls back to file input on web or if plugin unavailable.
+// Converts a Capacitor camera file URI to a base64 string, done after the
+// camera handoff has already completed (see captureNativeCamera below for
+// why that timing matters for reliability).
+async function uriToBase64(uri) {
+  try {
+    var resp = await fetch(uri);
+    var blob = await resp.blob();
+    return await new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onloadend = function () {
+        var result = reader.result || '';
+        var commaIdx = result.indexOf(',');
+        resolve(commaIdx !== -1 ? result.slice(commaIdx + 1) : null);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.warn('Failed to convert camera URI to base64:', e);
+    return null;
+  }
+}
+
 async function captureNativeCamera(onImageReady, fallbackInputId, source, returnTab) {
   // Stash which screen we launched the camera from. If Android kills
   // the app to free memory for the native camera, this lets us return
@@ -5050,22 +5073,29 @@ async function captureNativeCamera(onImageReady, fallbackInputId, source, return
       var result = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
-        resultType: 'base64',
+        resultType: 'uri', // a file path, not an in-memory base64 blob —
+                            // the OS writes this to disk itself, so it
+                            // survives a background process kill far better
+                            // than holding a huge base64 string in memory
+                            // during the risky camera-app handoff window.
         source: source || 'CAMERA', // 'CAMERA' = camera only, 'PROMPT' = ask Camera or Gallery
         saveToGallery: false,
         correctOrientation: true,
-        width: 1600 // caps resolution before base64 encoding — full-sensor
-                     // photos (12MP+) require decoding + encoding a huge
-                     // bitmap in memory, which is a common trigger for
-                     // Android killing the app during the camera handoff.
-                     // 1600px is far more than legible enough for label/menu
-                     // text recognition, and cuts that memory pressure a lot.
+        width: 1600 // caps resolution — full-sensor photos (12MP+) are far
+                     // more than needed for label/menu text recognition,
+                     // and cost real memory pressure to process.
       });
       // Capture completed without the app being killed — clear the flag
       try { localStorage.removeItem('cg_camera_pending'); } catch(e) {}
-      if (result && result.base64String) {
-        onImageReady(result.base64String, 'image/jpeg');
-        return;
+      if (result && result.webPath) {
+        // Convert to base64 now, after the camera handoff has already
+        // finished and we're back in the foreground — this is a much
+        // safer time to do it than during the handoff itself.
+        var base64 = await uriToBase64(result.webPath);
+        if (base64) {
+          onImageReady(base64, 'image/jpeg');
+          return;
+        }
       }
     } catch(e) {
       try { localStorage.removeItem('cg_camera_pending'); } catch(e2) {}
