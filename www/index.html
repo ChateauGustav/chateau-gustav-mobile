@@ -5537,17 +5537,6 @@ async function initOnboarding() {
   if (!overlay) return;
 
   var onboarded = localStorage.getItem('cg_onboarded');
-  if (onboarded) {
-    overlay.style.display = 'none';
-    checkPendingCameraRecovery();
-    return;
-  }
-
-  // Before showing onboarding, check whether Firebase already has a
-  // signed-in session for this device (e.g. re-installed app, same
-  // Google account still cached natively) — skip straight into the app.
-  var restored = await restoreAuthSession();
-  if (restored) return;
 
   // If the user just signed out, skip the splash animation and feature
   // slides entirely and land directly on the sign-in screen.
@@ -5555,17 +5544,32 @@ async function initOnboarding() {
   try { justSignedOut = !!localStorage.getItem('cg_just_signed_out'); } catch(e) {}
   if (justSignedOut) {
     try { localStorage.removeItem('cg_just_signed_out'); } catch(e) {}
+    overlay.style.display = 'flex';
     var splashEl = document.getElementById('ob-splash');
     if (splashEl) splashEl.style.display = 'none';
     showObLogin();
     return;
   }
 
-  // Overlay is visible by default — just handle the splash timing
+  // Always show the branded splash first, regardless of onboarding
+  // or sign-in state. Auth-session restore runs in the background
+  // while the splash plays, so it doesn't add extra wait time.
+  overlay.style.display = 'flex';
+  var restored = await restoreAuthSession();
+
   setTimeout(function() {
     var splash = document.getElementById('ob-splash');
     if (splash) splash.classList.add('hidden');
+
     setTimeout(function() {
+      // Splash has finished — now decide what happens next.
+      if (onboarded) {
+        overlay.style.display = 'none';
+        checkPendingCameraRecovery();
+        return;
+      }
+      if (restored) return; // signed-in session restored — hand off to the app
+
       var slides = document.getElementById('ob-slides');
       if (slides) {
         slides.style.display = 'flex';
@@ -5574,6 +5578,7 @@ async function initOnboarding() {
       }
     }, 420);
   }, 3000);
+}
 }
 
 // If the app reloaded while a camera capture was in progress (Android
