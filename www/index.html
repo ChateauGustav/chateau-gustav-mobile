@@ -5557,7 +5557,10 @@ async function initOnboarding() {
   overlay.style.display = 'flex';
   var restored = false;
 try {
-  restored = await restoreAuthSession();
+  restored = await Promise.race([
+    restoreAuthSession(),
+    new Promise(function(resolve) { setTimeout(function() { resolve(false); }, 1500); })
+  ]);
 } catch (e) {
   console.error('restoreAuthSession failed:', e);
 }
