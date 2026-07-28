@@ -5574,21 +5574,23 @@ async function initOnboarding() {
       if (splash) splash.classList.add('hidden');
       alert('CHECKPOINT 5: hidden class added');
     setTimeout(function() {
-      // Splash has finished — now decide what happens next.
-      if (onboarded) {
-        overlay.style.display = 'none';
-        checkPendingCameraRecovery();
-        return;
-      }
-      if (restored) return; // signed-in session restored — hand off to the app
+        alert('CHECKPOINT 6: inside second setTimeout, deciding what to show next');
+        // Splash has finished — now decide what happens next.
+        if (onboarded) {
+          overlay.style.display = 'none';
+          checkPendingCameraRecovery();
+          return;
+        }
+        if (restored) { alert('CHECKPOINT 7: restored=true, returning early'); return; }
 
-      var slides = document.getElementById('ob-slides');
-      if (slides) {
-        slides.style.display = 'flex';
-        slides.style.flexDirection = 'column';
-        slides.style.flex = '1';
-      }
-    }, 420);
+        var slides = document.getElementById('ob-slides');
+        if (slides) {
+          slides.style.display = 'flex';
+          slides.style.flexDirection = 'column';
+          slides.style.flex = '1';
+        }
+        alert('CHECKPOINT 8: slides shown (or attempted)');
+      }, 420);
   }, 3000);
 }
 }
