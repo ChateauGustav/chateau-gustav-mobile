@@ -5555,7 +5555,12 @@ async function initOnboarding() {
   // or sign-in state. Auth-session restore runs in the background
   // while the splash plays, so it doesn't add extra wait time.
   overlay.style.display = 'flex';
-  var restored = await restoreAuthSession();
+  var restored = false;
+try {
+  restored = await restoreAuthSession();
+} catch (e) {
+  console.error('restoreAuthSession failed:', e);
+}
 
   setTimeout(function() {
     var splash = document.getElementById('ob-splash');
