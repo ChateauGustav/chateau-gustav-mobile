@@ -5554,44 +5554,39 @@ async function initOnboarding() {
   // Always show the branded splash first, regardless of onboarding
   // or sign-in state. Auth-session restore runs in the background
   // while the splash plays, so it doesn't add extra wait time.
-  alert('CHECKPOINT 1: entering splash logic');
-    overlay.style.display = 'flex';
-    var restored = false;
-    try {
-      alert('CHECKPOINT 2: about to call restoreAuthSession');
-      restored = await Promise.race([
-        restoreAuthSession(),
-        new Promise(function(resolve) { setTimeout(function() { resolve(false); }, 1500); })
-      ]);
-      alert('CHECKPOINT 3: restoreAuthSession resolved, restored=' + restored);
-    } catch (e) {
-      alert('CHECKPOINT 3-ERROR: ' + e.message);
-    }
+  overlay.style.display = 'flex';
+  var restored = false;
+  try {
+    restored = await Promise.race([
+      restoreAuthSession(),
+      new Promise(function(resolve) { setTimeout(function() { resolve(false); }, 1500); })
+    ]);
+  } catch (e) {
+    console.error('restoreAuthSession failed:', e);
+  }
+
+  setTimeout(function() {
+    var splash = document.getElementById('ob-splash');
+    if (splash) splash.classList.add('hidden');
 
     setTimeout(function() {
-      alert('CHECKPOINT 4: inside first setTimeout, about to hide splash');
-      var splash = document.getElementById('ob-splash');
-      if (splash) splash.classList.add('hidden');
-      alert('CHECKPOINT 5: hidden class added');
-    setTimeout(function() {
-        alert('CHECKPOINT 6: inside second setTimeout, deciding what to show next');
-        // Splash has finished — now decide what happens next.
-        if (onboarded) {
-          overlay.style.display = 'none';
-          checkPendingCameraRecovery();
-          return;
-        }
-        if (restored) { alert('CHECKPOINT 7: restored=true, returning early'); return; }
+      // Splash has finished — now decide what happens next.
+      if (onboarded) {
+        overlay.style.display = 'none';
+        checkPendingCameraRecovery();
+        return;
+      }
+      if (restored) return; // signed-in session restored — hand off to the app
 
-        var slides = document.getElementById('ob-slides');
-        if (slides) {
-          slides.style.display = 'flex';
-          slides.style.flexDirection = 'column';
-          slides.style.flex = '1';
-        }
-        alert('CHECKPOINT 8: slides shown (or attempted)');
-      }, 420);
+      var slides = document.getElementById('ob-slides');
+      if (slides) {
+        slides.style.display = 'flex';
+        slides.style.flexDirection = 'column';
+        slides.style.flex = '1';
+      }
+    }, 420);
   }, 3000);
+}
 }
 
 // If the app reloaded while a camera capture was in progress (Android
