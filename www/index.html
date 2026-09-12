@@ -5087,15 +5087,11 @@ async function captureNativeCamera(onImageReady, fallbackInputId, source, return
       });
       // Capture completed without the app being killed — clear the flag
       try { localStorage.removeItem('cg_camera_pending'); } catch(e) {}
-      if (result && result.webPath) {
-        // Convert to base64 now, after the camera handoff has already
-        // finished and we're back in the foreground — this is a much
-        // safer time to do it than during the handoff itself.
-        var base64 = await uriToBase64(result.webPath);
-        if (base64) {
-          onImageReady(base64, 'image/jpeg');
-          return;
-        }
+            if (result && result.base64String) {
+        // We already have base64 from Capacitor — no conversion needed
+        onImageReady(result.base64String, 'image/jpeg');
+        return;
+      }
       }
     } catch(e) {
       try { localStorage.removeItem('cg_camera_pending'); } catch(e2) {}
