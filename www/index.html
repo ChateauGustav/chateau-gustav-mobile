@@ -5092,7 +5092,6 @@ async function captureNativeCamera(onImageReady, fallbackInputId, source, return
         onImageReady(result.base64String, 'image/jpeg');
         return;
       }
-      }
     } catch(e) {
       try { localStorage.removeItem('cg_camera_pending'); } catch(e2) {}
       // User cancelled — don't fall through
