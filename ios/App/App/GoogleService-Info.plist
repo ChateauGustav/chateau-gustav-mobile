@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>633704951503-surthc4ib8h88krp4teshs5fdg8msjjs.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.633704951503-surthc4ib8h88krp4teshs5fdg8msjjs</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAZPaTR3pXrE36m35ARAE7bAb6xx7L2jcs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>633704951503</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.chateaugustav.pairing</string>
+	<key>PROJECT_ID</key>
+	<string>chateau-gustav</string>
+	<key>STORAGE_BUCKET</key>
+	<string>chateau-gustav.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:633704951503:ios:c6c46f27bb4205878b51ba</string>
+</dict>
+</plist>

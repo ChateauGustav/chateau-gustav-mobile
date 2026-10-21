@@ -1,0 +1,7 @@
+
+.DS_Store
+**/xcuserdata/
+**/xcshareddata/swiftpm/
+ios/App/CapApp-SPM/.swiftpm/
+ios/capacitor-cordova-ios-plugins/
+node_modules/
