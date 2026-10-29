@@ -10,7 +10,7 @@ const config = {
   plugins: {
     FirebaseAuthentication: {
       skipNativeAuth: false,
-      providers: ['google.com']
+      providers: ['apple.com', 'google.com']
     },
     SplashScreen: {
       launchShowDuration: 1200,
