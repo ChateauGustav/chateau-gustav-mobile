@@ -3375,6 +3375,13 @@ input, textarea, select { font-size: 16px !important; }
         </div>
         <button class="ob-login-btn ob-login-social" style="width:auto;padding:8px 16px;font-size:0.82rem;" onclick="signOutUser()">Sign out</button>
       </div>
+      <div class="settings-row">
+        <div class="settings-row-text">
+          <div class="settings-row-label">Delete account</div>
+          <div class="settings-row-sub">Permanently removes your account and saved wine scans. This can't be undone.</div>
+        </div>
+        <button id="delete-account-btn" class="ob-login-btn ob-login-social" style="width:auto;padding:8px 16px;font-size:0.82rem;color:#9b2c2c;" onclick="deleteAccount(this)">Delete account</button>
+      </div>
     </div>
 
     <div class="profile-section" id="settings-guest-section" style="display:none;">
@@ -5841,6 +5848,51 @@ function showSignInFromSettings() {
   var slides = document.getElementById('ob-slides');
   if (slides) slides.style.display = 'none';
   showObLogin();
+}
+
+// Account deletion (required by App Store Guideline 5.1.1(v)).
+// Two taps: the first arms the button, the second deletes. No native dialogs.
+var deleteArmed = false;
+async function deleteAccount(btn) {
+  if (!deleteArmed) {
+    deleteArmed = true;
+    btn.textContent = 'Tap again to confirm';
+    setTimeout(function() {
+      deleteArmed = false;
+      if (!btn.disabled) btn.textContent = 'Delete account';
+    }, 5000);
+    return;
+  }
+  deleteArmed = false;
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+
+  try {
+    // 1. Remove the account's cloud data (scanned wines, device tokens).
+    var token = await getIdToken();
+    if (!token) throw new Error('Please sign in again first');
+    var r = await fetch('https://chateau-gustav-app.vercel.app/api/account', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!r.ok) throw new Error('Could not delete your data. Try again');
+
+    // 2. Delete the Firebase account. Firebase may ask for a recent sign-in.
+    await window.Capacitor.Plugins.FirebaseAuthentication.deleteUser();
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = (e && e.message) ? e.message : 'Could not delete account';
+    setTimeout(function() { btn.textContent = 'Delete account'; }, 4000);
+    return;
+  }
+
+  // 3. Wipe everything this app stored on the device.
+  try {
+    Object.keys(localStorage).forEach(function(k) {
+      if (k.indexOf('cg_') === 0) localStorage.removeItem(k);
+    });
+  } catch (e) {}
+  window.location.reload();
 }
 
 async function signOutUser() {
