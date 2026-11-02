@@ -1525,6 +1525,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 .ob-email-input:focus { border-color: var(--gold); }
 .ob-email-input::placeholder { color: var(--dim); opacity: 0.5; }
+
+/* Age gate (21+) shown once per device before the app is used */
+.ob-age { flex: 1; flex-direction: column; justify-content: center; padding: 32px 28px; text-align: center; }
+.ob-age-title { font-size: 1.6rem; color: var(--ink); margin-bottom: 12px; }
+.ob-age-sub { font-size: 0.9rem; color: var(--dim); line-height: 1.5; margin-bottom: 24px; }
+.ob-age-error { color: #9b2c2c; font-size: 0.85rem; min-height: 1.2em; margin: 10px 0; }
 .ob-email-cta {
   padding: 0 24px calc(var(--safe-bottom) + 24px);
   flex-shrink: 0;
@@ -5389,6 +5395,15 @@ function resetScan() {
     <div class="ob-splash-tagline">Your personal sommelier</div>
   </div>
 
+  <!-- Age gate: adults 21+ only -->
+  <div class="ob-age" id="ob-age" style="display:none;">
+    <div class="ob-age-title">Welcome</div>
+    <div class="ob-age-sub">Château Gustav is for adults 21 and over. Enter your date of birth to continue.</div>
+    <input class="ob-email-input" id="ob-age-dob" type="date" min="1900-01-01" aria-label="Date of birth">
+    <div class="ob-age-error" id="ob-age-error" role="alert"></div>
+    <button class="ob-login-btn" onclick="submitAgeGate()">Continue</button>
+  </div>
+
   <!-- Feature slides -->
   <div class="ob-slides" id="ob-slides" style="display:none;">
 
@@ -5537,6 +5552,72 @@ function resetScan() {
 var obSlideIndex = 0;
 var OB_TOTAL = 3;
 
+// ── AGE GATE (21+) ───────────────────────────────────────────────
+// Confirmed once per device, stored locally. Shown after the splash and
+// before any other onboarding or sign-in screen.
+var cgSessionRestored = false;
+
+function ageGateOk() {
+  try { return localStorage.getItem('cg_age_ok') === '1'; } catch (e) { return false; }
+}
+
+function showAgeGate() {
+  var overlay = document.getElementById('onboarding-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  var slides = document.getElementById('ob-slides');
+  if (slides) slides.style.display = 'none';
+  var login = document.getElementById('ob-login');
+  if (login) login.style.display = 'none';
+  var dob = document.getElementById('ob-age-dob');
+  if (dob) dob.max = new Date().toISOString().slice(0, 10);
+  var age = document.getElementById('ob-age');
+  if (age) age.style.display = 'flex';
+}
+
+function submitAgeGate() {
+  var input = document.getElementById('ob-age-dob');
+  var err = document.getElementById('ob-age-error');
+  var val = input ? input.value : '';
+  if (!val) { err.textContent = 'Please enter your date of birth.'; return; }
+
+  var p = val.split('-').map(Number);
+  var birth = new Date(p[0], p[1] - 1, p[2]);
+  var today = new Date();
+  var years = today.getFullYear() - birth.getFullYear();
+  var m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) years--;
+  if (isNaN(years) || years < 0 || years > 120) { err.textContent = 'Please enter a valid date.'; return; }
+
+  if (years < 21) {
+    err.textContent = 'Sorry, Château Gustav is for adults 21 and over.';
+    return;
+  }
+
+  try { localStorage.setItem('cg_age_ok', '1'); } catch (e) {}
+  var age = document.getElementById('ob-age');
+  if (age) age.style.display = 'none';
+  continueAfterAgeGate();
+}
+
+// Picks up the normal onboarding path once the age gate has been passed.
+function continueAfterAgeGate() {
+  var overlay = document.getElementById('onboarding-overlay');
+  var onboarded = null;
+  try { onboarded = localStorage.getItem('cg_onboarded'); } catch (e) {}
+  if (onboarded) {
+    if (overlay) overlay.style.display = 'none';
+    checkPendingCameraRecovery();
+    return;
+  }
+  if (cgSessionRestored) return;
+  var slides = document.getElementById('ob-slides');
+  if (slides) {
+    slides.style.display = 'flex';
+    slides.style.flexDirection = 'column';
+    slides.style.flex = '1';
+  }
+}
+
 async function initOnboarding() {
   var overlay = document.getElementById('onboarding-overlay');
   if (!overlay) return;
@@ -5576,6 +5657,10 @@ async function initOnboarding() {
 
     setTimeout(function() {
       // Splash has finished — now decide what happens next.
+      // Age gate comes first: nobody gets past it without confirming 21+.
+      cgSessionRestored = restored;
+      if (!ageGateOk()) { showAgeGate(); return; }
+
       if (onboarded) {
         overlay.style.display = 'none';
         checkPendingCameraRecovery();
