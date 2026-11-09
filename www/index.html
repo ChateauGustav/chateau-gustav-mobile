@@ -1243,6 +1243,51 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .chat-chip:active { border-color: var(--gold); color: var(--gold); }
 
 /* Input row */
+.chat-attach {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--parchment2);
+  border: 1px solid var(--mist);
+  color: var(--ink);
+  font-size: 1rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.chat-pending {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 0;
+  background: var(--card-bg);
+}
+.chat-pending.visible { display: flex; }
+.chat-pending img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--mist);
+}
+.chat-pending-remove {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px;
+}
+.msg-photo {
+  display: block;
+  max-width: 180px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  border: 1px solid var(--mist);
+}
 .chat-input-row {
   display: flex;
   align-items: center;
@@ -3069,7 +3114,15 @@ input, textarea, select { font-size: 16px !important; }
     <button class="chat-chip" onclick="sendSuggestion('What is the difference between Old World and New World wine?')">🌍 Old vs New World?</button>
   </div>
 
+  <div class="chat-pending" id="chat-pending">
+    <img id="chat-pending-img" alt="Photo to send" />
+    <button class="chat-pending-remove" onclick="clearPendingChatImage()" aria-label="Remove photo">Remove</button>
+  </div>
+
+  <input type="file" id="chat-file-input" accept="image/*" hidden />
+
   <div class="chat-input-row">
+    <button class="chat-attach" onclick="triggerChatCamera()" aria-label="Add a photo">📷</button>
     <input class="chat-input" id="chat-input" type="text" placeholder="Ask anything about wine…"
       autocomplete="off" autocorrect="on" spellcheck="true"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}" />
@@ -6070,17 +6123,92 @@ function sendSuggestion(text) {
   sendMessage();
 }
 
+var pendingChatImage = null; // { base64, mediaType, dataUrl }
+
+function triggerChatCamera() {
+  captureNativeCamera(function(base64, mediaType) {
+    setPendingChatImage(base64, mediaType);
+  }, 'chat-file-input', 'PROMPT', currentTab);
+}
+
+document.getElementById('chat-file-input').addEventListener('change', function(e) {
+  var file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    var raw = String(reader.result).split(',')[1];
+    setPendingChatImage(raw, file.type || 'image/jpeg');
+  };
+  reader.readAsDataURL(file);
+});
+
+// Shrink to 1024px JPEG before it is queued, so uploads stay small.
+function setPendingChatImage(rawBase64, mediaType) {
+  var src = 'data:' + (mediaType || 'image/jpeg') + ';base64,' + rawBase64;
+  var img = new Image();
+  img.onload = function() {
+    var maxDim = 1024;
+    var w = img.width, h = img.height;
+    if (w > maxDim || h > maxDim) {
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    var canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    pendingChatImage = { base64: dataUrl.split(',')[1], mediaType: 'image/jpeg', dataUrl: dataUrl };
+    document.getElementById('chat-pending-img').src = dataUrl;
+    document.getElementById('chat-pending').classList.add('visible');
+    document.getElementById('chat-input').focus();
+  };
+  img.src = src;
+}
+
+function clearPendingChatImage() {
+  pendingChatImage = null;
+  document.getElementById('chat-pending').classList.remove('visible');
+  document.getElementById('chat-pending-img').removeAttribute('src');
+}
+
+// Older photos are dropped from the request so each new message doesn't
+// re-send every earlier image. The last user message keeps its photo.
+function buildChatRequestMessages() {
+  var lastUserIdx = -1;
+  for (var i = chatHistory.length - 1; i >= 0; i--) {
+    if (chatHistory[i].role === 'user') { lastUserIdx = i; break; }
+  }
+  return chatHistory.map(function(m, idx) {
+    if (Array.isArray(m.content) && idx !== lastUserIdx) {
+      var textPart = m.content.filter(function(p) { return p.type === 'text'; })[0];
+      return { role: m.role, content: (textPart ? textPart.text : '') + ' [photo shared earlier]' };
+    }
+    return { role: m.role, content: m.content };
+  });
+}
+
 async function sendMessage() {
   var input = document.getElementById('chat-input');
   var text = input.value.trim();
-  if (!text || chatTyping) return;
+  var image = pendingChatImage;
+  if ((!text && !image) || chatTyping) return;
+  if (!text && image) text = 'What can you tell me about this?';
 
   input.value = '';
   document.getElementById('chat-suggestions').style.display = 'none';
   document.getElementById('chat-send').disabled = true;
 
-  appendUserMessage(text);
-  chatHistory.push({ role: 'user', content: text });
+  appendUserMessage(text, image ? image.dataUrl : null);
+  if (image) {
+    chatHistory.push({ role: 'user', content: [
+      { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.base64 } },
+      { type: 'text', text: text }
+    ] });
+    clearPendingChatImage();
+  } else {
+    chatHistory.push({ role: 'user', content: text });
+  }
 
   chatTyping = true;
   var typingEl = showTyping();
@@ -6090,7 +6218,7 @@ async function sendMessage() {
     var response = await fetch('https://chateau-gustav-app.vercel.app/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory, preferences: prefs })
+      body: JSON.stringify({ messages: buildChatRequestMessages(), preferences: prefs })
     });
 
     removeTyping(typingEl);
@@ -6146,10 +6274,11 @@ async function sendMessage() {
   }
 }
 
-function appendUserMessage(text) {
+function appendUserMessage(text, imageDataUrl) {
   var el = document.createElement('div');
   el.className = 'msg user';
-  el.innerHTML = '<div class="msg-bubble">' + escapeHtml(text) + '</div>';
+  var photo = imageDataUrl ? '<img class="msg-photo" src="' + imageDataUrl + '" alt="Your photo" />' : '';
+  el.innerHTML = '<div class="msg-bubble">' + photo + escapeHtml(text) + '</div>';
   document.getElementById('chat-messages').appendChild(el);
   scrollChatToBottom();
 }
