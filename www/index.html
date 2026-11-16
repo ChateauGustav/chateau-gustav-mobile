@@ -1080,15 +1080,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 
 /* Gustav Plus star: same pulsing gold halo as the chat button */
 .hub-row-icon.plus-halo {
-  width: 30px;
-  height: 30px;
-  background: var(--rouge);
   color: var(--gold);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fabGlow 2.8s 1s ease-in-out infinite;
+  animation: starGlow 2.8s 1s ease-in-out infinite;
+}
+@keyframes starGlow {
+  0%, 100% { text-shadow: 0 0 6px rgba(199,169,107,0.35); }
+  50% { text-shadow: 0 0 14px rgba(199,169,107,0.75), 0 0 4px rgba(199,169,107,0.5); }
 }
 
 /* ── CHAT PANEL ─────────────────────────────────────────────────── */
