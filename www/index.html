@@ -1170,6 +1170,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   line-height: 1.65;
   word-break: break-word;
 }
+.msg-bubble strong { font-weight: 600; }
 .msg.user .msg-bubble {
   background: var(--rouge);
   color: #f8f4ee;
@@ -6251,9 +6252,7 @@ async function sendMessage() {
         var text2 = decoder.decode(chunk.value, { stream: true });
         fullText += text2;
         // Render with basic line-break support
-        bubble.innerHTML = escapeHtml(fullText)
-          .replace(/\n\n/g, '<br><br>')
-          .replace(/\n/g, '<br>');
+        bubble.innerHTML = formatChatText(fullText);
         scrollChatToBottom();
       }
 
@@ -6286,11 +6285,7 @@ function appendUserMessage(text, imageDataUrl) {
 function appendGustavMessage(text) {
   var el = document.createElement('div');
   el.className = 'msg gustav';
-  // Convert basic markdown-like line breaks and bullet points
-  var formatted = escapeHtml(text)
-    .replace(/\n\n/g, '<br><br>')
-    .replace(/\n/g, '<br>')
-    .replace(/• /g, '· ');
+  var formatted = formatChatText(text).replace(/• /g, '· ');
   el.innerHTML =
     '<div class="msg-avatar">G</div>' +
     '<div class="msg-bubble">' + formatted + '</div>';
@@ -6316,6 +6311,16 @@ function removeTyping(el) {
 function scrollChatToBottom() {
   var msgs = document.getElementById('chat-messages');
   msgs.scrollTop = msgs.scrollHeight;
+}
+
+// Formats Gustav's replies: escapes HTML first (so model text can never inject
+// markup), then renders **bold**, *italic* and line breaks.
+function formatChatText(str) {
+  return escapeHtml(str)
+    .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*(?=\S)([^*\n]*?\S)\*(?![*\w])/g, '$1<em>$2</em>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
 }
 
 function escapeHtml(str) {
