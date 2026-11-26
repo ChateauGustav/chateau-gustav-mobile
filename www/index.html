@@ -438,6 +438,9 @@ input[type="range"] {
 .detail-title { font-family: Georgia, serif; font-size: 1.25rem; margin-bottom: 4px; padding-right: 28px; }
 .detail-meta { font-size: 0.82rem; color: var(--dim); margin-bottom: 14px; }
 .detail-option { background: var(--card-bg); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px; }
+.detail-option-row { display: flex; gap: 12px; align-items: flex-start; }
+.detail-bottle { flex: 0 0 auto; padding-top: 2px; }
+.detail-option-body { flex: 1; min-width: 0; }
 .detail-option-name { font-weight: 600; }
 .detail-option-region { font-size: 0.8rem; color: var(--dim); margin-top: 2px; }
 .detail-price { display: inline-block; font-size: 0.75rem; color: var(--rouge); border: 1px solid var(--gold); border-radius: 20px; padding: 2px 9px; margin-top: 6px; }
@@ -3976,10 +3979,15 @@ function renderDetail(isWine, title, data) {
     html += '<div class="detail-meta">Specific bottles that suit this pairing</div>';
     (data.options || []).forEach(function(o) {
       html += '<div class="detail-option">' +
-        '<div class="detail-option-name">' + escapeHtml(o.name || '') + '</div>' +
-        (o.region ? '<div class="detail-option-region">' + escapeHtml(o.region) + '</div>' : '') +
-        '<div><span class="detail-price">' + escapeHtml(o.priceTier || '') +
-          (o.estimatedPrice ? ' · ' + escapeHtml(o.estimatedPrice) : '') + '</span></div>' +
+        '<div class="detail-option-row">' +
+          '<div class="detail-bottle">' + wineIconSvg(wineStyle(o.name, o.region)) + '</div>' +
+          '<div class="detail-option-body">' +
+            '<div class="detail-option-name">' + escapeHtml(o.name || '') + '</div>' +
+            (o.region ? '<div class="detail-option-region">' + escapeHtml(o.region) + '</div>' : '') +
+            '<div><span class="detail-price">' + escapeHtml(o.priceTier || '') +
+              (o.estimatedPrice ? ' · ' + escapeHtml(o.estimatedPrice) : '') + '</span></div>' +
+          '</div>' +
+        '</div>' +
         (o.why ? '<div class="detail-option-why">' + escapeHtml(o.why) + '</div>' : '') +
         '</div>';
     });
@@ -4011,6 +4019,28 @@ function renderDetail(isWine, title, data) {
   }
 
   sheet.innerHTML = html;
+}
+
+// Style icons: the style is read from the wine's name and region.
+// Sparkling and rosé are checked first, then white, then red.
+function wineStyle(name, region) {
+  var s = ((name || '') + ' ' + (region || '')).toLowerCase();
+  if (/champagne|prosecco|cava|cr[ée]mant|sparkling|brut|franciacorta|sekt|lambrusco|cidre|cider/.test(s)) return 'sparkling';
+  if (/ros[ée]|rose\b|rosado|rosato|tavel|bandol rosé/.test(s)) return 'rose';
+  if (/chardonnay|sauvignon|riesling|pinot grigio|pinot gris|chablis|albari|sancerre|muscadet|vinho verde|gew[üu]rz|viognier|gr[üu]ner|moscato|chenin|vermentino|verdejo|assyrtiko|blanc|bianco|blanco|weisswein|white/.test(s)) return 'white';
+  return 'red';
+}
+
+function wineIconSvg(style) {
+  var colors = { red: '#7c2d3e', white: '#d9c77a', rose: '#e8a1a8', sparkling: '#e9e2c6' };
+  var fill = colors[style] || colors.red;
+  var fizz = style === 'sparkling'
+    ? '<circle cx="12" cy="11" r="1" fill="#b8933a"/><circle cx="14" cy="13" r="0.8" fill="#b8933a"/><circle cx="11" cy="15" r="0.8" fill="#b8933a"/>'
+    : '';
+  return '<svg viewBox="0 0 24 40" width="28" height="46" aria-label="' + style + ' wine" role="img">' +
+    '<path d="M9 1h6v8c0 1.5 1 2.5 2 4v22a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3V13c1-1.5 2-2.5 2-4z" fill="' + fill + '" stroke="#b8933a" stroke-width="0.8"/>' +
+    '<rect x="8.5" y="22" width="7" height="8" rx="1" fill="#f8f4ee" opacity="0.85"/>' +
+    fizz + '</svg>';
 }
 
 function closeDetail() {
