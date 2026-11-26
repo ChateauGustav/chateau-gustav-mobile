@@ -1111,6 +1111,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .gustav-fab:active { transform: scale(0.94); animation: none; box-shadow: 0 2px 10px rgba(124,45,62,0.3); }
 .gustav-fab-icon { font-size: 1.4rem; line-height: 1; }
 
+/* Gustav Plus star: same pulsing gold halo as the chat button */
+.hub-row-icon.plus-halo {
+  color: var(--gold);
+  animation: starGlow 2.8s 1s ease-in-out infinite;
+}
+@keyframes starGlow {
+  0%, 100% { text-shadow: 0 0 6px rgba(199,169,107,0.35); }
+  50% { text-shadow: 0 0 14px rgba(199,169,107,0.75), 0 0 4px rgba(199,169,107,0.5); }
+}
+
 /* ── CHAT PANEL ─────────────────────────────────────────────────── */
 .chat-panel {
   position: fixed;
@@ -2541,6 +2551,75 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 
 input, textarea, select { font-size: 16px !important; }
+
+/* ── Gustav Plus paywall ─────────────────────────────── */
+.paywall-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: var(--parchment, #f8f4ee);
+  display: none; flex-direction: column;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: calc(var(--safe-top, 0px) + 20px) 18px calc(var(--safe-bottom, 0px) + 24px);
+}
+.paywall-overlay.open { display: flex; }
+.paywall-close {
+  align-self: flex-end; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--mist); background: var(--card-bg);
+  color: var(--ink); font-size: 1rem; cursor: pointer;
+}
+.paywall-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.9rem;
+  color: var(--ink); text-align: center; margin: 6px 0 4px;
+}
+.paywall-sub {
+  text-align: center; color: var(--dim); font-size: 0.92rem; margin-bottom: 18px;
+}
+.paywall-card {
+  background: var(--card-bg); border: 1px solid var(--mist);
+  border-radius: 16px; padding: 6px 16px; margin-bottom: 18px;
+}
+.paywall-feature {
+  display: flex; gap: 10px; padding: 12px 0;
+  border-bottom: 1px solid var(--mist); font-size: 0.92rem; color: var(--ink);
+}
+.paywall-feature:last-child { border-bottom: none; }
+.paywall-feature span:first-child { color: var(--gold); font-weight: 600; }
+.paywall-soon { color: var(--dim); font-size: 0.78rem; margin-left: 4px; }
+.paywall-plans-label {
+  text-align: center; color: var(--ink); font-size: 0.95rem; margin-bottom: 10px;
+}
+.paywall-plan {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; text-align: left; cursor: pointer;
+  background: var(--card-bg); border: 1.5px solid var(--mist);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+  font-family: 'DM Sans', sans-serif; color: var(--ink);
+}
+.paywall-plan.selected { border-color: var(--rouge); }
+.paywall-plan-name { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.paywall-plan-price { font-size: 0.85rem; color: var(--dim); margin-top: 3px; }
+.paywall-badge {
+  background: var(--ink); color: var(--card-bg); font-size: 0.7rem;
+  padding: 3px 8px; border-radius: 6px; font-weight: 600;
+}
+.paywall-radio {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--mist); flex-shrink: 0;
+}
+.paywall-plan.selected .paywall-radio { border-color: var(--rouge); background: var(--rouge); box-shadow: inset 0 0 0 3px var(--card-bg); }
+.paywall-cta {
+  width: 100%; padding: 16px; border-radius: 28px; border: none;
+  background: var(--rouge); color: #f8f4ee; font-size: 1rem; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px;
+}
+.paywall-status { text-align: center; color: var(--dim); font-size: 0.82rem; min-height: 1.2em; margin-top: 10px; }
+.paywall-legal {
+  text-align: center; color: var(--dim); font-size: 0.72rem; line-height: 1.5; margin-top: 14px;
+}
+.paywall-legal a { color: inherit; text-decoration: underline; }
+.paywall-restore {
+  display: block; margin: 10px auto 0; background: none; border: none;
+  color: var(--ink); font-size: 0.82rem; text-decoration: underline; cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -3220,6 +3299,17 @@ input, textarea, select { font-size: 16px !important; }
         <div class="hub-row-text">
           <div class="hub-row-label">My Menus</div>
           <div class="hub-row-sub" id="hub-menu-count">Your saved multi-course pairings</div>
+        </div>
+        <div class="hub-row-chev">›</div>
+      </div>
+    </div>
+
+    <div class="hub-section">
+      <div class="hub-row" onclick="openPaywall()">
+        <div class="hub-row-icon plus-halo">★</div>
+        <div class="hub-row-text">
+          <div class="hub-row-label">Gustav Plus</div>
+          <div class="hub-row-sub">Unlimited Ask Gustav, photo chat, and more</div>
         </div>
         <div class="hub-row-chev">›</div>
       </div>
@@ -6653,6 +6743,96 @@ function showTermDef(term, event) {
 function closeGlossary() {
   document.getElementById('glossary-overlay').classList.remove('open');
 }
+
+// ── Gustav Plus paywall ──────────────────────────────────────────
+// Store product IDs. Purchases stay disabled until the in-app purchase
+// plugin is connected, so nothing can be charged from this build yet.
+var GUSTAV_PLANS = {
+  annual: { id: 'com.chateaugustav.pairing.plus.annual', cta: 'Join for $47.90/year' },
+  monthly: { id: 'com.chateaugustav.pairing.plus.monthly', cta: 'Join for $4.99/month' }
+};
+var selectedPlan = 'annual';
+
+function openPaywall() {
+  document.getElementById('paywall').classList.add('open');
+  document.getElementById('paywall-status').textContent = '';
+}
+
+function closePaywall() {
+  document.getElementById('paywall').classList.remove('open');
+}
+
+function selectPlan(key) {
+  selectedPlan = key;
+  document.getElementById('plan-annual').classList.toggle('selected', key === 'annual');
+  document.getElementById('plan-monthly').classList.toggle('selected', key === 'monthly');
+  document.getElementById('paywall-cta').textContent = GUSTAV_PLANS[key].cta;
+  document.getElementById('paywall-status').textContent = '';
+}
+
+function purchasesReady() {
+  var cap = window.Capacitor;
+  return !!(cap && cap.Plugins && cap.Plugins.Purchases);
+}
+
+function purchaseSelectedPlan() {
+  var status = document.getElementById('paywall-status');
+  if (!purchasesReady()) {
+    status.textContent = 'Subscriptions are not available yet.';
+    return;
+  }
+  // Wired up with the in-app purchase plugin in the next step.
+  status.textContent = 'Starting purchase…';
+}
+
+function restorePurchases() {
+  var status = document.getElementById('paywall-status');
+  if (!purchasesReady()) {
+    status.textContent = 'Nothing to restore yet.';
+    return;
+  }
+  status.textContent = 'Restoring purchases…';
+}
 </script>
+<div class="paywall-overlay" id="paywall" role="dialog" aria-modal="true" aria-label="Gustav Plus">
+  <button class="paywall-close" onclick="closePaywall()" aria-label="Close">✕</button>
+  <div class="paywall-title">Gustav Plus</div>
+  <div class="paywall-sub">Your sommelier, every night.</div>
+
+  <div class="paywall-card">
+    <div class="paywall-feature"><span>✓</span><span>Unlimited Ask Gustav chat</span></div>
+    <div class="paywall-feature"><span>✓</span><span>Photo chat: ask about a dish or a label</span></div>
+    <div class="paywall-feature"><span>✓</span><span>Unlimited label scans<span class="paywall-soon">(coming soon)</span></span></div>
+    <div class="paywall-feature"><span>✓</span><span>Restaurant pairing menus<span class="paywall-soon">(coming soon)</span></span></div>
+  </div>
+
+  <div class="paywall-plans-label">Choose your plan</div>
+  <button class="paywall-plan selected" id="plan-annual" onclick="selectPlan('annual')">
+    <div>
+      <div class="paywall-plan-name">Annual <span class="paywall-badge">Save 20%</span></div>
+      <div class="paywall-plan-price">$47.90/year ($3.99/month)</div>
+    </div>
+    <div class="paywall-radio"></div>
+  </button>
+  <button class="paywall-plan" id="plan-monthly" onclick="selectPlan('monthly')">
+    <div>
+      <div class="paywall-plan-name">Monthly</div>
+      <div class="paywall-plan-price">$4.99/month</div>
+    </div>
+    <div class="paywall-radio"></div>
+  </button>
+
+  <button class="paywall-cta" id="paywall-cta" onclick="purchaseSelectedPlan()">Join for $47.90/year</button>
+  <div class="paywall-status" id="paywall-status"></div>
+
+  <div class="paywall-legal">
+    Payment is charged to your Apple ID at confirmation. The subscription renews automatically unless canceled at least 24 hours before the end of the current period. Manage or cancel anytime in your Apple ID settings.
+    <br>
+    <a href="https://www.chateaugustav.com/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a> ·
+    <a href="https://www.chateaugustav.com/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>
+  </div>
+  <button class="paywall-restore" onclick="restorePurchases()">Restore Purchases</button>
+</div>
+
 </body>
 </html>
