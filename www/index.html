@@ -3912,7 +3912,17 @@ function openDetail(index) {
   var p = currentResults.pairings[index];
   if (!p) return;
   var isWine = currentResults.mode === 'food';
-  var title = isWine ? p.wine : p.food;
+  showDetailFor(isWine, isWine ? p.wine : p.food, currentResults.summary || '', p.why || '', currentResults.inputs || {});
+}
+
+function openSavedDetail(i) {
+  var s = getSaved()[i];
+  if (!s) return;
+  // Saved items keep the wine or dish name, the dish summary and the reason.
+  showDetailFor(s.mode === 'food', s.title, s.dish || '', s.why || '', {});
+}
+
+function showDetailFor(isWine, title, dishLabel, why, inputs) {
   var cacheKey = (isWine ? 'wineOptions:' : 'recipe:') + title;
 
   var overlay = document.createElement('div');
@@ -3931,13 +3941,11 @@ function openDetail(index) {
     return;
   }
 
-  var dishLabel = currentResults.summary || '';
-  var inputs = currentResults.inputs || {};
   var body = isWine
     ? { mode: 'wineOptions', inputs: {
-        wine: p.wine, dish: dishLabel || [inputs.cut, inputs.protein, inputs.sauce].filter(Boolean).join(', '),
+        wine: title, dish: dishLabel || [inputs.cut, inputs.protein, inputs.sauce].filter(Boolean).join(', '),
         dishSummary: dishLabel, budget: inputs.budget } }
-    : { mode: 'recipe', inputs: { dish: p.food, dishSummary: p.why || dishLabel } };
+    : { mode: 'recipe', inputs: { dish: title, dishSummary: why || dishLabel } };
 
   fetch('https://chateau-gustav-app.vercel.app/api/detail', {
     method: 'POST',
@@ -4061,7 +4069,7 @@ function renderSaved() {
 
     return '<div class="saved-item" id="saved-card-' + i + '" onclick="toggleSavedCard(' + i + ')">' +
       '<div class="saved-item-top">' +
-        '<div class="saved-wine-name">' + s.title + '</div>' +
+        '<div class="saved-wine-name tappable" onclick="event.stopPropagation(); openSavedDetail(' + i + ')">' + s.title + '<span class="tap-chevron">›</span></div>' +
         '<div class="saved-score">' + Math.round(s.score) + '%</div>' +
       '</div>' +
       (s.dish ? '<div class="saved-dish">' + s.dish + '</div>' : '') +
