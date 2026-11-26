@@ -421,6 +421,36 @@ input[type="range"] {
 }
 
 /* sommelier note */
+/* Tappable recommendation titles and the detail sheet */
+.pairing-name.tappable { cursor: pointer; }
+.tap-chevron { color: var(--gold); margin-left: 6px; font-size: 1.1em; }
+.detail-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(26,22,18,0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.detail-sheet {
+  background: var(--parchment); color: var(--ink);
+  width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+  border-radius: 16px 16px 0 0; padding: 20px 18px calc(24px + var(--safe-bottom));
+}
+.detail-close { float: right; background: none; border: none; font-size: 1.4rem; color: var(--dim); cursor: pointer; padding: 0 4px; }
+.detail-title { font-family: Georgia, serif; font-size: 1.25rem; margin-bottom: 4px; padding-right: 28px; }
+.detail-meta { font-size: 0.82rem; color: var(--dim); margin-bottom: 14px; }
+.detail-option { background: var(--card-bg); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px; }
+.detail-option-name { font-weight: 600; }
+.detail-option-region { font-size: 0.8rem; color: var(--dim); margin-top: 2px; }
+.detail-price { display: inline-block; font-size: 0.75rem; color: var(--rouge); border: 1px solid var(--gold); border-radius: 20px; padding: 2px 9px; margin-top: 6px; }
+.detail-option-why { font-size: 0.88rem; margin-top: 6px; }
+.detail-section-label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin: 16px 0 6px; }
+.detail-step { display: flex; gap: 10px; font-size: 0.92rem; margin-bottom: 8px; }
+.detail-step-num { color: var(--gold); font-weight: 600; min-width: 18px; }
+.detail-list { list-style: none; padding: 0; margin: 0; font-size: 0.92rem; }
+.detail-list li { padding: 5px 0; border-bottom: 1px solid var(--mist); }
+.detail-group { font-size: 0.85rem; font-weight: 600; margin: 10px 0 2px; }
+.detail-note { font-size: 0.8rem; color: var(--dim); margin-top: 14px; font-style: italic; }
+.detail-loading, .detail-error { text-align: center; color: var(--dim); padding: 30px 0; font-size: 0.92rem; }
+
 .sommelier-note {
   background: var(--parchment2);
   border: 1px solid var(--gold);
@@ -3803,6 +3833,8 @@ function renderResults(data, mode, inputs) {
   if (summary) html += '<div class="results-sub">' + summary + '</div>';
   if (curated) html += '<div class="curated-badge">✦ Curated by Château Gustav</div>';
 
+  currentResults = { mode: mode, pairings: pairings, summary: summary, inputs: inputs };
+
   pairings.forEach(function(p, i) {
     var rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : 'rank-3';
     var title = mode === 'food' ? p.wine : p.food;
@@ -3820,7 +3852,7 @@ function renderResults(data, mode, inputs) {
       '<div class="pairing-card-accent"></div>' +
       '<div class="pairing-card-inner">' +
         '<div class="pairing-top">' +
-          '<div><div class="pairing-name">' + title + '</div>' +
+          '<div><div class="pairing-name tappable" onclick="openDetail(' + i + ')">' + title + '<span class="tap-chevron">›</span></div>' +
           (sub ? '<div class="pairing-region">' + sub + '</div>' : '') + '</div>' +
           '<div class="score-block"><div class="score-num">' + p.score + '%</div><div class="score-label">Match</div></div>' +
         '</div>' +
@@ -3867,6 +3899,115 @@ function showForm(mode) {
   results.classList.remove('visible');
   results.innerHTML = '';
   document.getElementById('app-body').scrollTop = 0;
+}
+
+// ── RECOMMENDATION DETAILS (tap a title) ─────────────────────────
+// Food-mode results list wines: tapping shows specific bottles with price tiers.
+// Wine-mode results list dishes: tapping shows a recipe and shopping list.
+var currentResults = null;
+var detailCache = {};
+
+function openDetail(index) {
+  if (!currentResults) return;
+  var p = currentResults.pairings[index];
+  if (!p) return;
+  var isWine = currentResults.mode === 'food';
+  var title = isWine ? p.wine : p.food;
+  var cacheKey = (isWine ? 'wineOptions:' : 'recipe:') + title;
+
+  var overlay = document.createElement('div');
+  overlay.className = 'detail-overlay';
+  overlay.id = 'detail-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) closeDetail(); };
+  overlay.innerHTML = '<div class="detail-sheet">' +
+    '<button class="detail-close" onclick="closeDetail()" aria-label="Close">×</button>' +
+    '<div class="detail-title">' + escapeHtml(title) + '</div>' +
+    '<div class="detail-loading">' + (isWine ? 'Finding bottles…' : 'Writing the recipe…') + '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  if (detailCache[cacheKey]) {
+    renderDetail(isWine, title, detailCache[cacheKey]);
+    return;
+  }
+
+  var dishLabel = currentResults.summary || '';
+  var inputs = currentResults.inputs || {};
+  var body = isWine
+    ? { mode: 'wineOptions', inputs: {
+        wine: p.wine, dish: dishLabel || [inputs.cut, inputs.protein, inputs.sauce].filter(Boolean).join(', '),
+        dishSummary: dishLabel, budget: inputs.budget } }
+    : { mode: 'recipe', inputs: { dish: p.food, dishSummary: p.why || dishLabel } };
+
+  fetch('https://chateau-gustav-app.vercel.app/api/detail', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data) {
+    detailCache[cacheKey] = data;
+    if (document.getElementById('detail-overlay')) renderDetail(isWine, title, data);
+  }).catch(function() {
+    var sheet = document.querySelector('#detail-overlay .detail-sheet');
+    if (sheet) {
+      var loading = sheet.querySelector('.detail-loading');
+      if (loading) loading.outerHTML = '<div class="detail-error">Couldn’t load this right now. Check your connection and try again.</div>';
+    }
+  });
+}
+
+function renderDetail(isWine, title, data) {
+  var sheet = document.querySelector('#detail-overlay .detail-sheet');
+  if (!sheet) return;
+  var html = '<button class="detail-close" onclick="closeDetail()" aria-label="Close">×</button>' +
+    '<div class="detail-title">' + escapeHtml(title) + '</div>';
+
+  if (isWine) {
+    html += '<div class="detail-meta">Specific bottles that suit this pairing</div>';
+    (data.options || []).forEach(function(o) {
+      html += '<div class="detail-option">' +
+        '<div class="detail-option-name">' + escapeHtml(o.name || '') + '</div>' +
+        (o.region ? '<div class="detail-option-region">' + escapeHtml(o.region) + '</div>' : '') +
+        '<div><span class="detail-price">' + escapeHtml(o.priceTier || '') +
+          (o.estimatedPrice ? ' · ' + escapeHtml(o.estimatedPrice) : '') + '</span></div>' +
+        (o.why ? '<div class="detail-option-why">' + escapeHtml(o.why) + '</div>' : '') +
+        '</div>';
+    });
+    if (data.note) html += '<div class="detail-note">' + escapeHtml(data.note) + '</div>';
+  } else {
+    var meta = [];
+    if (data.servings) meta.push('Serves ' + data.servings);
+    if (data.totalTime) meta.push(data.totalTime);
+    if (meta.length) html += '<div class="detail-meta">' + escapeHtml(meta.join(' · ')) + '</div>';
+
+    html += '<div class="detail-section-label">Ingredients</div><ul class="detail-list">';
+    (data.ingredients || []).forEach(function(ing) {
+      html += '<li>' + escapeHtml([ing.amount, ing.item].filter(Boolean).join(' ')) + '</li>';
+    });
+    html += '</ul>';
+
+    html += '<div class="detail-section-label">Method</div>';
+    (data.steps || []).forEach(function(s, n) {
+      html += '<div class="detail-step"><span class="detail-step-num">' + (n + 1) + '.</span><span>' + escapeHtml(s) + '</span></div>';
+    });
+
+    html += '<div class="detail-section-label">Shopping list</div>';
+    (data.shoppingList || []).forEach(function(group) {
+      html += '<div class="detail-group">' + escapeHtml(group.section || '') + '</div><ul class="detail-list">';
+      (group.items || []).forEach(function(it) { html += '<li>' + escapeHtml(it) + '</li>'; });
+      html += '</ul>';
+    });
+    if (data.note) html += '<div class="detail-note">' + escapeHtml(data.note) + '</div>';
+  }
+
+  sheet.innerHTML = html;
+}
+
+function closeDetail() {
+  var el = document.getElementById('detail-overlay');
+  if (el) el.remove();
 }
 
 // ── SAVED PAIRINGS ────────────────────────────────────────────────
